@@ -4,7 +4,7 @@ import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function MachinePage({ params }: { params: any }) {
-  const id = params.id
+  const id = params?.id
   const [machine, setMachine] = useState<any>(null)
   const [lastWorkout, setLastWorkout] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
@@ -13,33 +13,44 @@ export default function MachinePage({ params }: { params: any }) {
   const [weight, setWeight] = useState('')
   const [notes, setNotes] = useState('')
   const [saved, setSaved] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          router.push('/login')
+          return
+        }
+        setUser(user)
+
+        const { data: machineData, error: machineError } = await supabase
+          .from('machines')
+          .select('*')
+          .eq('id', id)
+          .single()
+        
+        if (machineError) {
+          setError('Machine not found')
+          return
+        }
+        setMachine(machineData)
+
+        const { data: workoutData } = await supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('machine_id', id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        
+        setLastWorkout(workoutData)
+      } catch (err) {
+        setError('Something went wrong. Please try again.')
       }
-      setUser(user)
-
-      const { data: machineData } = await supabase
-        .from('machines')
-        .select('*')
-        .eq('id', id)
-        .single()
-      setMachine(machineData)
-
-      const { data: workoutData } = await supabase
-        .from('workouts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('machine_id', id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-      setLastWorkout(workoutData)
     }
     load()
   }, [])
@@ -56,6 +67,12 @@ export default function MachinePage({ params }: { params: any }) {
     })
     if (!error) setSaved(true)
   }
+
+  if (error) return (
+    <main className="min-h-screen bg-black flex items-center justify-center">
+      <p className="text-red-400">{error}</p>
+    </main>
+  )
 
   if (!machine) return (
     <main className="min-h-screen bg-black flex items-center justify-center">
