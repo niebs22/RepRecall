@@ -4,8 +4,8 @@ import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null)
-  const [workouts, setWorkouts] = useState([])
+  const [user, setUser] = useState<any>(null)
+  const [workouts, setWorkouts] = useState<any[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function Dashboard() {
     getUser()
   }, [])
 
-  async function fetchRecentWorkouts(userId) {
+  async function fetchRecentWorkouts(userId: string) {
     const { data } = await supabase
       .from('workouts')
       .select('*, machines(name)')
