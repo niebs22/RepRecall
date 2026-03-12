@@ -1,10 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
-export default function MachinePage({ params }: { params: any }) {
-  const id = typeof params?.id === 'string' ? params.id : null
+export default function MachinePage() {
+  const pathname = usePathname()
+  const id = pathname?.split('/').pop()
   const [machine, setMachine] = useState<any>(null)
   const [lastWorkout, setLastWorkout] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
@@ -19,6 +20,11 @@ export default function MachinePage({ params }: { params: any }) {
   useEffect(() => {
     async function load() {
       try {
+        if (!id) {
+          setError('Invalid machine ID')
+          return
+        }
+
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
           router.push('/login')
@@ -26,18 +32,14 @@ export default function MachinePage({ params }: { params: any }) {
         }
         setUser(user)
 
-        if (!id) {
-            setError('Invalid machine ID')
-            return
-        }
         const { data: machineData, error: machineError } = await supabase
           .from('machines')
           .select('*')
           .eq('id', id)
           .single()
-        
+
         if (machineError) {
-          setError('Machine not found:' + machineError.message)
+          setError('Machine not found: ' + machineError.message)
           return
         }
         setMachine(machineData)
@@ -50,14 +52,14 @@ export default function MachinePage({ params }: { params: any }) {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle()
-        
+
         setLastWorkout(workoutData)
       } catch (err) {
         setError('Something went wrong. Please try again.')
       }
     }
     load()
-  }, [])
+  }, [id])
 
   async function handleSave(e: any) {
     e.preventDefault()
