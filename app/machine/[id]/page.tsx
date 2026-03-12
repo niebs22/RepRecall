@@ -3,7 +3,7 @@ import { useState, useEffect, use } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
-export default function MachinePage({ params }) {
+export default function MachinePage({ params }: { params: any }) {
   const { id } = use(params)
   const [machine, setMachine] = useState(null)
   const [lastWorkout, setLastWorkout] = useState(null)
