@@ -1,13 +1,13 @@
 'use client'
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function MachinePage({ params }: { params: any }) {
-  const { id } = use(params)
-  const [machine, setMachine] = useState(null)
-  const [lastWorkout, setLastWorkout] = useState(null)
-  const [user, setUser] = useState(null)
+  const id = params.id
+  const [machine, setMachine] = useState<any>(null)
+  const [lastWorkout, setLastWorkout] = useState<any>(null)
+  const [user, setUser] = useState<any>(null)
   const [sets, setSets] = useState('')
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
@@ -44,7 +44,7 @@ export default function MachinePage({ params }: { params: any }) {
     load()
   }, [])
 
-  async function handleSave(e) {
+  async function handleSave(e: any) {
     e.preventDefault()
     const { error } = await supabase.from('workouts').insert({
       user_id: user.id,
@@ -93,11 +93,11 @@ export default function MachinePage({ params }: { params: any }) {
             <p className="text-gray-400 text-sm mb-1">Last Session</p>
             <p className="text-gray-500 text-xs mb-3">
               {new Date(lastWorkout.created_at).toLocaleDateString()} · {
-                Math.floor((new Date() - new Date(lastWorkout.created_at)) / (1000 * 60 * 60 * 24)) === 0
+                Math.floor((new Date().getTime() - new Date(lastWorkout.created_at).getTime()) / (1000 * 60 * 60 * 24)) === 0
                   ? 'Today'
-                  : Math.floor((new Date() - new Date(lastWorkout.created_at)) / (1000 * 60 * 60 * 24)) === 1
+                  : Math.floor((new Date().getTime() - new Date(lastWorkout.created_at).getTime()) / (1000 * 60 * 60 * 24)) === 1
                   ? '1 day ago'
-                  : `${Math.floor((new Date() - new Date(lastWorkout.created_at)) / (1000 * 60 * 60 * 24))} days ago`
+                  : `${Math.floor((new Date().getTime() - new Date(lastWorkout.created_at).getTime()) / (1000 * 60 * 60 * 24))} days ago`
               }
             </p>
             <div className="grid grid-cols-3 gap-4 text-center">
