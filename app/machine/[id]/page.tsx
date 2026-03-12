@@ -4,7 +4,7 @@ import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function MachinePage({ params }: { params: any }) {
-  const id = params?.id
+  const id = typeof params?.id === 'string' ? params.id : null
   const [machine, setMachine] = useState<any>(null)
   const [lastWorkout, setLastWorkout] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
@@ -26,6 +26,10 @@ export default function MachinePage({ params }: { params: any }) {
         }
         setUser(user)
 
+        if (!id) {
+            setError('Invalid machine ID')
+            return
+        }
         const { data: machineData, error: machineError } = await supabase
           .from('machines')
           .select('*')
@@ -33,7 +37,7 @@ export default function MachinePage({ params }: { params: any }) {
           .single()
         
         if (machineError) {
-          setError('Machine not found')
+          setError('Machine not found:' + machineError.message)
           return
         }
         setMachine(machineData)
