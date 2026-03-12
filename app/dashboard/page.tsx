@@ -47,11 +47,8 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-gray-900 rounded-2xl p-6 mb-6 text-center">
-          <p className="text-gray-400 mb-2">Ready to train?</p>
-          <p className="text-white text-lg font-semibold mb-4">Scan a QR code on any machine to get started</p>
-          <div className="bg-white text-black px-6 py-3 rounded-full font-semibold inline-block">
-            📷 Scan Equipment
-          </div>
+          <p className="text-white text-lg font-semibold mb-2">Ready to train?</p>
+          <p className="text-gray-500 text-sm">Use your phone camera to scan the QR code on any piece of equipment to get started</p>
         </div>
 
         <h2 className="text-white font-semibold text-lg mb-4">Recent Workouts</h2>
