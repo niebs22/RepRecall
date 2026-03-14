@@ -51,7 +51,7 @@ export default function Dashboard() {
           <p className="text-gray-500 text-sm">Open your camera app and scan the QR code on any piece of equipment to get started</p>
         </div>
 
-        <h2 className="text-white font-semibold text-lg mb-4">Recent Workouts ✓</h2>
+        <h2 className="text-white font-semibold text-lg mb-4">Recent Workouts</h2>
 
         {workouts.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No workouts yet. Scan a machine to get started.</p>
