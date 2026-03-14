@@ -27,7 +27,6 @@ export default function Dashboard() {
       .select('*, machines(name)')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
-    
     if (data) {
       const seen = new Set()
       const grouped = data.filter(workout => {
@@ -48,7 +47,7 @@ export default function Dashboard() {
     const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24))
     if (days === 0) return 'Today'
     if (days === 1) return 'Yesterday'
-    return `${days} days ago`
+    return days + ' days ago'
   }
 
   return (
@@ -64,10 +63,7 @@ export default function Dashboard() {
         <div className="bg-gray-900 rounded-2xl p-6 mb-6 text-center">
           <p className="text-white text-lg font-semibold mb-2">Ready to train?</p>
           <p className="text-gray-500 text-sm mb-4">Scan the QR code on any piece of equipment to get started</p>
-          
-            href="/scan"
-            className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 inline-flex items-center gap-2"
-          >
+          <a href="/scan" className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 inline-block">
             Scan Equipment
           </a>
         </div>
@@ -79,7 +75,7 @@ export default function Dashboard() {
         ) : (
           <div className="flex flex-col gap-3">
             {machineWorkouts.map(workout => (
-              <a href={`/machine/${workout.machine_id}`} key={workout.machine_id} className="bg-gray-900 rounded-xl p-4 block hover:bg-gray-800">
+              <a href={'/machine/' + workout.machine_id} key={workout.machine_id} className="bg-gray-900 rounded-xl p-4 block hover:bg-gray-800">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-white font-semibold">{workout.machines?.name}</p>
                   <p className="text-green-400 text-xs">{daysSince(workout.created_at)}</p>
