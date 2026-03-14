@@ -48,17 +48,17 @@ export default function Dashboard() {
 
         <div className="bg-gray-900 rounded-2xl p-6 mb-6 text-center">
           <p className="text-white text-lg font-semibold mb-2">Ready to train?</p>
-          <p className="text-gray-500 text-sm">Use your phone camera to scan the QR code on any piece of equipment to get started</p>
+          <p className="text-gray-500 text-sm">Open your camera app and scan the QR code on any piece of equipment to get started</p>
         </div>
 
-        <h2 className="text-white font-semibold text-lg mb-4">Recent Workouts</h2>
+        <h2 className="text-white font-semibold text-lg mb-4">Recent Workouts ✓</h2>
 
         {workouts.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No workouts yet. Scan a machine to get started.</p>
         ) : (
           <div className="flex flex-col gap-3">
             {workouts.map(workout => (
-              <div key={workout.id} className="bg-gray-900 rounded-xl p-4">
+              <a href={`/machine/${workout.machine_id}`} key={workout.id} className="bg-gray-900 rounded-xl p-4 block hover:bg-gray-800">
                 <div className="flex justify-between items-center">
                   <p className="text-white font-semibold">{workout.machines?.name}</p>
                   <p className="text-gray-400 text-sm">{new Date(workout.created_at).toLocaleDateString()}</p>
@@ -66,7 +66,7 @@ export default function Dashboard() {
                 <p className="text-gray-400 text-sm mt-1">
                   {workout.sets} sets · {workout.reps} reps · {workout.weight} lbs
                 </p>
-              </div>
+              </a>
             ))}
           </div>
         )}
