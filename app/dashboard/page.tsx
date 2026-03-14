@@ -68,7 +68,7 @@ export default function Dashboard() {
             href="/scan"
             className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 inline-flex items-center gap-2"
           >
-            📷 Scan Equipment
+            Scan Equipment
           </a>
         </div>
 
