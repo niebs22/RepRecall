@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
-import QRCode from 'qrcode.react'
+import { QRCodeCanvas } from 'qrcode.react'
 
 export default function Admin() {
   const [machines, setMachines] = useState<any[]>([])
@@ -139,7 +139,7 @@ export default function Admin() {
 
                 <div className="flex items-center gap-4">
                   <div className="bg-white p-2 rounded-lg">
-                    <QRCode
+                    <QRCodeCanvas
                       id={'qr-' + machine.id}
                       value={`https://rep-recall.vercel.app/machine/${machine.id}`}
                       size={100}
