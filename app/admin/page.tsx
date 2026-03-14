@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
+import QRCode from 'qrcode.react'
 
 export default function Admin() {
   const [machines, setMachines] = useState<any[]>([])
@@ -62,6 +63,17 @@ export default function Admin() {
     fetchMachines(gymId)
   }
 
+  function downloadQR(machineId: string, machineName: string) {
+    const canvas = document.getElementById('qr-' + machineId) as HTMLCanvasElement
+    if (canvas) {
+      const url = canvas.toDataURL('image/png')
+      const a = document.createElement('a')
+      a.href = url
+      a.download = machineName + '-QR.png'
+      a.click()
+    }
+  }
+
   return (
     <main className="min-h-screen bg-black p-6">
       <div className="max-w-lg mx-auto">
@@ -107,10 +119,10 @@ export default function Admin() {
         {machines.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No machines yet. Add one above.</p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-4">
             {machines.map(machine => (
               <div key={machine.id} className="bg-gray-900 rounded-xl p-4">
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="text-white font-semibold">{machine.name}</p>
                     {machine.description && (
@@ -124,11 +136,27 @@ export default function Admin() {
                     Delete
                   </button>
                 </div>
-                <div className="bg-black rounded-lg p-3 mt-2">
-                  <p className="text-gray-400 text-xs mb-1">QR Code URL</p>
-                  <p className="text-green-400 text-xs break-all">
-                    https://rep-recall.vercel.app/machine/{machine.id}
-                  </p>
+
+                <div className="flex items-center gap-4">
+                  <div className="bg-white p-2 rounded-lg">
+                    <QRCode
+                      id={'qr-' + machine.id}
+                      value={`https://rep-recall.vercel.app/machine/${machine.id}`}
+                      size={100}
+                      level="H"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-400 text-xs mb-2 break-all">
+                      rep-recall.vercel.app/machine/{machine.id}
+                    </p>
+                    <button
+                      onClick={() => downloadQR(machine.id, machine.name)}
+                      className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200"
+                    >
+                      Download QR
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
