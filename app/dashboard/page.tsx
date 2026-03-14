@@ -29,7 +29,6 @@ export default function Dashboard() {
       .order('created_at', { ascending: false })
     
     if (data) {
-      // Group by machine, keep only most recent per machine
       const seen = new Set()
       const grouped = data.filter(workout => {
         if (seen.has(workout.machine_id)) return false
@@ -43,14 +42,6 @@ export default function Dashboard() {
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
-  }
-
-  function openCamera() {
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
-    input.capture = 'environment'
-    input.click()
   }
 
   function daysSince(date: string) {
@@ -73,12 +64,12 @@ export default function Dashboard() {
         <div className="bg-gray-900 rounded-2xl p-6 mb-6 text-center">
           <p className="text-white text-lg font-semibold mb-2">Ready to train?</p>
           <p className="text-gray-500 text-sm mb-4">Scan the QR code on any piece of equipment to get started</p>
-          <button
-            onClick={openCamera}
+          
+            href="/scan"
             className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 inline-flex items-center gap-2"
           >
             📷 Scan Equipment
-          </button>
+          </a>
         </div>
 
         <h2 className="text-white font-semibold text-lg mb-4">My Equipment</h2>
