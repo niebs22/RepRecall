@@ -92,9 +92,14 @@ export default function MachinePage() {
         <p className="text-5xl mb-4">✅</p>
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
         <p className="text-gray-400 mb-8">Keep it up!</p>
-        <a href="/dashboard" className="bg-white text-black px-8 py-3 rounded-full font-semibold">
-          Back to Dashboard
-        </a>
+        <div className="flex flex-col gap-3">
+          <a href="/dashboard" className="bg-white text-black px-8 py-3 rounded-full font-semibold text-center">
+            Back to Dashboard
+          </a>
+          <a href={`/machine/${id}`} className="border border-white text-white px-8 py-3 rounded-full font-semibold text-center">
+            Log Another Set
+          </a>
+        </div>
       </div>
     </main>
   )
