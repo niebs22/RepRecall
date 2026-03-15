@@ -90,7 +90,7 @@ export default function Dashboard() {
           <div className="flex flex-col gap-3">
             {machineWorkouts.map(workout => (
               
-                href={'/machine/' + workout.machine_id}
+                <a href={'/machine/' + workout.machine_id}
                 key={workout.machine_id}
                 className="rounded-xl p-4 block"
                 style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
