@@ -7,8 +7,9 @@ export default function MachinePage() {
   const pathname = usePathname()
   const id = pathname?.split('/').pop()
   const [machine, setMachine] = useState<any>(null)
-  const [lastWorkout, setLastWorkout] = useState<any>(null)
+  const [lastWorkouts, setLastWorkouts] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
+  const [exercise, setExercise] = useState('')
   const [sets, setSets] = useState('')
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
@@ -24,14 +25,28 @@ export default function MachinePage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { router.push('/login'); return }
         setUser(user)
+
         const { data: machineData, error: machineError } = await supabase
           .from('machines').select('*').eq('id', id).single()
         if (machineError) { setError('Machine not found'); return }
         setMachine(machineData)
+
         const { data: workoutData } = await supabase
-          .from('workouts').select('*').eq('user_id', user.id).eq('machine_id', id)
-          .order('created_at', { ascending: false }).limit(1).maybeSingle()
-        setLastWorkout(workoutData)
+          .from('workouts').select('*')
+          .eq('user_id', user.id)
+          .eq('machine_id', id)
+          .order('created_at', { ascending: false })
+
+        if (workoutData) {
+          const seen = new Set()
+          const grouped = workoutData.filter(w => {
+            const key = w.exercise_name || 'General'
+            if (seen.has(key)) return false
+            seen.add(key)
+            return true
+          })
+          setLastWorkouts(grouped)
+        }
       } catch (err) {
         setError('Something went wrong. Please try again.')
       }
@@ -44,6 +59,7 @@ export default function MachinePage() {
     const { error } = await supabase.from('workouts').insert({
       user_id: user.id,
       machine_id: id,
+      exercise_name: exercise || 'General',
       sets: parseInt(sets),
       reps: parseInt(reps),
       weight: parseFloat(weight),
@@ -53,7 +69,7 @@ export default function MachinePage() {
   }
 
   function daysSince(date: string) {
-    const diffMs = new Date().getTime() - new Date(date).getTime() 
+    const diffMs = new Date().getTime() - new Date(date).getTime()
     const diffHours = diffMs / (1000 * 60 * 60)
     const diffDays = Math.floor(diffHours / 24)
     if (diffHours < 1) return 'Just now'
@@ -78,7 +94,7 @@ export default function MachinePage() {
     <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
       <div className="text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#2563EB'}}>
-          <span className="text-2xl">✓</span>
+          <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
         <p className="mb-8" style={{color: '#64748B'}}>Keep it up!</p>
@@ -87,7 +103,7 @@ export default function MachinePage() {
             Back to Dashboard
           </a>
           <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
-            Log Another Set
+            Log Another Exercise
           </a>
         </div>
       </div>
@@ -106,35 +122,55 @@ export default function MachinePage() {
           <p className="mb-6" style={{color: '#64748B'}}>{machine.description}</p>
         )}
 
-        {lastWorkout ? (
-          <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040'}}>
-            <p className="text-sm mb-1" style={{color: '#64748B'}}>Last Session</p>
-            <p className="text-xs mb-4" style={{color: '#3B82F6'}}>
-              {new Date(lastWorkout.created_at).toLocaleDateString()} · {daysSince(lastWorkout.created_at)}
-            </p>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-white">{lastWorkout.sets}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{lastWorkout.reps}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{lastWorkout.weight}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
-              </div>
+        {lastWorkouts.length > 0 && (
+          <div className="mb-8">
+            <p className="text-sm font-semibold mb-3" style={{color: '#64748B'}}>PREVIOUS SESSIONS</p>
+            <div className="flex flex-col gap-3">
+              {lastWorkouts.map(workout => (
+                <div key={workout.id} className="rounded-xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-white font-semibold">{workout.exercise_name || 'General'}</p>
+                    <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
+                  </div>
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="text-white font-bold">{workout.sets}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
+                    </div>
+                    <div>
+                      <p className="text-white font-bold">{workout.reps}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
+                    </div>
+                    <div>
+                      <p className="text-white font-bold">{workout.weight}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ) : (
+        )}
+
+        {lastWorkouts.length === 0 && (
           <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F2040'}}>
-            <p style={{color: '#64748B'}}>No previous session on this machine</p>
+            <p style={{color: '#64748B'}}>No previous sessions on this machine</p>
           </div>
         )}
 
         <h2 className="font-semibold text-lg mb-4 text-white">Log Today's Workout</h2>
         <form onSubmit={handleSave} className="flex flex-col gap-4">
+          <div>
+            <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Exercise Name</label>
+            <input
+              type="text"
+              value={exercise}
+              onChange={e => setExercise(e.target.value)}
+              placeholder="e.g. Squat, Deadlift, Bench Press"
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+            />
+          </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Sets</label>
