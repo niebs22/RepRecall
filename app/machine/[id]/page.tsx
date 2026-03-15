@@ -213,7 +213,7 @@ export default function MachinePage() {
                 <button
                   onClick={handleAddVariation}
                   className="flex-1 py-3 rounded-full font-semibold text-white"
-                  style={{background: '#2563EB', border: '2px solid #EF4444', boxshadow: '0 0 8px rgba(239, 68, 68, 0.4)'}}
+                  style={{background: '#2563EB', border: '2px solid #EF4444', boxShadow: '0 0 8px rgba(239, 68, 68, 0.4)'}}
                 >
                   Save Variation
                 </button>
