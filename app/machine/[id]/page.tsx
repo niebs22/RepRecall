@@ -8,8 +8,11 @@ export default function MachinePage() {
   const id = pathname?.split('/').pop()
   const [machine, setMachine] = useState<any>(null)
   const [lastWorkouts, setLastWorkouts] = useState<any[]>([])
+  const [variations, setVariations] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
-  const [exercise, setExercise] = useState('')
+  const [selectedExercise, setSelectedExercise] = useState('')
+  const [showAddVariation, setShowAddVariation] = useState(false)
+  const [newVariation, setNewVariation] = useState('')
   const [sets, setSets] = useState('')
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
@@ -30,6 +33,15 @@ export default function MachinePage() {
           .from('machines').select('*').eq('id', id).single()
         if (machineError) { setError('Machine not found'); return }
         setMachine(machineData)
+        setSelectedExercise(machineData.name)
+
+        const { data: variationData } = await supabase
+          .from('variations')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('machine_id', id)
+          .order('created_at', { ascending: true })
+        if (variationData) setVariations(variationData)
 
         const { data: workoutData } = await supabase
           .from('workouts').select('*')
@@ -40,7 +52,7 @@ export default function MachinePage() {
         if (workoutData) {
           const seen = new Set()
           const grouped = workoutData.filter(w => {
-            const key = w.exercise_name || 'General'
+            const key = w.exercise_name || machineData.name
             if (seen.has(key)) return false
             seen.add(key)
             return true
@@ -54,12 +66,27 @@ export default function MachinePage() {
     load()
   }, [id])
 
+  async function handleAddVariation() {
+    if (!newVariation.trim()) return
+    const { data } = await supabase.from('variations').insert({
+      user_id: user.id,
+      machine_id: id,
+      name: newVariation.trim()
+    }).select().single()
+    if (data) {
+      setVariations([...variations, data])
+      setSelectedExercise(data.name)
+    }
+    setNewVariation('')
+    setShowAddVariation(false)
+  }
+
   async function handleSave(e: any) {
     e.preventDefault()
     const { error } = await supabase.from('workouts').insert({
       user_id: user.id,
       machine_id: id,
-      exercise_name: exercise || 'General',
+      exercise_name: selectedExercise,
       sets: parseInt(sets),
       reps: parseInt(reps),
       weight: parseFloat(weight),
@@ -110,6 +137,10 @@ export default function MachinePage() {
     </main>
   )
 
+  const lastWorkoutForSelected = lastWorkouts.find(w => 
+    (w.exercise_name || machine.name) === selectedExercise
+  )
+
   return (
     <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
       <div className="max-w-lg mx-auto">
@@ -119,58 +150,83 @@ export default function MachinePage() {
 
         <h1 className="text-3xl font-bold text-white mb-1">{machine.name}</h1>
         {machine.description && (
-          <p className="mb-6" style={{color: '#64748B'}}>{machine.description}</p>
+          <p className="mb-4" style={{color: '#64748B'}}>{machine.description}</p>
         )}
 
-        {lastWorkouts.length > 0 && (
-          <div className="mb-8">
-            <p className="text-sm font-semibold mb-3" style={{color: '#64748B'}}>PREVIOUS SESSIONS</p>
-            <div className="flex flex-col gap-3">
-              {lastWorkouts.map(workout => (
-                <div key={workout.id} className="rounded-xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-white font-semibold">{workout.exercise_name || 'General'}</p>
-                    <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
-                  </div>
-                  <div className="flex gap-6">
-                    <div>
-                      <p className="text-white font-bold">{workout.sets}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
-                    </div>
-                    <div>
-                      <p className="text-white font-bold">{workout.reps}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
-                    </div>
-                    <div>
-                      <p className="text-white font-bold">{workout.weight}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
-                    </div>
-                  </div>
-                </div>
+        {/* Exercise selector */}
+        <div className="mb-6">
+          <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise</label>
+          <div className="flex flex-col gap-2">
+            <select
+              value={selectedExercise}
+              onChange={e => {
+                if (e.target.value === '__add__') {
+                  setShowAddVariation(true)
+                } else {
+                  setSelectedExercise(e.target.value)
+                  setShowAddVariation(false)
+                }
+              }}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+            >
+              <option value={machine.name}>{machine.name} (default)</option>
+              {variations.map(v => (
+                <option key={v.id} value={v.name}>{v.name}</option>
               ))}
+              <option value="__add__">+ Add variation...</option>
+            </select>
+
+            {showAddVariation && (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newVariation}
+                  onChange={e => setNewVariation(e.target.value)}
+                  placeholder="e.g. Close Grip Bench Press"
+                  className="flex-1 px-4 py-3 rounded-lg text-white focus:outline-none"
+                  style={{background: '#0F2040', border: '1px solid #2563EB'}}
+                />
+                <button
+                  onClick={handleAddVariation}
+                  className="px-4 py-3 rounded-lg font-semibold text-white"
+                  style={{background: '#2563EB'}}
+                >
+                  Save
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Last session for selected exercise */}
+        {lastWorkoutForSelected ? (
+          <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
+            <p className="text-xs font-semibold mb-1 tracking-widest uppercase" style={{color: '#64748B'}}>Last Session — {selectedExercise}</p>
+            <p className="text-xs mb-4" style={{color: '#3B82F6'}}>{daysSince(lastWorkoutForSelected.created_at)}</p>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.sets}</p>
+                <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.reps}</p>
+                <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.weight}</p>
+                <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
+              </div>
             </div>
           </div>
-        )}
-
-        {lastWorkouts.length === 0 && (
+        ) : (
           <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F2040'}}>
-            <p style={{color: '#64748B'}}>No previous sessions on this machine</p>
+            <p style={{color: '#64748B'}}>No previous session for {selectedExercise}</p>
           </div>
         )}
 
         <h2 className="font-semibold text-lg mb-4 text-white">Log Today's Workout</h2>
         <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <div>
-            <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Exercise Name</label>
-            <input
-              type="text"
-              value={exercise}
-              onChange={e => setExercise(e.target.value)}
-              placeholder="e.g. Squat, Deadlift, Bench Press"
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-            />
-          </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Sets</label>
