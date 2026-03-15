@@ -5,33 +5,35 @@ import { useRouter } from 'next/navigation'
 export default function ScanPage() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
     let stream: MediaStream | null = null
-    let animationId: number
 
     async function startCamera() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' }
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
         })
         if (videoRef.current) {
           videoRef.current.srcObject = stream
-          videoRef.current.play()
-          scanQR()
+          videoRef.current.setAttribute('playsinline', 'true')
+          await videoRef.current.play()
+          startScanning()
         }
       } catch (err) {
         console.error('Camera error:', err)
       }
     }
 
-    async function scanQR() {
-      const { BrowserQRCodeReader } = await import('@zxing/browser')
-      const codeReader = new BrowserQRCodeReader()
-      
+    async function startScanning() {
       try {
-        const result = await codeReader.decodeFromVideoDevice(
+        const { BrowserQRCodeReader } = await import('@zxing/browser')
+        const codeReader = new BrowserQRCodeReader()
+        await codeReader.decodeFromVideoDevice(
           undefined,
           videoRef.current!,
           (result) => {
@@ -61,19 +63,29 @@ export default function ScanPage() {
   }, [])
 
   return (
-    <main className="min-h-screen bg-black p-6">
+    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
       <div className="max-w-lg mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Scan Equipment</h1>
-          <a href="/dashboard" className="text-gray-400 hover:text-white text-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+          <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>
             Back
           </a>
         </div>
-        <p className="text-gray-400 text-sm text-center mb-6">Point your camera at a QR code on any piece of equipment</p>
-        <div className="rounded-xl overflow-hidden bg-gray-900">
-          <video ref={videoRef} className="w-full" playsInline muted />
-          <canvas ref={canvasRef} className="hidden" />
+        <p className="text-sm text-center mb-6" style={{color: '#64748B'}}>
+          Point your camera at a QR code on any piece of equipment
+        </p>
+        <div className="rounded-2xl overflow-hidden" style={{background: '#0F2040'}}>
+          <video
+            ref={videoRef}
+            className="w-full"
+            playsInline
+            muted
+            autoPlay
+          />
         </div>
+        <p className="text-xs text-center mt-4" style={{color: '#64748B'}}>
+          Make sure to allow camera access when prompted
+        </p>
       </div>
     </main>
   )
