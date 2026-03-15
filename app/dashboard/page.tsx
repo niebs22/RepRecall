@@ -138,7 +138,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <h2 className="font-semibold text-lg mb-4 text-white">My Equipment</h2>
+        <h2 className="font-semibold text-lg mb-4 text-white">Last Sessions</h2>
 
         {machineWorkouts.length === 0 ? (
           <p className="text-center py-8" style={{color: '#64748B'}}>No workouts yet. Scan a machine to get started.</p>
