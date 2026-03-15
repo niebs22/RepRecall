@@ -241,19 +241,19 @@ export default function MachinePage() {
 
             {/* Set list */}
             <div className="flex flex-col gap-2 mb-3">
-              <div className="grid grid-cols-12 gap-2 mb-1">
-                <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
-                <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
-                <p className="col-span-6 text-xs" style={{color: '#64748B'}}>Weight</p>
+              <div className="grid grid-cols-12 gap-2 mb-2 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
+                <p className="col-span-1"></p>
+                <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#2563EB'}}>Reps</p>
+                <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#2563EB'}}>Weight</p>
               </div>
               {lastSessionSets.map((s, i) => (
-                <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                  <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
-                  <p className="col-span-5 text-white font-semibold">{s.reps} reps</p>
-                  <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
-                </div>
-              ))}
+             <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
+                <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                <p className="col-span-5 text-white font-semibold">{s.reps}</p>
+                <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
             </div>
+          ))}
+        </div>
 
             {lastSessionNotes && (
               <p className="text-xs italic pt-3" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
