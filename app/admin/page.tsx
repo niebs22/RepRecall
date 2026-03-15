@@ -16,15 +16,9 @@ export default function Admin() {
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
+      if (!user) { router.push('/login'); return }
       const { data: gym } = await supabase
-        .from('gyms')
-        .select('*')
-        .limit(1)
-        .single()
+        .from('gyms').select('*').limit(1).single()
       if (gym) {
         setGymId(gym.id)
         setGymName(gym.name)
@@ -36,10 +30,8 @@ export default function Admin() {
 
   async function fetchMachines(gymId: string) {
     const { data } = await supabase
-      .from('machines')
-      .select('*')
-      .eq('gym_id', gymId)
-      .order('created_at', { ascending: false })
+      .from('machines').select('*').eq('gym_id', gymId)
+      .order('name', { ascending: true })
     if (data) setMachines(data)
   }
 
@@ -75,19 +67,20 @@ export default function Admin() {
   }
 
   return (
-    <main className="min-h-screen bg-black p-6">
+    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-            {gymName && <p className="text-gray-400 text-sm">{gymName}</p>}
+            <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+            <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
-          <a href="/dashboard" className="text-gray-400 hover:text-white text-sm">
-            ← Dashboard
+          <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>
+            Dashboard
           </a>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-6 mb-8">
+        {/* Add machine form */}
+        <div className="rounded-2xl p-6 mb-8" style={{background: '#0F2040'}}>
           <h2 className="text-white font-semibold text-lg mb-4">Add Machine</h2>
           <form onSubmit={addMachine} className="flex flex-col gap-3">
             <input
@@ -95,64 +88,71 @@ export default function Admin() {
               placeholder="Machine name (e.g. Bench Press)"
               value={newMachine}
               onChange={e => setNewMachine(e.target.value)}
-              className="bg-black text-white px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:border-white"
+              className="px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
             />
             <input
               type="text"
               placeholder="Description (optional)"
               value={newDescription}
               onChange={e => setNewDescription(e.target.value)}
-              className="bg-black text-white px-4 py-3 rounded-lg border border-gray-700 focus:outline-none focus:border-white"
+              className="px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200"
+              className="py-3 rounded-full font-semibold text-white"
+              style={{background: '#2563EB'}}
             >
               {loading ? 'Adding...' : 'Add Machine'}
             </button>
           </form>
         </div>
 
-        <h2 className="text-white font-semibold text-lg mb-4">Your Machines</h2>
+        <h2 className="font-semibold text-lg mb-4 text-white">
+          Your Machines <span className="text-sm font-normal" style={{color: '#64748B'}}>({machines.length})</span>
+        </h2>
 
         {machines.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No machines yet. Add one above.</p>
+          <p className="text-center py-8" style={{color: '#64748B'}}>No machines yet. Add one above.</p>
         ) : (
           <div className="flex flex-col gap-4">
             {machines.map(machine => (
-              <div key={machine.id} className="bg-gray-900 rounded-xl p-4">
+              <div key={machine.id} className="rounded-xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="text-white font-semibold">{machine.name}</p>
                     {machine.description && (
-                      <p className="text-gray-400 text-sm">{machine.description}</p>
+                      <p className="text-xs mt-0.5" style={{color: '#64748B'}}>{machine.description}</p>
                     )}
                   </div>
                   <button
                     onClick={() => deleteMachine(machine.id)}
-                    className="text-red-400 hover:text-red-300 text-sm ml-4"
+                    className="text-xs px-3 py-1 rounded-full ml-4"
+                    style={{background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)'}}
                   >
                     Delete
                   </button>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="bg-white p-2 rounded-lg">
+                  <div className="p-2 rounded-lg" style={{background: 'white'}}>
                     <QRCodeCanvas
                       id={'qr-' + machine.id}
-                      value={`https://rep-recall.vercel.app/machine/${machine.id}`}
-                      size={100}
+                      value={'https://rep-recall.vercel.app/machine/' + machine.id}
+                      size={90}
                       level="H"
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="text-gray-400 text-xs mb-2 break-all">
-                      rep-recall.vercel.app/machine/{machine.id}
+                    <p className="text-xs mb-3 break-all" style={{color: '#64748B'}}>
+                      rep-recall.vercel.app/machine/{machine.id.slice(0, 8)}...
                     </p>
                     <button
                       onClick={() => downloadQR(machine.id, machine.name)}
-                      className="bg-white text-black px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200"
+                      className="px-4 py-2 rounded-full text-sm font-semibold text-white"
+                      style={{background: '#2563EB'}}
                     >
                       Download QR
                     </button>
