@@ -45,16 +45,13 @@ export default function Dashboard() {
 
   function daysSince(date: string) {
     const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24))
-    if (days === 0) return 'Today'
+    if (days <= 0) return 'Today'
     if (days === 1) return 'Yesterday'
-    if (days < 0) return 'Today'
     return days + ' days ago'
   }
 
   return (
     <main className="min-h-screen p-6 relative overflow-hidden" style={{background: '#0A1628'}}>
-
-      {/* Subtle background watermark */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
         <div style={{
           fontSize: '22vw',
@@ -96,10 +93,7 @@ export default function Dashboard() {
                 href={'/machine/' + workout.machine_id}
                 key={workout.machine_id}
                 className="rounded-xl p-4 block"
-                style={{
-                  background: '#0F2040',
-                  borderLeft: '3px solid #2563EB'
-                }}
+                style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
               >
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-white font-semibold">{workout.machines?.name}</p>
