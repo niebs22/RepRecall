@@ -7,7 +7,7 @@ export default function MachinePage() {
   const pathname = usePathname()
   const id = pathname?.split('/').pop()
   const [machine, setMachine] = useState<any>(null)
-  const [lastWorkouts, setLastWorkouts] = useState<any[]>([])
+  const [allWorkouts, setAllWorkouts] = useState<any[]>([])
   const [variations, setVariations] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
   const [selectedExercise, setSelectedExercise] = useState('')
@@ -46,23 +46,26 @@ export default function MachinePage() {
           .eq('user_id', user.id)
           .eq('machine_id', id)
           .order('created_at', { ascending: false })
+        if (workoutData) setAllWorkouts(workoutData)
 
-        if (workoutData) {
-          const seen = new Set()
-          const grouped = workoutData.filter(w => {
-            const key = w.exercise_name || machineData.name
-            if (seen.has(key)) return false
-            seen.add(key)
-            return true
-          })
-          setLastWorkouts(grouped)
-        }
       } catch (err) {
         setError('Something went wrong. Please try again.')
       }
     }
     load()
   }, [id])
+
+  function getLastSessionSets(exerciseName: string) {
+    const exerciseWorkouts = allWorkouts.filter(w =>
+      (w.exercise_name || machine?.name) === exerciseName
+    )
+    if (exerciseWorkouts.length === 0) return []
+
+    const lastDate = new Date(exerciseWorkouts[0].created_at).toDateString()
+    return exerciseWorkouts.filter(w =>
+      new Date(w.created_at).toDateString() === lastDate
+    )
+  }
 
   async function handleAddVariation() {
     if (!newVariation.trim()) return
@@ -156,9 +159,9 @@ export default function MachinePage() {
     </main>
   )
 
-  const lastWorkoutForSelected = lastWorkouts.find(w =>
-    (w.exercise_name || machine.name) === selectedExercise
-  )
+  const lastSessionSets = getLastSessionSets(selectedExercise)
+  const lastSessionDate = lastSessionSets.length > 0 ? lastSessionSets[0].created_at : null
+  const lastSessionNotes = lastSessionSets.find(s => s.notes)?.notes
 
   return (
     <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
@@ -226,28 +229,35 @@ export default function MachinePage() {
           )}
         </div>
 
-        {/* Last session for selected exercise */}
-        {lastWorkoutForSelected ? (
+        {/* Last session — all sets */}
+        {lastSessionSets.length > 0 ? (
           <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
-            <p className="text-xs font-semibold mb-1 tracking-widest uppercase" style={{color: '#64748B'}}>Last Session — {selectedExercise}</p>
-            <p className="text-xs mb-4" style={{color: '#3B82F6'}}>{daysSince(lastWorkoutForSelected.created_at)}</p>
-            <div className="grid grid-cols-3 gap-4 text-center mb-3">
-              <div>
-                <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.sets}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.reps}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.weight}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
-              </div>
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>
+                Last Session — {selectedExercise}
+              </p>
+              <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(lastSessionDate)}</p>
             </div>
-            {lastWorkoutForSelected.notes && (
-              <p className="text-xs italic mt-2 pt-2" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
-                "{lastWorkoutForSelected.notes}"
+
+            {/* Set list */}
+            <div className="flex flex-col gap-2 mb-3">
+              <div className="grid grid-cols-12 gap-2 mb-1">
+                <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
+                <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
+                <p className="col-span-6 text-xs" style={{color: '#64748B'}}>Weight</p>
+              </div>
+              {lastSessionSets.map((s, i) => (
+                <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
+                  <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                  <p className="col-span-5 text-white font-semibold">{s.reps} reps</p>
+                  <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
+                </div>
+              ))}
+            </div>
+
+            {lastSessionNotes && (
+              <p className="text-xs italic pt-3" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
+                "{lastSessionNotes}"
               </p>
             )}
           </div>
@@ -257,11 +267,9 @@ export default function MachinePage() {
           </div>
         )}
 
-        {/* Log workout with multiple sets */}
+        {/* Log workout */}
         <h2 className="font-semibold text-lg mb-4 text-white">Log Today's Workout</h2>
         <form onSubmit={handleSave} className="flex flex-col gap-4">
-
-          {/* Set headers */}
           <div className="grid grid-cols-12 gap-2 px-1">
             <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
             <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
