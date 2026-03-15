@@ -152,7 +152,7 @@ export default function Dashboard() {
                 style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
               >
                 <div className="flex justify-between items-center mb-3">
-                  <p className="text-white font-semibold">{workout.machines?.name}</p>
+                  <p className="text-white font-semibold">{workout.exercise_name || workout.machines?.name}</p>
                   <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
                 </div>
                 <div className="flex gap-6">
