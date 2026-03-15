@@ -102,14 +102,19 @@ export default function Dashboard() {
   const todayIndex = today === 0 ? 6 : today - 1
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
-      <div className="max-w-lg mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+  <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+    <div className="max-w-lg mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+        <div className="flex items-center gap-4">  
+          <a href="/admin" className="text-sm" style={{color: #64748B}}>
+            Admin
+          </a>
           <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>
             Log Out
           </button>
         </div>
+      </div>
 
         {/* Scan card */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
