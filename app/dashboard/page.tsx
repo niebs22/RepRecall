@@ -47,12 +47,29 @@ export default function Dashboard() {
     const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24))
     if (days === 0) return 'Today'
     if (days === 1) return 'Yesterday'
+    if (days < 0) return 'Today'
     return days + ' days ago'
   }
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
-      <div className="max-w-lg mx-auto">
+    <main className="min-h-screen p-6 relative overflow-hidden" style={{background: '#0A1628'}}>
+
+      {/* Subtle background watermark */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+        <div style={{
+          fontSize: '22vw',
+          fontWeight: 900,
+          color: 'rgba(37, 99, 235, 0.04)',
+          letterSpacing: '-0.05em',
+          whiteSpace: 'nowrap',
+          transform: 'rotate(-20deg)',
+          userSelect: 'none'
+        }}>
+          RepRecall
+        </div>
+      </div>
+
+      <div className="max-w-lg mx-auto relative z-10">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
           <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>
@@ -75,7 +92,15 @@ export default function Dashboard() {
         ) : (
           <div className="flex flex-col gap-3">
             {machineWorkouts.map(workout => (
-              <a href={'/machine/' + workout.machine_id} key={workout.machine_id} className="rounded-xl p-4 block" style={{background: '#0F2040'}}>
+              
+                href={'/machine/' + workout.machine_id}
+                key={workout.machine_id}
+                className="rounded-xl p-4 block"
+                style={{
+                  background: '#0F2040',
+                  borderLeft: '3px solid #2563EB'
+                }}
+              >
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-white font-semibold">{workout.machines?.name}</p>
                   <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
