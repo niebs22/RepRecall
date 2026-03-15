@@ -243,8 +243,8 @@ export default function MachinePage() {
             <div className="flex flex-col gap-2 mb-3">
               <div className="grid grid-cols-12 gap-2 mb-2 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
                 <p className="col-span-1"></p>
-                <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#2563EB'}}>Reps</p>
-                <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#2563EB'}}>Weight</p>
+                <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
+                <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
               </div>
               {lastSessionSets.map((s, i) => (
              <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
