@@ -152,7 +152,7 @@ export default function MachinePage() {
             Scan Next Machine
           </a>
           <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
-            Log Another Exercise
+            Back to Dashboard
           </a>
         </div>
       </div>
