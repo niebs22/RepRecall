@@ -11,6 +11,7 @@ export default function Admin() {
   const [gymId, setGymId] = useState<any>(null)
   const [gymName, setGymName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [expanded, setExpanded] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function Admin() {
 
   async function deleteMachine(id: string) {
     await supabase.from('machines').delete().eq('id', id)
+    if (expanded === id) setExpanded(null)
     fetchMachines(gymId)
   }
 
@@ -64,6 +66,10 @@ export default function Admin() {
       a.download = machineName + '-QR.png'
       a.click()
     }
+  }
+
+  function toggleExpand(id: string) {
+    setExpanded(expanded === id ? null : id)
   }
 
   return (
@@ -117,47 +123,58 @@ export default function Admin() {
         {machines.length === 0 ? (
           <p className="text-center py-8" style={{color: '#64748B'}}>No machines yet. Add one above.</p>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
             {machines.map(machine => (
-              <div key={machine.id} className="rounded-xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-white font-semibold">{machine.name}</p>
-                    {machine.description && (
-                      <p className="text-xs mt-0.5" style={{color: '#64748B'}}>{machine.description}</p>
-                    )}
+              <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+                
+                {/* Collapsed row */}
+                <button
+                  onClick={() => toggleExpand(machine.id)}
+                  className="w-full px-4 py-3 flex justify-between items-center"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: '#2563EB'}}></div>
+                    <p className="text-white font-medium text-sm">{machine.name}</p>
                   </div>
-                  <button
-                    onClick={() => deleteMachine(machine.id)}
-                    className="text-xs px-3 py-1 rounded-full ml-4"
-                    style={{background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)'}}
-                  >
-                    Delete
-                  </button>
-                </div>
+                  <span className="text-lg" style={{color: '#64748B', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
+                    ▾
+                  </span>
+                </button>
 
-                <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-lg" style={{background: 'white'}}>
-                    <QRCodeCanvas
-                      id={'qr-' + machine.id}
-                      value={'https://rep-recall.vercel.app/machine/' + machine.id}
-                      size={90}
-                      level="H"
-                    />
+                {/* Expanded content */}
+                {expanded === machine.id && (
+                  <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #1E3A5F'}}>
+                    {machine.description && (
+                      <p className="text-xs mb-4" style={{color: '#64748B'}}>{machine.description}</p>
+                    )}
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-lg" style={{background: 'white'}}>
+                        <QRCodeCanvas
+                          id={'qr-' + machine.id}
+                          value={'https://rep-recall.vercel.app/machine/' + machine.id}
+                          size={90}
+                          level="H"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 flex-1">
+                        <button
+                          onClick={() => downloadQR(machine.id, machine.name)}
+                          className="py-2 rounded-full text-sm font-semibold text-white text-center"
+                          style={{background: '#2563EB'}}
+                        >
+                          Download QR
+                        </button>
+                        <button
+                          onClick={() => deleteMachine(machine.id)}
+                          className="py-2 rounded-full text-sm font-semibold text-center"
+                          style={{background: 'transparent', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#EF4444'}}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-xs mb-3 break-all" style={{color: '#64748B'}}>
-                      rep-recall.vercel.app/machine/{machine.id.slice(0, 8)}...
-                    </p>
-                    <button
-                      onClick={() => downloadQR(machine.id, machine.name)}
-                      className="px-4 py-2 rounded-full text-sm font-semibold text-white"
-                      style={{background: '#2563EB'}}
-                    >
-                      Download QR
-                    </button>
-                  </div>
-                </div>
+                )}
               </div>
             ))}
           </div>
