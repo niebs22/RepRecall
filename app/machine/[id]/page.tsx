@@ -148,10 +148,10 @@ export default function MachinePage() {
         <p className="mb-2" style={{color: '#64748B'}}>{sets.filter(s => s.reps && s.weight).length} sets logged</p>
         <p className="mb-8" style={{color: '#64748B'}}>Keep it up!</p>
         <div className="flex flex-col gap-3">
-          <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#2563EB'}}>
-            Back to Dashboard
+          <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#2563EB'}}>
+            Scan Next Machine
           </a>
-          <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
+          <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
             Log Another Exercise
           </a>
         </div>
