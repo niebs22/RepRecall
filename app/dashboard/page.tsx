@@ -7,7 +7,8 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
-  const [selectedMachine, setSelectedMachine] = useState('')
+  const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
+  const [totalThisWeek, setTotalThisWeek] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function Dashboard() {
         setUser(user)
         fetchMachineWorkouts(user.id)
         fetchAllMachines()
+        fetchWeekActivity(user.id)
       }
     }
     getUser()
@@ -49,6 +51,32 @@ export default function Dashboard() {
     if (data) setAllMachines(data)
   }
 
+  async function fetchWeekActivity(userId: string) {
+    const now = new Date()
+    const dayOfWeek = now.getDay()
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    monday.setHours(0, 0, 0, 0)
+
+    const { data } = await supabase
+      .from('workouts')
+      .select('created_at')
+      .eq('user_id', userId)
+      .gte('created_at', monday.toISOString())
+
+    if (data) {
+      const activeDays = new Set<number>()
+      data.forEach(w => {
+        const day = new Date(w.created_at).getDay()
+        const adjusted = day === 0 ? 6 : day - 1
+        activeDays.add(adjusted)
+      })
+      const week = [0,1,2,3,4,5,6].map(d => activeDays.has(d))
+      setWeekActivity(week)
+      setTotalThisWeek(activeDays.size)
+    }
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
@@ -60,15 +88,18 @@ export default function Dashboard() {
   }
 
   function daysSince(date: string) {
-    const days = Math.floor((new Date().getTime() - new Date(date).getTime()) / (1000 * 60 * 60 * 24))
     const diffMs = new Date().getTime() - new Date(date).getTime()
     const diffHours = diffMs / (1000 * 60 * 60)
     const diffDays = Math.floor(diffHours / 24)
-    if (diffHours < 1) return 'Just Now'
+    if (diffHours < 1) return 'Just now'
     if (diffHours < 24) return 'Today'
-    if (diffDays === 1) return '1 day ago'
+    if (diffDays === 1) return 'Yesterday'
     return diffDays + ' days ago'
   }
+
+  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+  const today = new Date().getDay()
+  const todayIndex = today === 0 ? 6 : today - 1
 
   return (
     <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
@@ -80,22 +111,47 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <div className="rounded-2xl p-6 mb-6" style={{background: '#0F2040'}}>
-          <p className="text-white font-semibold text-lg mb-2">Ready to train?</p>
+        {/* Week activity graph */}
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-white font-semibold">This Week</p>
+            <p className="text-sm font-medium" style={{color: '#3B82F6'}}>
+              {totalThisWeek} {totalThisWeek === 1 ? 'day' : 'days'} active
+            </p>
+          </div>
+          <div className="flex gap-2 items-end justify-between">
+            {dayLabels.map((day, i) => (
+              <div key={i} className="flex flex-col items-center gap-2 flex-1">
+                <div
+                  className="w-full rounded-md transition-all"
+                  style={{
+                    height: '40px',
+                    background: weekActivity[i] ? '#2563EB' : '#0A1628',
+                    border: i === todayIndex ? '1px solid #2563EB' : '1px solid transparent',
+                    opacity: i > todayIndex ? 0.4 : 1
+                  }}
+                />
+                <p className="text-xs" style={{color: i === todayIndex ? '#3B82F6' : '#64748B'}}>{day}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Scan card */}
+        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
+          <p className="text-white font-semibold text-lg mb-1">Ready to train?</p>
           <p className="text-sm mb-4" style={{color: '#64748B'}}>Scan a QR code or select equipment below</p>
-          
-          <a href="/scan" className="px-8 py-3 rounded-full font-semibold text-white inline-block mb-4 w-full text-center" style={{background: '#2563EB'}}>
+          <a href="/scan" className="px-8 py-3 rounded-full font-semibold text-white inline-block mb-3 w-full text-center" style={{background: '#2563EB'}}>
             Scan Equipment
           </a>
-
           <div className="relative">
             <select
-              value={selectedMachine}
               onChange={handleMachineSelect}
+              defaultValue=""
               className="w-full px-4 py-3 rounded-lg text-white appearance-none focus:outline-none"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F', color: selectedMachine ? 'white' : '#64748B'}}
+              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
             >
-              <option value="">Select equipment manually</option>
+              <option value="" disabled>Select equipment manually</option>
               {allMachines.map(machine => (
                 <option key={machine.id} value={machine.id}>
                   {machine.name}
@@ -116,7 +172,7 @@ export default function Dashboard() {
           <div className="flex flex-col gap-3">
             {machineWorkouts.map(workout => (
               
-            <a href={'/machine/' + workout.machine_id}
+             <a href={'/machine/' + workout.machine_id}
                 key={workout.machine_id}
                 className="rounded-xl p-4 block"
                 style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
