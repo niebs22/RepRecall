@@ -51,20 +51,7 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen p-6 relative overflow-hidden" style={{background: '#0A1628'}}>
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
-        <div style={{
-          fontSize: '22vw',
-          fontWeight: 900,
-          color: 'rgba(37, 99, 235, 0.04)',
-          letterSpacing: '-0.05em',
-          whiteSpace: 'nowrap',
-          transform: 'rotate(-20deg)',
-          userSelect: 'none'
-        }}>
-          RepRecall
-        </div>
-      </div>
+    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
 
       <div className="max-w-lg mx-auto relative z-10">
         <div className="flex justify-between items-center mb-8">
