@@ -13,9 +13,7 @@ export default function MachinePage() {
   const [selectedExercise, setSelectedExercise] = useState('')
   const [showAddVariation, setShowAddVariation] = useState(false)
   const [newVariation, setNewVariation] = useState('')
-  const [sets, setSets] = useState('')
-  const [reps, setReps] = useState('')
-  const [weight, setWeight] = useState('')
+  const [sets, setSets] = useState<any[]>([{reps: '', weight: ''}])
   const [notes, setNotes] = useState('')
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
@@ -81,17 +79,37 @@ export default function MachinePage() {
     setShowAddVariation(false)
   }
 
+  function addSet() {
+    setSets([...sets, {reps: '', weight: ''}])
+  }
+
+  function removeSet(index: number) {
+    if (sets.length === 1) return
+    setSets(sets.filter((_, i) => i !== index))
+  }
+
+  function updateSet(index: number, field: string, value: string) {
+    const updated = [...sets]
+    updated[index] = {...updated[index], [field]: value}
+    setSets(updated)
+  }
+
   async function handleSave(e: any) {
     e.preventDefault()
-    const { error } = await supabase.from('workouts').insert({
+    const validSets = sets.filter(s => s.reps && s.weight)
+    if (validSets.length === 0) return
+
+    const inserts = validSets.map((s, i) => ({
       user_id: user.id,
       machine_id: id,
       exercise_name: selectedExercise,
-      sets: parseInt(sets),
-      reps: parseInt(reps),
-      weight: parseFloat(weight),
-      notes
-    })
+      sets: validSets.length,
+      reps: parseInt(s.reps),
+      weight: parseFloat(s.weight),
+      notes: i === 0 ? notes : null
+    }))
+
+    const { error } = await supabase.from('workouts').insert(inserts)
     if (!error) setSaved(true)
   }
 
@@ -124,6 +142,7 @@ export default function MachinePage() {
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
+        <p className="mb-2" style={{color: '#64748B'}}>{sets.filter(s => s.reps && s.weight).length} sets logged</p>
         <p className="mb-8" style={{color: '#64748B'}}>Keep it up!</p>
         <div className="flex flex-col gap-3">
           <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#2563EB'}}>
@@ -137,7 +156,7 @@ export default function MachinePage() {
     </main>
   )
 
-  const lastWorkoutForSelected = lastWorkouts.find(w => 
+  const lastWorkoutForSelected = lastWorkouts.find(w =>
     (w.exercise_name || machine.name) === selectedExercise
   )
 
@@ -156,47 +175,55 @@ export default function MachinePage() {
         {/* Exercise selector */}
         <div className="mb-6">
           <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise</label>
-          <div className="flex flex-col gap-2">
-            <select
-              value={selectedExercise}
-              onChange={e => {
-                if (e.target.value === '__add__') {
-                  setShowAddVariation(true)
-                } else {
-                  setSelectedExercise(e.target.value)
-                  setShowAddVariation(false)
-                }
-              }}
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-            >
-              <option value={machine.name}>{machine.name} (default)</option>
-              {variations.map(v => (
-                <option key={v.id} value={v.name}>{v.name}</option>
-              ))}
-              <option value="__add__">+ Add variation...</option>
-            </select>
+          <select
+            value={selectedExercise}
+            onChange={e => {
+              if (e.target.value === '__add__') {
+                setShowAddVariation(true)
+              } else {
+                setSelectedExercise(e.target.value)
+                setShowAddVariation(false)
+              }
+            }}
+            className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
+            style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+          >
+            <option value={machine.name}>{machine.name} (default)</option>
+            {variations.map(v => (
+              <option key={v.id} value={v.name}>{v.name}</option>
+            ))}
+            <option value="__add__">+ Add variation...</option>
+          </select>
 
-            {showAddVariation && (
+          {showAddVariation && (
+            <div className="rounded-xl p-4" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+              <p className="text-white text-sm font-semibold mb-3">Add a variation</p>
+              <input
+                type="text"
+                value={newVariation}
+                onChange={e => setNewVariation(e.target.value)}
+                placeholder="e.g. Close Grip Bench Press"
+                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+                style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+              />
               <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newVariation}
-                  onChange={e => setNewVariation(e.target.value)}
-                  placeholder="e.g. Close Grip Bench Press"
-                  className="flex-1 px-4 py-3 rounded-lg text-white focus:outline-none"
-                  style={{background: '#0F2040', border: '1px solid #2563EB'}}
-                />
                 <button
                   onClick={handleAddVariation}
-                  className="px-4 py-3 rounded-lg font-semibold text-white"
+                  className="flex-1 py-3 rounded-full font-semibold text-white"
                   style={{background: '#2563EB'}}
                 >
-                  Save
+                  Save Variation
+                </button>
+                <button
+                  onClick={() => { setShowAddVariation(false); setNewVariation('') }}
+                  className="flex-1 py-3 rounded-full font-semibold"
+                  style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}
+                >
+                  Cancel
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Last session for selected exercise */}
@@ -204,7 +231,7 @@ export default function MachinePage() {
           <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
             <p className="text-xs font-semibold mb-1 tracking-widest uppercase" style={{color: '#64748B'}}>Last Session — {selectedExercise}</p>
             <p className="text-xs mb-4" style={{color: '#3B82F6'}}>{daysSince(lastWorkoutForSelected.created_at)}</p>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center mb-3">
               <div>
                 <p className="text-2xl font-bold text-white">{lastWorkoutForSelected.sets}</p>
                 <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
@@ -218,6 +245,11 @@ export default function MachinePage() {
                 <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
               </div>
             </div>
+            {lastWorkoutForSelected.notes && (
+              <p className="text-xs italic mt-2 pt-2" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
+                "{lastWorkoutForSelected.notes}"
+              </p>
+            )}
           </div>
         ) : (
           <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F2040'}}>
@@ -225,40 +257,59 @@ export default function MachinePage() {
           </div>
         )}
 
+        {/* Log workout with multiple sets */}
         <h2 className="font-semibold text-lg mb-4 text-white">Log Today's Workout</h2>
         <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Sets</label>
-              <input
-                type="number"
-                value={sets}
-                onChange={e => setSets(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-              />
-            </div>
-            <div>
-              <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Reps</label>
-              <input
-                type="number"
-                value={reps}
-                onChange={e => setReps(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-              />
-            </div>
-            <div>
-              <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Lbs</label>
-              <input
-                type="number"
-                value={weight}
-                onChange={e => setWeight(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-              />
-            </div>
+
+          {/* Set headers */}
+          <div className="grid grid-cols-12 gap-2 px-1">
+            <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
+            <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
+            <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+            <p className="col-span-1"></p>
           </div>
+
+          {sets.map((set, i) => (
+            <div key={i} className="grid grid-cols-12 gap-2 items-center">
+              <div className="col-span-1 text-center">
+                <p className="text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+              </div>
+              <input
+                type="number"
+                value={set.reps}
+                onChange={e => updateSet(i, 'reps', e.target.value)}
+                placeholder="0"
+                className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+              />
+              <input
+                type="number"
+                value={set.weight}
+                onChange={e => updateSet(i, 'weight', e.target.value)}
+                placeholder="0"
+                className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+              />
+              <button
+                type="button"
+                onClick={() => removeSet(i)}
+                className="col-span-1 text-center text-lg"
+                style={{color: sets.length === 1 ? '#1E3A5F' : '#64748B'}}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={addSet}
+            className="py-3 rounded-xl font-semibold text-sm"
+            style={{background: 'transparent', border: '1px dashed #2563EB', color: '#3B82F6'}}
+          >
+            + Add Set
+          </button>
+
           <div>
             <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
             <input
@@ -270,12 +321,13 @@ export default function MachinePage() {
               style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
             />
           </div>
+
           <button
             type="submit"
             className="py-3 rounded-full font-semibold text-white"
             style={{background: '#2563EB'}}
           >
-            Save Workout
+            Finish Workout
           </button>
         </form>
       </div>
