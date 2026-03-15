@@ -111,32 +111,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* Week activity graph */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-white font-semibold">This Week</p>
-            <p className="text-sm font-medium" style={{color: '#3B82F6'}}>
-              {totalThisWeek} {totalThisWeek === 1 ? 'day' : 'days'} active
-            </p>
-          </div>
-          <div className="flex gap-2 items-end justify-between">
-            {dayLabels.map((day, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                <div
-                  className="w-full rounded-md transition-all"
-                  style={{
-                    height: '40px',
-                    background: weekActivity[i] ? '#2563EB' : '#0A1628',
-                    border: i === todayIndex ? '1px solid #2563EB' : '1px solid transparent',
-                    opacity: i > todayIndex ? 0.4 : 1
-                  }}
-                />
-                <p className="text-xs" style={{color: i === todayIndex ? '#3B82F6' : '#64748B'}}>{day}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Scan card */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold text-lg mb-1">Ready to train?</p>
@@ -169,7 +143,7 @@ export default function Dashboard() {
         {machineWorkouts.length === 0 ? (
           <p className="text-center py-8" style={{color: '#64748B'}}>No workouts yet. Scan a machine to get started.</p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 mb-6">
             {machineWorkouts.map(workout => (
               
              <a href={'/machine/' + workout.machine_id}
@@ -199,6 +173,46 @@ export default function Dashboard() {
             ))}
           </div>
         )}
+
+        {/* Weekly activity graph at bottom */}
+        <div className="rounded-2xl p-5 mt-2" style={{background: '#0F2040'}}>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <p className="text-white font-semibold text-sm">Weekly Activity</p>
+              <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Your training this week</p>
+            </div>
+            <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E'}}>
+              {totalThisWeek}/7 days
+            </div>
+          </div>
+          <div className="flex gap-2 items-end justify-between">
+            {dayLabels.map((day, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+                <div
+                  className="w-full rounded"
+                  style={{
+                    height: '24px',
+                    background: weekActivity[i]
+                      ? 'linear-gradient(180deg, #4ADE80 0%, #22C55E 100%)'
+                      : '#0A1628',
+                    border: i === todayIndex
+                      ? '1px solid #22C55E'
+                      : weekActivity[i]
+                      ? 'none'
+                      : '1px solid #1E3A5F',
+                    opacity: i > todayIndex ? 0.35 : 1,
+                    boxShadow: weekActivity[i] ? '0 0 8px rgba(34, 197, 94, 0.4)' : 'none'
+                  }}
+                />
+                <p className="text-xs" style={{
+                  color: i === todayIndex ? '#22C55E' : '#64748B',
+                  fontWeight: i === todayIndex ? 700 : 400
+                }}>{day}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </main>
   )
