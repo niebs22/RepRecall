@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
+  const [allMachines, setAllMachines] = useState<any[]>([])
+  const [selectedMachine, setSelectedMachine] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -16,6 +18,7 @@ export default function Dashboard() {
       } else {
         setUser(user)
         fetchMachineWorkouts(user.id)
+        fetchAllMachines()
       }
     }
     getUser()
@@ -38,9 +41,22 @@ export default function Dashboard() {
     }
   }
 
+  async function fetchAllMachines() {
+    const { data } = await supabase
+      .from('machines')
+      .select('*')
+      .order('name', { ascending: true })
+    if (data) setAllMachines(data)
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  function handleMachineSelect(e: any) {
+    const id = e.target.value
+    if (id) router.push('/machine/' + id)
   }
 
   function daysSince(date: string) {
@@ -52,8 +68,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
-
-      <div className="max-w-lg mx-auto relative z-10">
+      <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
           <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>
@@ -61,12 +76,32 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <div className="rounded-2xl p-6 mb-6 text-center" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl p-6 mb-6" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold text-lg mb-2">Ready to train?</p>
-          <p className="text-sm mb-4" style={{color: '#64748B'}}>Scan the QR code on any piece of equipment to get started</p>
-          <a href="/scan" className="px-8 py-3 rounded-full font-semibold text-white inline-block" style={{background: '#2563EB'}}>
+          <p className="text-sm mb-4" style={{color: '#64748B'}}>Scan a QR code or select equipment below</p>
+          
+          <a href="/scan" className="px-8 py-3 rounded-full font-semibold text-white inline-block mb-4 w-full text-center" style={{background: '#2563EB'}}>
             Scan Equipment
           </a>
+
+          <div className="relative">
+            <select
+              value={selectedMachine}
+              onChange={handleMachineSelect}
+              className="w-full px-4 py-3 rounded-lg text-white appearance-none focus:outline-none"
+              style={{background: '#0A1628', border: '1px solid #1E3A5F', color: selectedMachine ? 'white' : '#64748B'}}
+            >
+              <option value="">Select equipment manually</option>
+              {allMachines.map(machine => (
+                <option key={machine.id} value={machine.id}>
+                  {machine.name}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#64748B'}}>
+              ▾
+            </div>
+          </div>
         </div>
 
         <h2 className="font-semibold text-lg mb-4 text-white">My Equipment</h2>
@@ -77,7 +112,7 @@ export default function Dashboard() {
           <div className="flex flex-col gap-3">
             {machineWorkouts.map(workout => (
               
-                <a href={'/machine/' + workout.machine_id}
+            <a href={'/machine/' + workout.machine_id}
                 key={workout.machine_id}
                 className="rounded-xl p-4 block"
                 style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
