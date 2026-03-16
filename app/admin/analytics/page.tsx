@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation'
 
 export default function Analytics() {
   const [loading, setLoading] = useState(true)
-  const [gymId, setGymId] = useState<any>(null)
   const [totalMembers, setTotalMembers] = useState(0)
   const [activeThisWeek, setActiveThisWeek] = useState(0)
   const [totalWorkoutsThisWeek, setTotalWorkoutsThisWeek] = useState(0)
   const [mostUsed, setMostUsed] = useState<any>(null)
   const [leastUsed, setLeastUsed] = useState<any>(null)
   const [machineStats, setMachineStats] = useState<any[]>([])
+  const [dayStats, setDayStats] = useState<number[]>([0,0,0,0,0,0,0])
+  const [timeStats, setTimeStats] = useState({morning: 0, afternoon: 0, evening: 0})
   const router = useRouter()
 
   useEffect(() => {
@@ -22,7 +23,6 @@ export default function Analytics() {
       const { data: gym } = await supabase
         .from('gyms').select('*').limit(1).single()
       if (!gym) return
-      setGymId(gym.id)
 
       const now = new Date()
       const monday = new Date(now)
@@ -30,44 +30,30 @@ export default function Analytics() {
       monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
       monday.setHours(0, 0, 0, 0)
 
-      // Get all machines for this gym
       const { data: machines } = await supabase
-        .from('machines')
-        .select('*')
-        .eq('gym_id', gym.id)
+        .from('machines').select('*').eq('gym_id', gym.id)
 
-      // Get all workouts this week
       const { data: weekWorkouts } = await supabase
-        .from('workouts')
-        .select('*, machines(name)')
+        .from('workouts').select('*, machines(name)')
         .gte('created_at', monday.toISOString())
 
-      // Get all workouts ever
       const { data: allWorkouts } = await supabase
-        .from('workouts')
-        .select('user_id, machine_id, created_at, machines(name)')
+        .from('workouts').select('user_id, machine_id, created_at, machines(name)')
 
-      // Get total members
       const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, created_at')
+        .from('profiles').select('id, created_at')
 
       setTotalMembers(profiles?.length || 0)
 
-      // Active this week
       const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
       setActiveThisWeek(activeUserIds.size)
-
-      // Total workouts this week
       setTotalWorkoutsThisWeek(weekWorkouts?.length || 0)
 
       // Machine usage stats
       const usageMap: Record<string, { name: string, count: number, lastUsed: string | null }> = {}
-
       machines?.forEach(m => {
         usageMap[m.id] = { name: m.name, count: 0, lastUsed: null }
       })
-
       allWorkouts?.forEach(w => {
         if (usageMap[w.machine_id]) {
           usageMap[w.machine_id].count++
@@ -76,11 +62,30 @@ export default function Analytics() {
           }
         }
       })
-
       const stats = Object.values(usageMap).sort((a, b) => b.count - a.count)
       setMachineStats(stats)
       setMostUsed(stats[0] || null)
       setLeastUsed(stats[stats.length - 1] || null)
+
+      // Day of week stats (0=Mon, 6=Sun)
+      const days = [0,0,0,0,0,0,0]
+      allWorkouts?.forEach(w => {
+        const day = new Date(w.created_at).getDay()
+        const adjusted = day === 0 ? 6 : day - 1
+        days[adjusted]++
+      })
+      setDayStats(days)
+
+      // Time of day stats
+      const times = { morning: 0, afternoon: 0, evening: 0 }
+      allWorkouts?.forEach(w => {
+        const hour = new Date(w.created_at).getHours()
+        if (hour >= 5 && hour < 11) times.morning++
+        else if (hour >= 11 && hour < 17) times.afternoon++
+        else if (hour >= 17 && hour < 22) times.evening++
+      })
+      setTimeStats(times)
+
       setLoading(false)
     }
     load()
@@ -97,6 +102,10 @@ export default function Analytics() {
   }
 
   const maxCount = machineStats[0]?.count || 1
+  const maxDayCount = Math.max(...dayStats) || 1
+  const maxTimeCount = Math.max(timeStats.morning, timeStats.afternoon, timeStats.evening) || 1
+  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
 
   if (loading) return (
     <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
@@ -112,9 +121,7 @@ export default function Analytics() {
             <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Gym Analytics</p>
           </div>
-          <a href="/admin" className="text-sm" style={{color: '#64748B'}}>
-            Admin
-          </a>
+          <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
         </div>
 
         {/* Key metrics */}
@@ -152,6 +159,61 @@ export default function Analytics() {
             </div>
           </div>
         )}
+
+        {/* Busiest days */}
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
+          <p className="text-white font-semibold mb-4">Busiest Days</p>
+          <div className="flex gap-1.5 items-end justify-between">
+            {dayLabels.map((day, i) => (
+              <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+                <p className="text-xs" style={{color: '#64748B'}}>{dayStats[i]}</p>
+                <div
+                  className="w-full rounded"
+                  style={{
+                    height: dayStats[i] === 0 ? '4px' : Math.max(4, dayStats[i] / maxDayCount * 60) + 'px',
+                    background: i === todayIndex
+                      ? '#3B82F6'
+                      : dayStats[i] === Math.max(...dayStats)
+                      ? '#22C55E'
+                      : '#1E3A5F'
+                  }}
+                />
+                <p className="text-xs" style={{color: i === todayIndex ? '#3B82F6' : '#64748B'}}>{day}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Busiest times */}
+        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
+          <p className="text-white font-semibold mb-4">Busiest Times</p>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: 'Morning', sublabel: '5am – 11am', count: timeStats.morning, color: '#F59E0B' },
+              { label: 'Afternoon', sublabel: '11am – 5pm', count: timeStats.afternoon, color: '#2563EB' },
+              { label: 'Evening', sublabel: '5pm – 10pm', count: timeStats.evening, color: '#8B5CF6' }
+            ].map((slot, i) => (
+              <div key={i}>
+                <div className="flex justify-between items-center mb-1">
+                  <div>
+                    <span className="text-white text-sm font-medium">{slot.label}</span>
+                    <span className="text-xs ml-2" style={{color: '#64748B'}}>{slot.sublabel}</span>
+                  </div>
+                  <p className="text-xs font-semibold" style={{color: slot.color}}>{slot.count} sessions</p>
+                </div>
+                <div className="w-full rounded-full h-2" style={{background: '#0A1628'}}>
+                  <div
+                    className="h-2 rounded-full"
+                    style={{
+                      width: slot.count === 0 ? '2%' : (slot.count / maxTimeCount * 100) + '%',
+                      background: slot.color
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Equipment usage bars */}
         <h2 className="font-semibold text-lg mb-4 text-white">Equipment Usage</h2>
