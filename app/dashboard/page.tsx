@@ -200,7 +200,7 @@ export default function Dashboard() {
               boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'
             }}
           >
-            <span style={{fontSize: '22px'}}>⬡</span> Scan Equipment
+            <span style={{fontSize: '22px'}}>📷</span> Scan Equipment
           </a>
           <div className="relative">
             <select
