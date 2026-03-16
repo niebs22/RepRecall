@@ -8,6 +8,7 @@ export default function Admin() {
   const [machines, setMachines] = useState<any[]>([])
   const [newMachine, setNewMachine] = useState('')
   const [newDescription, setNewDescription] = useState('')
+  const [newType, setNewType] = useState('strength')
   const [gymId, setGymId] = useState<any>(null)
   const [gymName, setGymName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -43,10 +44,12 @@ export default function Admin() {
     await supabase.from('machines').insert({
       gym_id: gymId,
       name: newMachine,
-      description: newDescription
+      description: newDescription,
+      type: newType
     })
     setNewMachine('')
     setNewDescription('')
+    setNewType('strength')
     fetchMachines(gymId)
     setLoading(false)
   }
@@ -81,13 +84,9 @@ export default function Admin() {
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
           <div className="flex gap-4">
-            <a href="/admin/analytics" className="text-sm" style={{color: '#3B82F6'}}>
-             Analytics
-            </a>
-            <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>
-             Dashboard
-            </a>
-           </div>
+            <a href="/admin/analytics" className="text-sm" style={{color: '#3B82F6'}}>Analytics</a>
+            <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>Dashboard</a>
+          </div>
         </div>
 
         {/* Add machine form */}
@@ -110,6 +109,33 @@ export default function Admin() {
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
               style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
             />
+
+            {/* Type toggle */}
+            <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1E3A5F'}}>
+              <button
+                type="button"
+                onClick={() => setNewType('strength')}
+                className="flex-1 py-3 text-sm font-semibold transition-colors"
+                style={{
+                  background: newType === 'strength' ? '#2563EB' : '#0A1628',
+                  color: newType === 'strength' ? '#fff' : '#64748B'
+                }}
+              >
+                💪 Strength
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewType('cardio')}
+                className="flex-1 py-3 text-sm font-semibold transition-colors"
+                style={{
+                  background: newType === 'cardio' ? '#2563EB' : '#0A1628',
+                  color: newType === 'cardio' ? '#fff' : '#64748B'
+                }}
+              >
+                🏃 Cardio
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -131,22 +157,25 @@ export default function Admin() {
           <div className="flex flex-col gap-2">
             {machines.map(machine => (
               <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
-                
-                {/* Collapsed row */}
                 <button
                   onClick={() => toggleExpand(machine.id)}
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: '#2563EB'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#22C55E' : '#2563EB'}}></div>
                     <p className="text-white font-medium text-sm">{machine.name}</p>
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{
+                      background: machine.type === 'cardio' ? 'rgba(34,197,94,0.1)' : 'rgba(37,99,235,0.1)',
+                      color: machine.type === 'cardio' ? '#22C55E' : '#3B82F6'
+                    }}>
+                      {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
+                    </span>
                   </div>
-                  <span className="text-lg" style={{color: '#64748B', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
+                  <span style={{color: '#64748B', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
                     ▾
                   </span>
                 </button>
 
-                {/* Expanded content */}
                 {expanded === machine.id && (
                   <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #1E3A5F'}}>
                     {machine.description && (
