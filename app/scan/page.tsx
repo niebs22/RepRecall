@@ -1,13 +1,18 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function ScanPage() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [cameraReady, setCameraReady] = useState(false)
+  const [showFallback, setShowFallback] = useState(false)
 
   useEffect(() => {
     let stream: MediaStream | null = null
+    const fallbackTimer = setTimeout(() => {
+      if (!cameraReady) setShowFallback(true)
+    }, 3000)
 
     async function startCamera() {
       try {
@@ -22,10 +27,14 @@ export default function ScanPage() {
           videoRef.current.srcObject = stream
           videoRef.current.setAttribute('playsinline', 'true')
           await videoRef.current.play()
+          setCameraReady(true)
+          clearTimeout(fallbackTimer)
           startScanning()
         }
       } catch (err) {
         console.error('Camera error:', err)
+        setShowFallback(true)
+        clearTimeout(fallbackTimer)
       }
     }
 
@@ -50,12 +59,14 @@ export default function ScanPage() {
         )
       } catch (err) {
         console.error('QR scan error:', err)
+        setShowFallback(true)
       }
     }
 
     startCamera()
 
     return () => {
+      clearTimeout(fallbackTimer)
       if (stream) {
         stream.getTracks().forEach(track => track.stop())
       }
@@ -71,10 +82,12 @@ export default function ScanPage() {
             Back
           </a>
         </div>
-        <p className="text-sm text-center mb-6" style={{color: '#64748B'}}>
+
+        <p className="text-sm text-center mb-4" style={{color: '#64748B'}}>
           Point your camera at a QR code on any piece of equipment
         </p>
-        <div className="rounded-2xl overflow-hidden" style={{background: '#0F2040'}}>
+
+        <div className="rounded-2xl overflow-hidden mb-4" style={{background: '#0F2040', minHeight: '200px'}}>
           <video
             ref={videoRef}
             className="w-full"
@@ -83,9 +96,40 @@ export default function ScanPage() {
             autoPlay
           />
         </div>
-        <p className="text-xs text-center mt-4" style={{color: '#64748B'}}>
-          Make sure to allow camera access when prompted
-        </p>
+
+        {showFallback && (
+          <div className="rounded-2xl p-5 text-center" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+            <p className="text-white font-semibold mb-2">Camera not loading?</p>
+            <p className="text-sm mb-4" style={{color: '#64748B'}}>
+              No problem — just open your phone camera app and point it at the QR code on any machine. It works exactly the same way.
+            </p>
+            <div className="flex flex-col gap-2">
+              
+                href="https://apps.apple.com/app/camera"
+                className="py-3 rounded-full font-semibold text-white text-center"
+                style={{background: '#2563EB'}}
+                onClick={e => {
+                  e.preventDefault()
+                  window.location.href = 'camera://'
+                  setTimeout(() => {
+                    window.location.href = 'https://support.apple.com/en-us/HT208843'
+                  }, 500)
+                }}
+              >
+                Open Camera App
+              </a>
+              <a href="/dashboard" className="py-3 rounded-full font-semibold text-center" style={{border: '1px solid #1E3A5F', color: '#64748B'}}>
+                Back to Dashboard
+              </a>
+            </div>
+          </div>
+        )}
+
+        {!showFallback && (
+          <p className="text-xs text-center mt-2" style={{color: '#64748B'}}>
+            Make sure to allow camera access when prompted
+          </p>
+        )}
       </div>
     </main>
   )
