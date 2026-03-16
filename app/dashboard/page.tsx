@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
   const [totalThisWeek, setTotalThisWeek] = useState(0)
-  const [TotalSessions, setTotalSessions] = useState(0)
+  const [totalSessions, settotalSessions] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function Dashboard() {
         return true
       })
       setMachineWorkouts(grouped)
-      setTotalSessions(data.length)
+      settotalSessions(data.length)
     }
   }
 
@@ -218,9 +218,8 @@ export default function Dashboard() {
               <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E'}}>
                 {totalThisWeek}/7 days
               </div>
-              {trend && (
-                <p className="text-xs mt-1" style={{color: '#64748B'}}>{TotalSessions} total sessions</p>
-              )}
+                <p className="text-xs mt-1" style={{color: '#64748B'}}>{totalSessions} total sessions</p>
+              )
             </div>
           </div>
           <div className="flex gap-2 items-end justify-between">
