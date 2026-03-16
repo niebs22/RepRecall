@@ -80,9 +80,14 @@ export default function Admin() {
             <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
-          <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>
-            Dashboard
-          </a>
+          <div className="flex gap-4">
+            <a href="/admin/analytics" className="text-sm" style={{color: '#3B82F6'}}>
+             Analytics
+            </a>
+            <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>
+             Dashboard
+            </a>
+           </div>
         </div>
 
         {/* Add machine form */}
