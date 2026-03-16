@@ -238,7 +238,10 @@ export default function MachinePage() {
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>
                 Last Session — {selectedExercise}
               </p>
+             <div className="flex gap-2 items-center mb-4">
               <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(lastSessionDate)}</p>
+              <p className="text-xs" style={{color: '#64748B'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+             </div>
             </div>
 
             {/* Set list */}

@@ -160,7 +160,10 @@ export default function Dashboard() {
               >
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-white font-semibold">{workout.exercise_name || workout.machines?.name}</p>
-                  <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
+                  <div className="text-right">
+                    <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
+                    <p className="text-xs" style={{color: '#64748B'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                  </div>
                 </div>
                 <div className="flex gap-6">
                   <div>
