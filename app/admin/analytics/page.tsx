@@ -13,6 +13,7 @@ export default function Analytics() {
   const [machineStats, setMachineStats] = useState<any[]>([])
   const [dayStats, setDayStats] = useState<number[]>([0,0,0,0,0,0,0])
   const [timeStats, setTimeStats] = useState({morning: 0, afternoon: 0, evening: 0})
+  const [equipmentOpen, setEquipmentOpen] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -49,7 +50,6 @@ export default function Analytics() {
       setActiveThisWeek(activeUserIds.size)
       setTotalWorkoutsThisWeek(weekWorkouts?.length || 0)
 
-      // Machine usage stats
       const usageMap: Record<string, { name: string, count: number, lastUsed: string | null }> = {}
       machines?.forEach(m => {
         usageMap[m.id] = { name: m.name, count: 0, lastUsed: null }
@@ -67,7 +67,6 @@ export default function Analytics() {
       setMostUsed(stats[0] || null)
       setLeastUsed(stats[stats.length - 1] || null)
 
-      // Day of week stats (0=Mon, 6=Sun)
       const days = [0,0,0,0,0,0,0]
       allWorkouts?.forEach(w => {
         const day = new Date(w.created_at).getDay()
@@ -76,7 +75,6 @@ export default function Analytics() {
       })
       setDayStats(days)
 
-      // Time of day stats
       const times = { morning: 0, afternoon: 0, evening: 0 }
       allWorkouts?.forEach(w => {
         const hour = new Date(w.created_at).getHours()
@@ -215,30 +213,59 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Equipment usage bars */}
-        <h2 className="font-semibold text-lg mb-4 text-white">Equipment Usage</h2>
-        <div className="flex flex-col gap-3">
-          {machineStats.map((machine, i) => (
-            <div key={i} className="rounded-xl p-4" style={{background: '#0F2040'}}>
-              <div className="flex justify-between items-center mb-2">
-                <p className="text-white text-sm font-medium">{machine.name}</p>
-                <div className="text-right">
-                  <p className="text-xs font-semibold" style={{color: '#2563EB'}}>{machine.count} sessions</p>
-                  <p className="text-xs" style={{color: '#64748B'}}>{daysSince(machine.lastUsed)}</p>
-                </div>
-              </div>
-              <div className="w-full rounded-full h-1.5" style={{background: '#0A1628'}}>
-                <div
-                  className="h-1.5 rounded-full"
-                  style={{
-                    width: machine.count === 0 ? '2%' : (machine.count / maxCount * 100) + '%',
-                    background: machine.count === 0 ? '#1E3A5F' : 'linear-gradient(90deg, #2563EB, #3B82F6)'
-                  }}
-                />
-              </div>
+        {/* Equipment usage — collapsible */}
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
+          <button
+            onClick={() => setEquipmentOpen(prev => !prev)}
+            className="w-full flex justify-between items-center p-5"
+            style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-lg text-white">Equipment Usage</h2>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+                {machineStats.length}
+              </span>
             </div>
-          ))}
+            <span
+              style={{
+                color: '#64748B',
+                fontSize: '18px',
+                transform: equipmentOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+                display: 'inline-block',
+                lineHeight: 1
+              }}
+            >
+              ▾
+            </span>
+          </button>
+
+          {equipmentOpen && (
+            <div className="flex flex-col gap-3 px-5 pb-5">
+              {machineStats.map((machine, i) => (
+                <div key={i} className="rounded-xl p-4" style={{background: '#0A1628'}}>
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-white text-sm font-medium">{machine.name}</p>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold" style={{color: '#2563EB'}}>{machine.count} sessions</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>{daysSince(machine.lastUsed)}</p>
+                    </div>
+                  </div>
+                  <div className="w-full rounded-full h-1.5" style={{background: '#1E3A5F'}}>
+                    <div
+                      className="h-1.5 rounded-full"
+                      style={{
+                        width: machine.count === 0 ? '2%' : (machine.count / maxCount * 100) + '%',
+                        background: machine.count === 0 ? '#1E3A5F' : 'linear-gradient(90deg, #2563EB, #3B82F6)'
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
       </div>
     </main>
   )
