@@ -89,8 +89,9 @@ export default function Analytics() {
   function daysSince(date: string | null) {
     if (!date) return 'Never'
     const diffMs = new Date().getTime() - new Date(date).getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-    if (diffDays === 0) return 'Today'
+    const diffHours = diffMs / (1000 * 60 * 60)
+    const diffDays = Math.floor(diffHours / 24)
+    if (diffHours < 24) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     return diffDays + ' days ago'
   }
