@@ -11,7 +11,7 @@ export default function ScanPage() {
   useEffect(() => {
     let stream: MediaStream | null = null
     const fallbackTimer = setTimeout(() => {
-      if (!cameraReady) setShowFallback(true)
+      setShowFallback(true)
     }, 3000)
 
     async function startCamera() {
@@ -103,25 +103,12 @@ export default function ScanPage() {
             <p className="text-sm mb-4" style={{color: '#64748B'}}>
               No problem — just open your phone camera app and point it at the QR code on any machine. It works exactly the same way.
             </p>
-            <div className="flex flex-col gap-2">
-              
-                href="https://apps.apple.com/app/camera"
-                className="py-3 rounded-full font-semibold text-white text-center"
-                style={{background: '#2563EB'}}
-                onClick={e => {
-                  e.preventDefault()
-                  window.location.href = 'camera://'
-                  setTimeout(() => {
-                    window.location.href = 'https://support.apple.com/en-us/HT208843'
-                  }, 500)
-                }}
-              >
-                Open Camera App
-              </a>
-              <a href="/dashboard" className="py-3 rounded-full font-semibold text-center" style={{border: '1px solid #1E3A5F', color: '#64748B'}}>
-                Back to Dashboard
-              </a>
-            </div>
+            <p className="text-sm py-2 font-semibold" style={{color: '#2563EB'}}>
+              Swipe out of this app and open your Camera app
+            </p>
+            <a href="/dashboard" className="block mt-3 py-3 rounded-full font-semibold text-center" style={{border: '1px solid #1E3A5F', color: '#64748B'}}>
+              Back to Dashboard
+            </a>
           </div>
         )}
 
