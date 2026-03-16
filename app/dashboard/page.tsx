@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
   const [totalThisWeek, setTotalThisWeek] = useState(0)
-  const [lastWeekTotal, setLastWeekTotal] = useState(0)
+  const [TotalSessions, setTotalSessions] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -52,6 +52,7 @@ export default function Dashboard() {
         return true
       })
       setMachineWorkouts(grouped)
+      setTotalSessions(data.length)
     }
   }
 
@@ -99,7 +100,6 @@ export default function Dashboard() {
       const week = [0,1,2,3,4,5,6].map(d => activeDays.has(d))
       setWeekActivity(week)
       setTotalThisWeek(activeDays.size)
-      setLastWeekTotal(lastWeekDays.size)
     }
   }
 
@@ -151,19 +151,9 @@ export default function Dashboard() {
     return parts.join(' · ')
   }
 
-  function getWeekTrend() {
-    if (lastWeekTotal === 0 && totalThisWeek === 0) return null
-    if (lastWeekTotal === 0) return { label: 'New this week', color: '#22C55E' }
-    const diff = totalThisWeek - lastWeekTotal
-    if (diff > 0) return { label: `↑ ${diff} day${diff > 1 ? 's' : ''} vs last week`, color: '#22C55E' }
-    if (diff < 0) return { label: `↓ ${Math.abs(diff)} day${Math.abs(diff) > 1 ? 's' : ''} vs last week`, color: '#EF4444' }
-    return { label: 'Same as last week', color: '#64748B' }
-  }
-
   const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
   const today = new Date().getDay()
   const todayIndex = today === 0 ? 6 : today - 1
-  const trend = getWeekTrend()
 
   return (
     <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
@@ -180,7 +170,7 @@ export default function Dashboard() {
 
         {/* Welcome */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()} 👋</h2>
+          <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()} </h2>
           <p className="text-sm mt-1" style={{color: '#64748B'}}>
             {totalThisWeek === 0
               ? "You haven't trained yet this week."
@@ -229,7 +219,7 @@ export default function Dashboard() {
                 {totalThisWeek}/7 days
               </div>
               {trend && (
-                <p className="text-xs mt-1" style={{color: trend.color}}>{trend.label}</p>
+                <p className="text-xs mt-1" style={{color: '#64748B'}}>{TotalSessions} total sessions</p>
               )}
             </div>
           </div>
