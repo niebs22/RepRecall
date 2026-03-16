@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
   const [totalThisWeek, setTotalThisWeek] = useState(0)
+  const [lastWeekTotal, setLastWeekTotal] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -18,6 +20,7 @@ export default function Dashboard() {
         router.push('/login')
       } else {
         setUser(user)
+        fetchProfile(user.id)
         fetchMachineWorkouts(user.id)
         fetchAllMachines()
         fetchWeekActivity(user.id)
@@ -26,10 +29,19 @@ export default function Dashboard() {
     getUser()
   }, [])
 
+  async function fetchProfile(userId: string) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+    if (data) setProfile(data)
+  }
+
   async function fetchMachineWorkouts(userId: string) {
     const { data } = await supabase
       .from('workouts')
-      .select('*, machines(name)')
+      .select('*, machines(name, type)')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
     if (data) {
@@ -58,22 +70,36 @@ export default function Dashboard() {
     monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
     monday.setHours(0, 0, 0, 0)
 
+    const lastMonday = new Date(monday)
+    lastMonday.setDate(monday.getDate() - 7)
+
     const { data } = await supabase
       .from('workouts')
       .select('created_at')
       .eq('user_id', userId)
-      .gte('created_at', monday.toISOString())
+      .gte('created_at', lastMonday.toISOString())
 
     if (data) {
+      const thisWeek = data.filter(w => new Date(w.created_at) >= monday)
+      const lastWeek = data.filter(w => new Date(w.created_at) < monday)
+
       const activeDays = new Set<number>()
-      data.forEach(w => {
+      thisWeek.forEach(w => {
         const day = new Date(w.created_at).getDay()
         const adjusted = day === 0 ? 6 : day - 1
         activeDays.add(adjusted)
       })
+      const lastWeekDays = new Set<number>()
+      lastWeek.forEach(w => {
+        const day = new Date(w.created_at).getDay()
+        const adjusted = day === 0 ? 6 : day - 1
+        lastWeekDays.add(adjusted)
+      })
+
       const week = [0,1,2,3,4,5,6].map(d => activeDays.has(d))
       setWeekActivity(week)
       setTotalThisWeek(activeDays.size)
+      setLastWeekTotal(lastWeekDays.size)
     }
   }
 
@@ -99,31 +125,82 @@ export default function Dashboard() {
     return diffDays + ' days ago'
   }
 
+  function getGreeting() {
+    const hour = new Date().getHours()
+    if (hour < 12) return 'Good morning'
+    if (hour < 17) return 'Good afternoon'
+    return 'Good evening'
+  }
+
+  function getFirstName() {
+    const fullName = profile?.full_name || user?.user_metadata?.full_name || ''
+    return fullName.split(' ')[0] || 'there'
+  }
+
+  function formatWorkoutSummary(workout: any) {
+    const type = workout.machines?.type
+    if (type === 'cardio') {
+      const parts = []
+      if (workout.duration) parts.push(workout.duration + ' min')
+      if (workout.distance) parts.push(workout.distance + ' mi')
+      return parts.join(' · ')
+    }
+    const parts = []
+    if (workout.sets) parts.push(workout.sets + ' sets')
+    if (workout.weight) parts.push(workout.weight + ' lbs')
+    return parts.join(' · ')
+  }
+
+  function getWeekTrend() {
+    if (lastWeekTotal === 0 && totalThisWeek === 0) return null
+    if (lastWeekTotal === 0) return { label: 'New this week', color: '#22C55E' }
+    const diff = totalThisWeek - lastWeekTotal
+    if (diff > 0) return { label: `↑ ${diff} day${diff > 1 ? 's' : ''} vs last week`, color: '#22C55E' }
+    if (diff < 0) return { label: `↓ ${Math.abs(diff)} day${Math.abs(diff) > 1 ? 's' : ''} vs last week`, color: '#EF4444' }
+    return { label: 'Same as last week', color: '#64748B' }
+  }
+
   const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
   const today = new Date().getDay()
   const todayIndex = today === 0 ? 6 : today - 1
+  const trend = getWeekTrend()
 
   return (
-  <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
-    <div className="max-w-lg mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
-        <div className="flex items-center gap-4">  
-          <a href="/admin" className="text-sm" style={{color: '#64748B'}}>
-            Admin
-          </a>
-          <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>
-            Log Out
-          </button>
+    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+      <div className="max-w-lg mx-auto">
+
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+          <div className="flex items-center gap-4">
+            <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
+            <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
+          </div>
         </div>
-      </div>
+
+        {/* Welcome */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()} 👋</h2>
+          <p className="text-sm mt-1" style={{color: '#64748B'}}>
+            {totalThisWeek === 0
+              ? "You haven't trained yet this week."
+              : `You've trained ${totalThisWeek} day${totalThisWeek > 1 ? 's' : ''} this week.`}
+          </p>
+        </div>
 
         {/* Scan card */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold text-lg mb-1">Ready to train?</p>
           <p className="text-sm mb-4" style={{color: '#64748B'}}>Scan a QR code or select equipment below</p>
-          <a href="/scan" className="px-8 py-3 rounded-full font-semibold text-white inline-block mb-3 w-full text-center" style={{background: '#2563EB'}}>
-            Scan Equipment
+          
+            href="/scan"
+            className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-white text-lg w-full text-center mb-3"
+            style={{
+              background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
+              boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'
+            }}
+          >
+            <span style={{fontSize: '22px'}}>⬡</span> Scan Equipment
           </a>
           <div className="relative">
             <select
@@ -134,65 +211,27 @@ export default function Dashboard() {
             >
               <option value="" disabled>Select equipment manually</option>
               {allMachines.map(machine => (
-                <option key={machine.id} value={machine.id}>
-                  {machine.name}
-                </option>
+                <option key={machine.id} value={machine.id}>{machine.name}</option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#64748B'}}>
-              ▾
-            </div>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#64748B'}}>▾</div>
           </div>
         </div>
 
-        <h2 className="font-semibold text-lg mb-4 text-white">Last Sessions</h2>
-
-        {machineWorkouts.length === 0 ? (
-          <p className="text-center py-8" style={{color: '#64748B'}}>No workouts yet. Scan a machine to get started.</p>
-        ) : (
-          <div className="flex flex-col gap-3 mb-6">
-            {machineWorkouts.map(workout => (
-              
-             <a href={'/machine/' + workout.machine_id}
-                key={workout.machine_id}
-                className="rounded-xl p-4 block"
-                style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
-              >
-                <div className="flex justify-between items-center mb-3">
-                  <p className="text-white font-semibold">{workout.exercise_name || workout.machines?.name}</p>
-                  <div className="text-right">
-                    <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
-                    <p className="text-xs" style={{color: '#64748B'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
-                  </div>
-                </div>
-                <div className="flex gap-6">
-                  <div>
-                    <p className="text-white font-bold text-lg">{workout.sets}</p>
-                    <p className="text-xs" style={{color: '#64748B'}}>Sets</p>
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-lg">{workout.reps}</p>
-                    <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
-                  </div>
-                  <div>
-                    <p className="text-white font-bold text-lg">{workout.weight}</p>
-                    <p className="text-xs" style={{color: '#64748B'}}>Lbs</p>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        )}
-
-        {/* Weekly activity graph at bottom */}
-        <div className="rounded-2xl p-5 mt-2" style={{background: '#0F2040'}}>
+        {/* Weekly activity */}
+        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <div className="flex justify-between items-center mb-4">
             <div>
               <p className="text-white font-semibold text-sm">Weekly Activity</p>
               <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Your training this week</p>
             </div>
-            <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E'}}>
-              {totalThisWeek}/7 days
+            <div className="text-right">
+              <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E'}}>
+                {totalThisWeek}/7 days
+              </div>
+              {trend && (
+                <p className="text-xs mt-1" style={{color: trend.color}}>{trend.label}</p>
+              )}
             </div>
           </div>
           <div className="flex gap-2 items-end justify-between">
@@ -222,6 +261,32 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+
+        {/* Last Sessions */}
+        <h2 className="font-semibold text-lg mb-4 text-white">Last Sessions</h2>
+        {machineWorkouts.length === 0 ? (
+          <p className="text-center py-8" style={{color: '#64748B'}}>No workouts yet. Scan a machine to get started.</p>
+        ) : (
+          <div className="flex flex-col gap-3 mb-6">
+            {machineWorkouts.map(workout => (
+              
+                key={workout.machine_id}
+                href={'/machine/' + workout.machine_id}
+                className="rounded-xl p-4 flex justify-between items-center"
+                style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
+              >
+                <div>
+                  <p className="text-white font-semibold">{workout.exercise_name || workout.machines?.name}</p>
+                  <p className="text-sm mt-1" style={{color: '#64748B'}}>{formatWorkoutSummary(workout)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
+                  <p className="text-xs mt-0.5" style={{color: '#64748B'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
 
       </div>
     </main>
