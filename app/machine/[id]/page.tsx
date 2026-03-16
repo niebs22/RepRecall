@@ -117,12 +117,14 @@ export default function MachinePage() {
   }
 
   function daysSince(date: string) {
-    const diffMs = new Date().getTime() - new Date(date).getTime()
+    const now = new Date()
+    const past = new Date(date)
+    const diffMs = now.getTime() - past.getTime()
     const diffHours = diffMs / (1000 * 60 * 60)
-    const diffDays = Math.floor(diffHours / 24)
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
     if (diffHours < 1) return 'Just now'
     if (diffHours < 24) return 'Today'
-    if (diffDays === 1) return '1 day ago'
+    if (diffDays === 1) return 'Yesterday'
     return diffDays + ' days ago'
   }
 
