@@ -193,15 +193,14 @@ export default function Dashboard() {
           <p className="text-white font-semibold text-lg mb-1">Ready to train?</p>
           <p className="text-sm mb-4" style={{color: '#64748B'}}>Scan a QR code or select equipment below</p>
           
+            <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-white text-lg w-full text-center mb-3"
-            style={{
-              background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
-              boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'
-            }}
+            style={{background: 'linear-gradient(135deg, #2563EB, #3B82F6)', boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'}}
           >
             <span style={{fontSize: '22px'}}>📷</span> Scan Equipment
           </a>
+            
           <div className="relative">
             <select
               onChange={handleMachineSelect}
@@ -270,6 +269,7 @@ export default function Dashboard() {
           <div className="flex flex-col gap-3 mb-6">
             {machineWorkouts.map(workout => (
               
+                <a
                 key={workout.machine_id}
                 href={'/machine/' + workout.machine_id}
                 className="rounded-xl p-4 flex justify-between items-center"
