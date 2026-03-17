@@ -13,16 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RepRecall",
-  description: "Simplifying the way gym-goers log and track their workouts",
-  applicationName: "RepRecall",
+  title: "ScanSet",
+  description: "Scan. Lift. Repeat.",
+  applicationName: "ScanSet",
   keywords: ["gym", "workout tracker", "fitness", "QR code", "weight training"],
-  authors: [{ name: "RepRecall" }],
+  authors: [{ name: "ScanSet" }],
   openGraph: {
-    title: "RepRecall",
-    description: "Simplifying the way gym-goers log and track their workouts",
+    title: "ScanSet",
+    description: "Scan. Lift. Repeat.",
     type: "website",
-    url: "https://rep-recall.vercel.app",
+    url: "https://scanset.app",
   },
 };
 
