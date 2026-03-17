@@ -21,8 +21,29 @@ export default function Analytics() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data: gym } = await supabase
-        .from('gyms').select('*').limit(1).single()
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile) { router.push('/dashboard'); return }
+
+      let gym = null
+
+      if (profile.role === 'super_admin') {
+        const { data } = await supabase
+          .from('gyms').select('*').limit(1).single()
+        gym = data
+      } else if (profile.role === 'gym_owner') {
+        const { data } = await supabase
+          .from('gyms').select('*').eq('owner_id', user.id).single()
+        gym = data
+      } else {
+        router.push('/dashboard')
+        return
+      }
+
       if (!gym) return
 
       const now = new Date()
@@ -34,17 +55,24 @@ export default function Analytics() {
       const { data: machines } = await supabase
         .from('machines').select('*').eq('gym_id', gym.id)
 
+      const machineIds = machines?.map(m => m.id) || []
+
       const { data: weekWorkouts } = await supabase
         .from('workouts').select('*, machines(name)')
+        .in('machine_id', machineIds)
         .gte('created_at', monday.toISOString())
 
       const { data: allWorkouts } = await supabase
         .from('workouts').select('user_id, machine_id, created_at, machines(name)')
+        .in('machine_id', machineIds)
 
-      const { data: profiles } = await supabase
-        .from('profiles').select('id, created_at')
+      // Count members via gym_members table
+      const { data: gymMembers } = await supabase
+        .from('gym_members')
+        .select('user_id')
+        .eq('gym_id', gym.id)
 
-      setTotalMembers(profiles?.length || 0)
+      setTotalMembers(gymMembers?.length || 0)
 
       const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
       setActiveThisWeek(activeUserIds.size)
@@ -116,13 +144,12 @@ export default function Analytics() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
+            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Gym Analytics</p>
           </div>
           <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
         </div>
 
-        {/* Key metrics */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Total Members</p>
@@ -142,7 +169,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Most and least used */}
         {mostUsed && (
           <div className="grid grid-cols-2 gap-3 mb-6">
             <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #22C55E'}}>
@@ -158,7 +184,6 @@ export default function Analytics() {
           </div>
         )}
 
-        {/* Busiest days */}
         <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold mb-4">Busiest Days</p>
           <div className="flex gap-1.5 items-end justify-between">
@@ -182,7 +207,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Busiest times */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold mb-4">Busiest Times</p>
           <div className="flex flex-col gap-3">
@@ -213,7 +237,6 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Equipment usage — collapsible */}
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
           <button
             onClick={() => setEquipmentOpen(prev => !prev)}
@@ -226,16 +249,14 @@ export default function Analytics() {
                 {machineStats.length}
               </span>
             </div>
-            <span
-              style={{
-                color: '#64748B',
-                fontSize: '18px',
-                transform: equipmentOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s ease',
-                display: 'inline-block',
-                lineHeight: 1
-              }}
-            >
+            <span style={{
+              color: '#64748B',
+              fontSize: '18px',
+              transform: equipmentOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block',
+              lineHeight: 1
+            }}>
               ▾
             </span>
           </button>
