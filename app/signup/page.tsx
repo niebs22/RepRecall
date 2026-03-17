@@ -1,9 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function Signup() {
+function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -103,5 +103,17 @@ export default function Signup() {
         </p>
       </div>
     </main>
+  )
+}
+
+export default function Signup() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
+        <p style={{color: '#64748B'}}>Loading...</p>
+      </main>
+    }>
+      <SignupForm />
+    </Suspense>
   )
 }
