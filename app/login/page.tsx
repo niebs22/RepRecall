@@ -1,22 +1,30 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function Login() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const gymCode = searchParams.get('gym')
 
   async function handleLogin(e: any) {
     e.preventDefault()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
-    } else {
-      router.push('/dashboard')
+      return
     }
+
+    // If there's a gym code, store it so dashboard can link them
+    if (gymCode) {
+      localStorage.setItem('pending_gym_code', gymCode)
+    }
+
+    router.push('/dashboard')
   }
 
   return (
@@ -45,6 +53,11 @@ export default function Login() {
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
             style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
           />
+          {gymCode && (
+            <div className="rounded-lg px-4 py-3" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+              <p className="text-xs" style={{color: '#3B82F6'}}>✓ You'll be joined to your gym after logging in</p>
+            </div>
+          )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
             type="submit"
@@ -56,9 +69,21 @@ export default function Login() {
         </form>
         <p className="text-center mt-6" style={{color: '#64748B'}}>
           No account?{' '}
-          <a href="/signup" style={{color: '#3B82F6'}}>Sign Up</a>
+          <a href={gymCode ? `/signup?gym=${gymCode}` : '/signup'} style={{color: '#3B82F6'}}>Sign Up</a>
         </p>
       </div>
     </main>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
+        <p style={{color: '#64748B'}}>Loading...</p>
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
