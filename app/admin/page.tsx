@@ -213,7 +213,7 @@ export default function Admin() {
                       <div className="p-2 rounded-lg" style={{background: 'white'}}>
                         <QRCodeCanvas
                           id={'qr-' + machine.id}
-                          value={'https://rep-recall.vercel.app/machine/' + machine.id}
+                          value={'https://rep-recall-dg0f8f8nw-niebs22s-projects.vercel.app/machine/' + machine.id}
                           size={90}
                           level="H"
                         />
