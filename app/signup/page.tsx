@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
@@ -10,6 +10,14 @@ export default function Signup() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const gymCode = searchParams.get('gym')
+
+  useEffect(() => {
+    if (gymCode) {
+      localStorage.setItem('pending_gym_code', gymCode)
+    }
+  }, [gymCode])
 
   async function handleSignup(e: any) {
     e.preventDefault()
@@ -75,6 +83,11 @@ export default function Signup() {
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
             style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
           />
+          {gymCode && (
+            <div className="rounded-lg px-4 py-3" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+              <p className="text-xs" style={{color: '#3B82F6'}}>✓ You'll be joined to your gym automatically</p>
+            </div>
+          )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
             type="submit"
@@ -86,7 +99,7 @@ export default function Signup() {
         </form>
         <p className="text-center mt-6" style={{color: '#64748B'}}>
           Already have an account?{' '}
-          <a href="/login" style={{color: '#3B82F6'}}>Log In</a>
+          <a href={gymCode ? `/login?gym=${gymCode}` : '/login'} style={{color: '#3B82F6'}}>Log In</a>
         </p>
       </div>
     </main>
