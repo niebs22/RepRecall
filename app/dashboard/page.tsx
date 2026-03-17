@@ -20,6 +20,7 @@ export default function Dashboard() {
         router.push('/login')
       } else {
         setUser(user)
+        await checkPendingGym(user.id)
         fetchProfile(user.id)
         fetchMachineWorkouts(user.id)
         fetchAllMachines()
@@ -28,6 +29,25 @@ export default function Dashboard() {
     }
     getUser()
   }, [])
+
+  async function checkPendingGym(userId: string) {
+    const pendingCode = localStorage.getItem('pending_gym_code')
+    if (!pendingCode) return
+
+    const { data: gym } = await supabase
+      .from('gyms')
+      .select('id')
+      .eq('code', pendingCode)
+      .single()
+
+    if (gym) {
+      await supabase
+        .from('gym_members')
+        .upsert({ user_id: userId, gym_id: gym.id }, { onConflict: 'user_id,gym_id' })
+    }
+
+    localStorage.removeItem('pending_gym_code')
+  }
 
   async function fetchProfile(userId: string) {
     const { data } = await supabase
@@ -177,10 +197,7 @@ export default function Dashboard() {
             <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-white text-lg w-full text-center mb-3"
-            style={{
-              background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
-              boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'
-            }}
+            style={{background: 'linear-gradient(135deg, #2563EB, #3B82F6)', boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'}}
           >
             <span style={{fontSize: '22px'}}>📷</span> Scan Equipment
           </a>
