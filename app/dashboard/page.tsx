@@ -153,7 +153,7 @@ export default function Dashboard() {
 
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+          <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span>< style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
           <div className="flex items-center gap-4">
             <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
             <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
