@@ -146,7 +146,7 @@ export default function Dashboard() {
       return parts.join(' · ')
     }
     const parts = []
-    if (workout.sets) parts.push(workout.sets + ' sets')
+    if (workout.sets) parts.push(workout.sets + (workout.sets === 1 ? ' sets' : ' sets'))
     if (workout.weight) parts.push(workout.weight + ' lbs')
     return parts.join(' · ')
   }
@@ -219,7 +219,6 @@ export default function Dashboard() {
                 {totalThisWeek}/7 days
               </div>
                 <p className="text-xs mt-1" style={{color: '#64748B'}}>{totalSessions} total sessions</p>
-              )
             </div>
           </div>
           <div className="flex gap-2 items-end justify-between">
