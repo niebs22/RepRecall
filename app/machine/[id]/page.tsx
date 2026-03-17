@@ -12,13 +12,18 @@ export default function MachinePage() {
   const [user, setUser] = useState<any>(null)
   const [selectedExercise, setSelectedExercise] = useState('')
   const [showAddVariation, setShowAddVariation] = useState(false)
+  const [showManageVariations, setShowManageVariations] = useState(false)
   const [newVariation, setNewVariation] = useState('')
+  const [editingVariation, setEditingVariation] = useState<any>(null)
+  const [editingVariationName, setEditingVariationName] = useState('')
   const [sets, setSets] = useState<any[]>([{reps: '', weight: ''}])
   const [duration, setDuration] = useState('')
   const [distance, setDistance] = useState('')
   const [notes, setNotes] = useState('')
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
+  const [editingSession, setEditingSession] = useState(false)
+  const [editableSets, setEditableSets] = useState<any[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -83,6 +88,28 @@ export default function MachinePage() {
     setShowAddVariation(false)
   }
 
+  async function handleRenameVariation(variation: any) {
+    if (!editingVariationName.trim()) return
+    const { data } = await supabase
+      .from('variations')
+      .update({ name: editingVariationName.trim() })
+      .eq('id', variation.id)
+      .select()
+      .single()
+    if (data) {
+      setVariations(variations.map(v => v.id === variation.id ? data : v))
+      if (selectedExercise === variation.name) setSelectedExercise(data.name)
+    }
+    setEditingVariation(null)
+    setEditingVariationName('')
+  }
+
+  async function handleDeleteVariation(variation: any) {
+    await supabase.from('variations').delete().eq('id', variation.id)
+    setVariations(variations.filter(v => v.id !== variation.id))
+    if (selectedExercise === variation.name) setSelectedExercise(machine.name)
+  }
+
   function addSet() {
     setSets([...sets, {reps: '', weight: ''}])
   }
@@ -96,6 +123,35 @@ export default function MachinePage() {
     const updated = [...sets]
     updated[index] = {...updated[index], [field]: value}
     setSets(updated)
+  }
+
+  function startEditingSession(sessionSets: any[]) {
+    setEditableSets(sessionSets.map(s => ({...s})))
+    setEditingSession(true)
+  }
+
+  function updateEditableSet(index: number, field: string, value: string) {
+    const updated = [...editableSets]
+    updated[index] = {...updated[index], [field]: value}
+    setEditableSets(updated)
+  }
+
+  async function saveEditedSession() {
+    for (const s of editableSets) {
+      await supabase.from('workouts').update({
+        reps: parseInt(s.reps),
+        weight: parseFloat(s.weight),
+        duration: s.duration ? parseFloat(s.duration) : null,
+        distance: s.distance ? parseFloat(s.distance) : null,
+      }).eq('id', s.id)
+    }
+    const { data: workoutData } = await supabase
+      .from('workouts').select('*')
+      .eq('user_id', user.id)
+      .eq('machine_id', id)
+      .order('created_at', { ascending: false })
+    if (workoutData) setAllWorkouts(workoutData)
+    setEditingSession(false)
   }
 
   async function handleSave(e: any) {
@@ -216,6 +272,8 @@ export default function MachinePage() {
               onChange={e => {
                 if (e.target.value === '__add__') {
                   setShowAddVariation(true)
+                } else if (e.target.value === '__manage__') {
+                  setShowManageVariations(true)
                 } else {
                   setSelectedExercise(e.target.value)
                   setShowAddVariation(false)
@@ -229,10 +287,11 @@ export default function MachinePage() {
                 <option key={v.id} value={v.name}>{v.name}</option>
               ))}
               <option value="__add__">+ Add variation...</option>
+              {variations.length > 0 && <option value="__manage__">✎ Manage variations...</option>}
             </select>
 
             {showAddVariation && (
-              <div className="rounded-xl p-4" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+              <div className="rounded-xl p-4 mb-2" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
                 <p className="text-white text-sm font-semibold mb-3">Add a variation</p>
                 <input
                   type="text"
@@ -243,20 +302,48 @@ export default function MachinePage() {
                   style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
                 />
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleAddVariation}
-                    className="flex-1 py-3 rounded-full font-semibold text-white"
-                    style={{background: '#2563EB'}}
-                  >
+                  <button onClick={handleAddVariation} className="flex-1 py-3 rounded-full font-semibold text-white" style={{background: '#2563EB'}}>
                     Save Variation
                   </button>
-                  <button
-                    onClick={() => { setShowAddVariation(false); setNewVariation('') }}
-                    className="flex-1 py-3 rounded-full font-semibold"
-                    style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}
-                  >
+                  <button onClick={() => { setShowAddVariation(false); setNewVariation('') }} className="flex-1 py-3 rounded-full font-semibold" style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>
                     Cancel
                   </button>
+                </div>
+              </div>
+            )}
+
+            {showManageVariations && (
+              <div className="rounded-xl p-4 mb-2" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-white text-sm font-semibold">Manage Variations</p>
+                  <button onClick={() => { setShowManageVariations(false); setEditingVariation(null) }} className="text-xs" style={{color: '#64748B'}}>Done</button>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {variations.map(v => (
+                    <div key={v.id}>
+                      {editingVariation?.id === v.id ? (
+                        <div className="flex gap-2 items-center">
+                          <input
+                            type="text"
+                            value={editingVariationName}
+                            onChange={e => setEditingVariationName(e.target.value)}
+                            className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
+                            style={{background: '#0A1628', border: '1px solid #2563EB'}}
+                          />
+                          <button onClick={() => handleRenameVariation(v)} className="px-3 py-2 rounded-lg text-white text-sm font-semibold" style={{background: '#2563EB'}}>Save</button>
+                          <button onClick={() => { setEditingVariation(null); setEditingVariationName('') }} className="px-3 py-2 rounded-lg text-sm" style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>✕</button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center px-3 py-2 rounded-lg" style={{background: '#0A1628'}}>
+                          <p className="text-white text-sm">{v.name}</p>
+                          <div className="flex gap-2">
+                            <button onClick={() => { setEditingVariation(v); setEditingVariationName(v.name) }} className="text-xs px-2 py-1 rounded" style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Rename</button>
+                            <button onClick={() => handleDeleteVariation(v)} className="text-xs px-2 py-1 rounded" style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)'}}>Delete</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -267,49 +354,113 @@ export default function MachinePage() {
         {lastSessionSets.length > 0 ? (
           <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
             <div className="flex justify-between items-center mb-4">
-              <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>
-                Last Session
-              </p>
-              <div className="flex gap-2 items-center">
-                <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(lastSessionDate)}</p>
-                <p className="text-xs" style={{color: '#64748B'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+              <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Last Session</p>
+              <div className="flex gap-3 items-center">
+                <div className="flex gap-2 items-center">
+                  <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(lastSessionDate)}</p>
+                  <p className="text-xs" style={{color: '#64748B'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                </div>
+                {!editingSession && (
+                  <button onClick={() => startEditingSession(lastSessionSets)} className="text-xs px-2 py-1 rounded" style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Edit</button>
+                )}
               </div>
             </div>
 
-            {machine.type === 'cardio' ? (
-              <div className="flex gap-6">
-                <div>
-                  <p className="text-white font-bold text-lg">{lastSessionSets[0].duration}</p>
-                  <p className="text-xs" style={{color: '#64748B'}}>Minutes</p>
-                </div>
-                {lastSessionSets[0].distance && (
-                  <div>
-                    <p className="text-white font-bold text-lg">{lastSessionSets[0].distance}</p>
-                    <p className="text-xs" style={{color: '#64748B'}}>Miles</p>
+            {editingSession ? (
+              <div>
+                {machine.type === 'cardio' ? (
+                  <div className="flex flex-col gap-3 mb-3">
+                    <div>
+                      <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Duration (minutes)</label>
+                      <input
+                        type="number"
+                        value={editableSets[0]?.duration || ''}
+                        onChange={e => updateEditableSet(0, 'duration', e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
+                        style={{background: '#0A1628', border: '1px solid #2563EB'}}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Distance (miles)</label>
+                      <input
+                        type="number"
+                        value={editableSets[0]?.distance || ''}
+                        onChange={e => updateEditableSet(0, 'distance', e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
+                        style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 mb-3">
+                    <div className="grid grid-cols-12 gap-2 mb-1 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
+                      <p className="col-span-1"></p>
+                      <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
+                      <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
+                    </div>
+                    {editableSets.map((s, i) => (
+                      <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
+                        <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                        <input
+                          type="number"
+                          value={s.reps}
+                          onChange={e => updateEditableSet(i, 'reps', e.target.value)}
+                          className="col-span-5 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
+                          style={{background: '#0A1628', border: '1px solid #2563EB'}}
+                        />
+                        <input
+                          type="number"
+                          value={s.weight}
+                          onChange={e => updateEditableSet(i, 'weight', e.target.value)}
+                          className="col-span-6 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
+                          style={{background: '#0A1628', border: '1px solid #2563EB'}}
+                        />
+                      </div>
+                    ))}
                   </div>
                 )}
+                <div className="flex gap-2">
+                  <button onClick={saveEditedSession} className="flex-1 py-2 rounded-full font-semibold text-white text-sm" style={{background: '#2563EB'}}>Save Changes</button>
+                  <button onClick={() => setEditingSession(false)} className="flex-1 py-2 rounded-full text-sm font-semibold" style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>Cancel</button>
+                </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
-                <div className="grid grid-cols-12 gap-2 mb-2 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
-                  <p className="col-span-1"></p>
-                  <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
-                  <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
-                </div>
-                {lastSessionSets.map((s, i) => (
-                  <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                    <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
-                    <p className="col-span-5 text-white font-semibold">{s.reps}</p>
-                    <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
+              <>
+                {machine.type === 'cardio' ? (
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="text-white font-bold text-lg">{lastSessionSets[0].duration}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>Minutes</p>
+                    </div>
+                    {lastSessionSets[0].distance && (
+                      <div>
+                        <p className="text-white font-bold text-lg">{lastSessionSets[0].distance}</p>
+                        <p className="text-xs" style={{color: '#64748B'}}>Miles</p>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-
-            {lastSessionNotes && (
-              <p className="text-xs italic pt-3 mt-3" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
-                "{lastSessionNotes}"
-              </p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <div className="grid grid-cols-12 gap-2 mb-2 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
+                      <p className="col-span-1"></p>
+                      <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
+                      <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
+                    </div>
+                    {lastSessionSets.map((s, i) => (
+                      <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
+                        <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                        <p className="col-span-5 text-white font-semibold">{s.reps}</p>
+                        <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {lastSessionNotes && (
+                  <p className="text-xs italic pt-3 mt-3" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
+                    "{lastSessionNotes}"
+                  </p>
+                )}
+              </>
             )}
           </div>
         ) : (
@@ -321,7 +472,6 @@ export default function MachinePage() {
         {/* Log workout */}
         <h2 className="font-semibold text-lg mb-4 text-white">Log Today's Workout</h2>
         <form onSubmit={handleSave} className="flex flex-col gap-4">
-
           {machine.type === 'cardio' ? (
             <>
               <div>
@@ -356,7 +506,6 @@ export default function MachinePage() {
                 <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
                 <p className="col-span-1"></p>
               </div>
-
               {sets.map((set, i) => (
                 <div key={i} className="grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-1 text-center">
@@ -388,7 +537,6 @@ export default function MachinePage() {
                   </button>
                 </div>
               ))}
-
               <button
                 type="button"
                 onClick={addSet}
@@ -399,7 +547,6 @@ export default function MachinePage() {
               </button>
             </>
           )}
-
           <div>
             <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
             <input
@@ -411,7 +558,6 @@ export default function MachinePage() {
               style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
             />
           </div>
-
           <button
             type="submit"
             className="py-3 rounded-full font-semibold text-white"
