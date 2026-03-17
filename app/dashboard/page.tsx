@@ -146,7 +146,7 @@ export default function Dashboard() {
       return parts.join(' · ')
     }
     const parts = []
-    if (workout.sets) parts.push(workout.sets + (workout.sets === 1 ? ' sets' : ' sets'))
+    if (workout.sets) parts.push(workout.sets + (workout.sets === 1 ? ' set' : ' sets'))
     if (workout.weight) parts.push(workout.weight + ' lbs')
     return parts.join(' · ')
   }
