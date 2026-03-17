@@ -31,7 +31,10 @@ export default function Signup() {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-white mb-4">Check your email</h1>
+          <h1 className="text-3xl font-bold text-white mb-4">
+            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span>
+          </h1>
+          <p className="text-white font-semibold text-lg mb-2">Check your email</p>
           <p style={{color: '#64748B'}}>We sent you a confirmation link. Click it to activate your account.</p>
         </div>
       </main>
@@ -42,7 +45,9 @@ export default function Signup() {
     <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-1">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+          <h1 className="text-4xl font-bold text-white mb-1">
+            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span>
+          </h1>
           <p className="text-sm tracking-widest uppercase" style={{color: '#2563EB'}}>Create Account</p>
         </div>
         <form onSubmit={handleSignup} className="flex flex-col gap-4">
