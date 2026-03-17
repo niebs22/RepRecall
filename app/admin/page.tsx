@@ -13,14 +13,42 @@ export default function Admin() {
   const [gymName, setGymName] = useState('')
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [role, setRole] = useState<string>('')
   const router = useRouter()
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data: gym } = await supabase
-        .from('gyms').select('*').limit(1).single()
+
+      // Get user role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile) { router.push('/dashboard'); return }
+      setRole(profile.role)
+
+      let gym = null
+
+      if (profile.role === 'super_admin') {
+        // Super admin sees first gym for now
+        const { data } = await supabase
+          .from('gyms').select('*').limit(1).single()
+        gym = data
+      } else if (profile.role === 'gym_owner') {
+        // Gym owner sees their own gym
+        const { data } = await supabase
+          .from('gyms').select('*').eq('owner_id', user.id).single()
+        gym = data
+      } else {
+        // Regular members don't get admin access
+        router.push('/dashboard')
+        return
+      }
+
       if (gym) {
         setGymId(gym.id)
         setGymName(gym.name)
@@ -80,11 +108,14 @@ export default function Admin() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
+            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
           <div className="flex gap-4">
             <a href="/admin/analytics" className="text-sm" style={{color: '#3B82F6'}}>Analytics</a>
+            {role === 'super_admin' && (
+              <a href="/superadmin" className="text-sm" style={{color: '#64748B'}}>Super Admin</a>
+            )}
             <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>Dashboard</a>
           </div>
         </div>
@@ -109,8 +140,6 @@ export default function Admin() {
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
               style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
             />
-
-            {/* Type toggle */}
             <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1E3A5F'}}>
               <button
                 type="button"
@@ -135,7 +164,6 @@ export default function Admin() {
                 🏃 Cardio
               </button>
             </div>
-
             <button
               type="submit"
               disabled={loading}
