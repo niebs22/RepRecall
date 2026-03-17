@@ -116,7 +116,7 @@ export default function Analytics() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#2563EB'}}>Recall</span></h1>
+            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Gym Analytics</p>
           </div>
           <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
