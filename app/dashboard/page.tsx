@@ -181,7 +181,6 @@ export default function Dashboard() {
         {/* Scan card */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold text-lg mb-1">Ready to train?</p>
-          <p className="text-sm mb-4" style={{color: '#64748B'}}>Scan a QR code or select equipment below</p>
           
             <a
             href="/scan"
