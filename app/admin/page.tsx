@@ -80,7 +80,7 @@ export default function Admin() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
+            <h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
           <div className="flex gap-4">
