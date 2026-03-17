@@ -25,7 +25,7 @@ export default function Home() {
           </h1>
           <p className="text-sm font-semibold tracking-widest uppercase" style={{color: '#2563EB'}}>Scan. Lift. Repeat.</p>
         </div>
-        <p className="mb-10 max-w-xs mx-auto" style={{color: '#64748B'}}>Simplifying the way gym-goers log and track their workouts</p>
+        <p className="mb-10 max-w-xs mx-auto" style={{color: '#64748B'}}>Simplifying the way gym-goers log and recall their workouts</p>
         <div className="flex flex-col gap-4">
           <a href="/login" className="px-8 py-3 rounded-full font-semibold text-white" style={{background: '#2563EB'}}>
             Log In
