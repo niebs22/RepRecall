@@ -10,7 +10,7 @@ export default function Dashboard() {
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
   const [totalThisWeek, setTotalThisWeek] = useState(0)
-  const [totalSessions, settotalSessions] = useState(0)
+  const [totalSessions, setTotalSessions] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -46,13 +46,18 @@ export default function Dashboard() {
       .order('created_at', { ascending: false })
     if (data) {
       const seen = new Set()
+      const countMap: Record<string, number> = {}
+      data.forEach(w => {
+        countMap[w.machine_id] = (countMap[w.machine_id] || 0) + 1
+      })
       const grouped = data.filter(workout => {
         if (seen.has(workout.machine_id)) return false
         seen.add(workout.machine_id)
         return true
       })
+      grouped.sort((a, b) => (countMap[b.machine_id] || 0) - (countMap[a.machine_id] || 0))
       setMachineWorkouts(grouped)
-      settotalSessions(data.length)
+      setTotalSessions(data.length)
     }
   }
 
@@ -71,32 +76,19 @@ export default function Dashboard() {
     monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
     monday.setHours(0, 0, 0, 0)
 
-    const lastMonday = new Date(monday)
-    lastMonday.setDate(monday.getDate() - 7)
-
     const { data } = await supabase
       .from('workouts')
       .select('created_at')
       .eq('user_id', userId)
-      .gte('created_at', lastMonday.toISOString())
+      .gte('created_at', monday.toISOString())
 
     if (data) {
-      const thisWeek = data.filter(w => new Date(w.created_at) >= monday)
-      const lastWeek = data.filter(w => new Date(w.created_at) < monday)
-
       const activeDays = new Set<number>()
-      thisWeek.forEach(w => {
+      data.forEach(w => {
         const day = new Date(w.created_at).getDay()
         const adjusted = day === 0 ? 6 : day - 1
         activeDays.add(adjusted)
       })
-      const lastWeekDays = new Set<number>()
-      lastWeek.forEach(w => {
-        const day = new Date(w.created_at).getDay()
-        const adjusted = day === 0 ? 6 : day - 1
-        lastWeekDays.add(adjusted)
-      })
-
       const week = [0,1,2,3,4,5,6].map(d => activeDays.has(d))
       setWeekActivity(week)
       setTotalThisWeek(activeDays.size)
@@ -170,7 +162,7 @@ export default function Dashboard() {
 
         {/* Welcome */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()} </h2>
+          <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()}</h2>
           <p className="text-sm mt-1" style={{color: '#64748B'}}>
             {totalThisWeek === 0
               ? "You haven't trained yet this week."
@@ -180,16 +172,18 @@ export default function Dashboard() {
 
         {/* Scan card */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
-          <p className="text-white font-semibold text-lg mb-1">Ready to train?</p>
+          <p className="text-white font-semibold text-lg mb-3">Ready to train?</p>
           
             <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-white text-lg w-full text-center mb-3"
-            style={{background: 'linear-gradient(135deg, #2563EB, #3B82F6)', boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'}}
+            style={{
+              background: 'linear-gradient(135deg, #2563EB, #3B82F6)',
+              boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'
+            }}
           >
             <span style={{fontSize: '22px'}}>📷</span> Scan Equipment
           </a>
-            
           <div className="relative">
             <select
               onChange={handleMachineSelect}
@@ -217,7 +211,7 @@ export default function Dashboard() {
               <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E'}}>
                 {totalThisWeek}/7 days
               </div>
-                <p className="text-xs mt-1" style={{color: '#64748B'}}>{totalSessions} total sessions</p>
+              <p className="text-xs mt-1" style={{color: '#64748B'}}>{totalSessions} total sessions</p>
             </div>
           </div>
           <div className="flex gap-2 items-end justify-between">
@@ -248,8 +242,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Last Sessions */}
-        <h2 className="font-semibold text-lg mb-4 text-white">Last Sessions</h2>
+        {/* Frequently Used */}
+        <h2 className="font-semibold text-lg mb-4 text-white">Frequently Used</h2>
         {machineWorkouts.length === 0 ? (
           <p className="text-center py-8" style={{color: '#64748B'}}>No workouts yet. Scan a machine to get started.</p>
         ) : (
