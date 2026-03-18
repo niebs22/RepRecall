@@ -25,6 +25,7 @@ export default function MachinePage() {
   const [error, setError] = useState('')
   const [editingSession, setEditingSession] = useState(false)
   const [editableSets, setEditableSets] = useState<any[]>([])
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -234,6 +235,37 @@ export default function MachinePage() {
     return diffDays + ' days ago'
   }
 
+  function formatHistoryDate(date: string) {
+  const d = new Date(date)
+  const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const diffMs = new Date().getTime() - d.getTime()
+  const diffHours = diffMs / (1000 * 60 * 60)
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+  let ago = ''
+  if (diffHours < 24) ago = 'Today'
+  else if (diffDays === 1) ago = 'Yesterday'
+  else ago = diffDays + ' days ago'
+  return { label, ago }
+}
+
+function getHistoryGrouped() {
+  const skipDate = allWorkouts.length > 0
+    ? new Date(allWorkouts[0].created_at).toDateString()
+    : null
+
+  const grouped: Record<string, any[]> = {}
+  allWorkouts.forEach(w => {
+    const dateStr = new Date(w.created_at).toDateString()
+    if (dateStr === skipDate) return
+    if (!grouped[dateStr]) grouped[dateStr] = []
+    grouped[dateStr].push(w)
+  })
+  return Object.entries(grouped).map(([date, workouts]) => ({
+    date,
+    workouts,
+    ...formatHistoryDate(workouts[0].created_at)
+  }))
+}
   const filteredMachines = allMachines.filter(m =>
     m.name.toLowerCase().includes(supersetSearch.toLowerCase())
   )
@@ -511,6 +543,76 @@ export default function MachinePage() {
             <p style={{color: '#64748B'}}>No previous session recorded</p>
           </div>
         )}
+        
+          {/* History */}
+{allWorkouts.length > 1 && (
+  <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F2040'}}>
+    <button
+      onClick={() => setHistoryOpen(prev => !prev)}
+      className="w-full flex justify-between items-center p-5"
+      style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+    >
+      <div className="flex items-center gap-2">
+        <h2 className="font-semibold text-white">History</h2>
+        <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+          {getHistoryGrouped().length} sessions
+        </span>
+      </div>
+      <span style={{
+        color: '#64748B',
+        fontSize: '18px',
+        transform: historyOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.2s ease',
+        display: 'inline-block',
+        lineHeight: 1
+      }}>▾</span>
+    </button>
+
+    {historyOpen && (
+      <div className="flex flex-col gap-4 px-5 pb-5">
+        {getHistoryGrouped().map((group, i) => (
+          <div key={i}>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-white text-sm font-semibold">{group.label}</p>
+              <p className="text-xs" style={{color: '#64748B'}}>({group.ago})</p>
+              {group.workouts[0]?.superset && (
+                <span className="text-xs font-bold" style={{color: '#22C55E'}}>SS</span>
+              )}
+            </div>
+            {group.workouts[0]?.duration ? (
+              <div className="flex gap-4">
+                <div>
+                  <p className="text-white font-semibold">{group.workouts[0].duration}</p>
+                  <p className="text-xs" style={{color: '#64748B'}}>min</p>
+                </div>
+                {group.workouts[0].distance && (
+                  <div>
+                    <p className="text-white font-semibold">{group.workouts[0].distance}</p>
+                    <p className="text-xs" style={{color: '#64748B'}}>mi</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1">
+                {group.workouts.map((w, j) => (
+                  <div key={j} className="flex gap-3 items-center">
+                    <p className="text-xs font-bold w-4" style={{color: '#3B82F6'}}>{j + 1}</p>
+                    <p className="text-sm text-white">{w.reps} reps</p>
+                    <p className="text-sm text-white">·</p>
+                    <p className="text-sm text-white">{w.weight} lbs</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            {i < getHistoryGrouped().length - 1 && (
+              <div className="mt-3" style={{borderBottom: '1px solid #1E3A5F'}}/>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
         {/* Log workout header */}
         <div className="flex justify-between items-center mb-4">
