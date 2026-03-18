@@ -188,9 +188,11 @@ export default function Dashboard() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
           <div className="flex items-center gap-4">
-            <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
-            <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
-          </div>
+            {profile?.role && profile.role !== 'member' && (
+              <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
+           )}
+           <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
+         </div>
         </div>
 
         {/* Welcome */}
