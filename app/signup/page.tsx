@@ -25,7 +25,10 @@ function SignupForm() {
       email,
       password,
       options: {
-        data: { full_name: name }
+        data: {
+          full_name: name,
+          pending_gym_code: gymCode || null
+        }
       }
     })
     if (error) {

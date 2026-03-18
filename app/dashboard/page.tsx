@@ -31,7 +31,15 @@ export default function Dashboard() {
   }, [])
 
   async function checkPendingGym(userId: string) {
-    const pendingCode = localStorage.getItem('pending_gym_code')
+    // Check localStorage first
+    let pendingCode = localStorage.getItem('pending_gym_code')
+
+    // Fall back to user metadata
+    if (!pendingCode) {
+      const { data: { user } } = await supabase.auth.getUser()
+      pendingCode = user?.user_metadata?.pending_gym_code || null
+    }
+
     if (!pendingCode) return
 
     const { data: gym } = await supabase
@@ -44,6 +52,11 @@ export default function Dashboard() {
       await supabase
         .from('gym_members')
         .upsert({ user_id: userId, gym_id: gym.id }, { onConflict: 'user_id,gym_id' })
+
+      // Clear the pending code from metadata
+      await supabase.auth.updateUser({
+        data: { pending_gym_code: null }
+      })
     }
 
     localStorage.removeItem('pending_gym_code')
