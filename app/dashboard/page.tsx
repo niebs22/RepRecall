@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [totalThisWeek, setTotalThisWeek] = useState(0)
   const [totalSessions, setTotalSessions] = useState(0)
   const router = useRouter()
+  const [gymName, setGymName] = useState('')
 
   useEffect(() => {
     async function getUser() {
@@ -22,6 +23,7 @@ export default function Dashboard() {
         setUser(user)
         await checkPendingGym(user.id)
         fetchProfile(user.id)
+        fetchUserGym(user.id)
         fetchMachineWorkouts(user.id)
         fetchAllMachines()
         fetchWeekActivity(user.id)
@@ -70,6 +72,15 @@ export default function Dashboard() {
       .single()
     if (data) setProfile(data)
   }
+
+   async function fetchUserGym(userId: string) {
+     const { data } = await supabase
+       .from('gym_members')
+       .select('gym_id, gyms(name)')
+       .eq('user_id', userId)
+       .single()
+    if (data?.gyms) setGymName((data.gyms as any).name)
+}
 
   async function fetchMachineWorkouts(userId: string) {
     const { data } = await supabase
@@ -198,6 +209,9 @@ export default function Dashboard() {
         {/* Welcome */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()}</h2>
+          {gymName && (
+            <p className="text-xs mt-0.5 mb-1" style={{color: '#2563EB'}}>📍 {gymName}</p>
+          )}
           <p className="text-sm mt-1" style={{color: '#64748B'}}>
             {totalThisWeek === 0
               ? "You haven't trained yet this week."
