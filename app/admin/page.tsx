@@ -101,7 +101,7 @@ export default function Admin() {
 
   qrImage.onload = () => {
     const cardWidth = 340
-    const cardHeight = 460
+    const cardHeight = 500
     const canvas = document.createElement('canvas')
     canvas.width = cardWidth
     canvas.height = cardHeight
@@ -114,84 +114,89 @@ export default function Admin() {
 
     // --- LOGO MARK ---
     const cx = cardWidth / 2
-    const cy = 85
-    const sq = 28  // outer square size
-    const inner = 17 // inner fill size
-    const gap = 7  // gap between outer and inner
-    const spread = 36 // distance from center to corner
+    const cy = 80
+    const sq = 24
+    const inner = 14
+    const gap = 5
+    const spread = 28
 
-    // Helper to draw one QR corner square
     function drawCorner(x: number, y: number) {
-      // Outer square
       ctx.strokeStyle = '#2563EB'
       ctx.lineWidth = 2.5
       ctx.beginPath()
       ctx.roundRect(x, y, sq, sq, 3)
       ctx.stroke()
-      // Inner fill
       ctx.fillStyle = '#2563EB'
       ctx.beginPath()
       ctx.roundRect(x + gap, y + gap, inner, inner, 1)
       ctx.fill()
     }
 
-    // Four corners
-    drawCorner(cx - spread - sq, cy - spread - sq) // top left
-    drawCorner(cx + spread, cy - spread - sq)       // top right
-    drawCorner(cx - spread - sq, cy + spread)       // bottom left
-    drawCorner(cx + spread, cy + spread)             // bottom right
+    drawCorner(cx - spread - sq, cy - spread - sq)
+    drawCorner(cx + spread, cy - spread - sq)
+    drawCorner(cx - spread - sq, cy + spread)
+    drawCorner(cx + spread, cy + spread)
 
-    // SS center — solid fill
-    ctx.font = '900 46px Helvetica'
+    // SS center
+    ctx.font = '900 42px Helvetica'
     ctx.fillStyle = '#2563EB'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText('SS', cx, cy)
 
     // --- WORDMARK ---
+    const wordmarkY = cy + spread + sq + 24
     ctx.textBaseline = 'alphabetic'
-    ctx.font = '300 22px Helvetica'
+    ctx.font = '300 20px Helvetica'
     ctx.fillStyle = '#ffffff'
-    ctx.textAlign = 'right'
-    ctx.fillText('scan', cx + 2, cy + spread + sq + 22)
-    ctx.font = '900 22px Helvetica'
-    ctx.fillStyle = '#2563EB'
+    const scanWidth = ctx.measureText('scan').width
+    ctx.font = '900 20px Helvetica'
+    const setWidth = ctx.measureText('set').width
+    const totalWidth = scanWidth + setWidth
+    const startX = cx - totalWidth / 2
+
+    ctx.font = '300 20px Helvetica'
+    ctx.fillStyle = '#ffffff'
     ctx.textAlign = 'left'
-    ctx.fillText('set', cx + 2, cy + spread + sq + 22)
+    ctx.fillText('scan', startX, wordmarkY)
+    ctx.font = '900 20px Helvetica'
+    ctx.fillStyle = '#2563EB'
+    ctx.fillText('set', startX + scanWidth, wordmarkY)
 
     // Divider
     ctx.strokeStyle = '#1E3A5F'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(30, cy + spread + sq + 36)
-    ctx.lineTo(cardWidth - 30, cy + spread + sq + 36)
+    ctx.moveTo(30, wordmarkY + 14)
+    ctx.lineTo(cardWidth - 30, wordmarkY + 14)
     ctx.stroke()
 
     // QR code
     const qrSize = 220
     const qrX = (cardWidth - qrSize) / 2
-    const qrY = cy + spread + sq + 48
+    const qrY = wordmarkY + 26
     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
 
     // Machine name
     ctx.font = '13px Helvetica'
     ctx.fillStyle = '#64748B'
     ctx.textAlign = 'center'
-    ctx.fillText(machineName, cardWidth / 2, qrY + qrSize + 20)
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillText(machineName, cardWidth / 2, qrY + qrSize + 22)
 
     // Divider
     ctx.strokeStyle = '#1E3A5F'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(30, qrY + qrSize + 32)
-    ctx.lineTo(cardWidth - 30, qrY + qrSize + 32)
+    ctx.moveTo(30, qrY + qrSize + 34)
+    ctx.lineTo(cardWidth - 30, qrY + qrSize + 34)
     ctx.stroke()
 
     // Tagline
     ctx.font = '10px Helvetica'
     ctx.fillStyle = '#2563EB'
     ctx.textAlign = 'center'
-    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, qrY + qrSize + 48)
+    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, qrY + qrSize + 52)
 
     // Download
     const url = canvas.toDataURL('image/png')
