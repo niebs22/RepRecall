@@ -8,6 +8,7 @@ export default function MachinePage() {
   const id = pathname?.split('/').pop()
   const [machine, setMachine] = useState<any>(null)
   const [allWorkouts, setAllWorkouts] = useState<any[]>([])
+  const [allMachines, setAllMachines] = useState<any[]>([])
   const [variations, setVariations] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
   const [selectedExercise, setSelectedExercise] = useState('')
@@ -24,6 +25,16 @@ export default function MachinePage() {
   const [error, setError] = useState('')
   const [editingSession, setEditingSession] = useState(false)
   const [editableSets, setEditableSets] = useState<any[]>([])
+
+  // Superset state
+  const [supersetMachine, setSupersetMachine] = useState<any>(null)
+  const [showSupersetPicker, setShowSupersetPicker] = useState(false)
+  const [supersetSearch, setSupersetSearch] = useState('')
+  const [activeSupersetPanel, setActiveSupersetPanel] = useState<'A' | 'B'>('A')
+  const [supersetSets, setSupersetSets] = useState<any[]>([{reps: '', weight: ''}])
+  const [supersetNotes, setSupersetNotes] = useState('')
+  const [supersetSaved, setSupersetSaved] = useState(false)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -54,6 +65,11 @@ export default function MachinePage() {
           .eq('machine_id', id)
           .order('created_at', { ascending: false })
         if (workoutData) setAllWorkouts(workoutData)
+
+        const { data: machinesData } = await supabase
+          .from('machines').select('*')
+          .order('name', { ascending: true })
+        if (machinesData) setAllMachines(machinesData.filter(m => m.id !== id))
 
       } catch (err) {
         setError('Something went wrong. Please try again.')
@@ -110,19 +126,26 @@ export default function MachinePage() {
     if (selectedExercise === variation.name) setSelectedExercise(machine.name)
   }
 
-  function addSet() {
-    setSets([...sets, {reps: '', weight: ''}])
-  }
-
+  function addSet() { setSets([...sets, {reps: '', weight: ''}]) }
   function removeSet(index: number) {
     if (sets.length === 1) return
     setSets(sets.filter((_, i) => i !== index))
   }
-
   function updateSet(index: number, field: string, value: string) {
     const updated = [...sets]
     updated[index] = {...updated[index], [field]: value}
     setSets(updated)
+  }
+
+  function addSupersetSet() { setSupersetSets([...supersetSets, {reps: '', weight: ''}]) }
+  function removeSupersetSet(index: number) {
+    if (supersetSets.length === 1) return
+    setSupersetSets(supersetSets.filter((_, i) => i !== index))
+  }
+  function updateSupersetSet(index: number, field: string, value: string) {
+    const updated = [...supersetSets]
+    updated[index] = {...updated[index], [field]: value}
+    setSupersetSets(updated)
   }
 
   function startEditingSession(sessionSets: any[]) {
@@ -143,6 +166,7 @@ export default function MachinePage() {
         weight: parseFloat(s.weight),
         duration: s.duration ? parseFloat(s.duration) : null,
         distance: s.distance ? parseFloat(s.distance) : null,
+        notes: s.notes || null,
       }).eq('id', s.id)
     }
     const { data: workoutData } = await supabase
@@ -156,38 +180,41 @@ export default function MachinePage() {
 
   async function handleSave(e: any) {
     e.preventDefault()
-
     if (machine.type === 'cardio') {
       if (!duration) return
       const { error } = await supabase.from('workouts').insert({
-        user_id: user.id,
-        machine_id: id,
-        exercise_name: selectedExercise,
-        duration: parseFloat(duration),
-        distance: distance ? parseFloat(distance) : null,
-        notes: notes || null,
-        sets: null,
-        reps: null,
-        weight: null
+        user_id: user.id, machine_id: id, exercise_name: selectedExercise,
+        duration: parseFloat(duration), distance: distance ? parseFloat(distance) : null,
+        notes: notes || null, sets: null, reps: null, weight: null,
+        superset: !!supersetMachine
       })
       if (!error) setSaved(true)
     } else {
       const validSets = sets.filter(s => s.reps && s.weight)
       if (validSets.length === 0) return
       const inserts = validSets.map((s, i) => ({
-        user_id: user.id,
-        machine_id: id,
-        exercise_name: selectedExercise,
-        sets: validSets.length,
-        reps: parseInt(s.reps),
-        weight: parseFloat(s.weight),
-        notes: i === 0 ? notes : null,
-        duration: null,
-        distance: null
+        user_id: user.id, machine_id: id, exercise_name: selectedExercise,
+        sets: validSets.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
+        notes: i === 0 ? notes : null, duration: null, distance: null,
+        superset: !!supersetMachine
       }))
       const { error } = await supabase.from('workouts').insert(inserts)
       if (!error) setSaved(true)
     }
+  }
+
+  async function handleSupersetSave() {
+    const validSets = supersetSets.filter(s => s.reps && s.weight)
+    if (validSets.length === 0) return
+    const inserts = validSets.map((s, i) => ({
+      user_id: user.id, machine_id: supersetMachine.id,
+      exercise_name: supersetMachine.name,
+      sets: validSets.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
+      notes: i === 0 ? supersetNotes : null, duration: null, distance: null,
+      superset: true
+    }))
+    await supabase.from('workouts').insert(inserts)
+    setSupersetSaved(true)
   }
 
   function daysSince(date: string) {
@@ -202,6 +229,10 @@ export default function MachinePage() {
     return diffDays + ' days ago'
   }
 
+  const filteredMachines = allMachines.filter(m =>
+    m.name.toLowerCase().includes(supersetSearch.toLowerCase())
+  )
+
   if (error) return (
     <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
       <p className="text-red-400">{error}</p>
@@ -214,13 +245,77 @@ export default function MachinePage() {
     </main>
   )
 
-  if (saved) return (
+  if (saved && supersetMachine && !supersetSaved) return (
+    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+      <div className="max-w-lg mx-auto">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#2563EB'}}>
+            <span className="text-2xl text-white">✓</span>
+          </div>
+          <h2 className="text-xl font-bold text-white mb-1">{machine.name} saved</h2>
+          <p style={{color: '#64748B'}}>Now log your superset</p>
+        </div>
+
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040', borderLeft: '3px solid #22C55E'}}>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-1" style={{color: '#22C55E'}}>Superset — {supersetMachine.name}</p>
+        </div>
+
+        <h2 className="font-semibold text-lg mb-4 text-white">Log {supersetMachine.name}</h2>
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-12 gap-2 px-1">
+            <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
+            <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
+            <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+            <p className="col-span-1"></p>
+          </div>
+          {supersetSets.map((set, i) => (
+            <div key={i} className="grid grid-cols-12 gap-2 items-center">
+              <div className="col-span-1 text-center">
+                <p className="text-xs font-bold" style={{color: '#22C55E'}}>{i + 1}</p>
+              </div>
+              <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
+                placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+              <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
+                placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+              <button type="button" onClick={() => removeSupersetSet(i)}
+                className="col-span-1 text-center text-lg"
+                style={{color: supersetSets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
+            </div>
+          ))}
+          <button type="button" onClick={addSupersetSet}
+            className="py-3 rounded-xl font-semibold text-sm"
+            style={{background: 'transparent', border: '1px dashed #22C55E', color: '#22C55E'}}>
+            + Add Set
+          </button>
+          <div>
+            <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
+            <input type="text" value={supersetNotes} onChange={e => setSupersetNotes(e.target.value)}
+              placeholder="e.g. felt strong today"
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+          </div>
+          <button onClick={handleSupersetSave}
+            className="py-3 rounded-full font-semibold text-white"
+            style={{background: '#22C55E'}}>
+            Finish Superset
+          </button>
+        </div>
+      </div>
+    </main>
+  )
+
+  if (saved && (!supersetMachine || supersetSaved)) return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
       <div className="text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#2563EB'}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
+        {supersetMachine && (
+          <p className="text-xs px-3 py-1 rounded-full inline-block mb-2" style={{background: 'rgba(34,197,94,0.15)', color: '#22C55E'}}>Superset logged</p>
+        )}
         {machine.type === 'cardio' ? (
           <p className="mb-2" style={{color: '#64748B'}}>{duration} min{distance ? ' · ' + distance + ' miles' : ''}</p>
         ) : (
@@ -263,21 +358,27 @@ export default function MachinePage() {
           <p className="mb-4" style={{color: '#64748B'}}>{machine.description}</p>
         )}
 
-        {/* Exercise selector — strength only */}
+        {/* Superset banner if active */}
+        {supersetMachine && (
+          <div className="rounded-xl px-4 py-3 mb-4 flex justify-between items-center" style={{background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)'}}>
+            <div>
+              <p className="text-xs font-semibold" style={{color: '#22C55E'}}>Superset with</p>
+              <p className="text-white text-sm font-semibold">{supersetMachine.name}</p>
+            </div>
+            <button onClick={() => setSupersetMachine(null)} className="text-xs" style={{color: '#64748B'}}>Remove</button>
+          </div>
+        )}
+
+        {/* Exercise selector */}
         {machine.type === 'strength' && (
           <div className="mb-6">
             <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise</label>
             <select
               value={selectedExercise}
               onChange={e => {
-                if (e.target.value === '__add__') {
-                  setShowAddVariation(true)
-                } else if (e.target.value === '__manage__') {
-                  setShowManageVariations(true)
-                } else {
-                  setSelectedExercise(e.target.value)
-                  setShowAddVariation(false)
-                }
+                if (e.target.value === '__add__') { setShowAddVariation(true) }
+                else if (e.target.value === '__manage__') { setShowManageVariations(true) }
+                else { setSelectedExercise(e.target.value); setShowAddVariation(false) }
               }}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
               style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
@@ -293,21 +394,15 @@ export default function MachinePage() {
             {showAddVariation && (
               <div className="rounded-xl p-4 mb-2" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
                 <p className="text-white text-sm font-semibold mb-3">Add a variation</p>
-                <input
-                  type="text"
-                  value={newVariation}
-                  onChange={e => setNewVariation(e.target.value)}
+                <input type="text" value={newVariation} onChange={e => setNewVariation(e.target.value)}
                   placeholder="e.g. Close Grip Bench Press"
                   className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
-                  style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
-                />
+                  style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
                 <div className="flex gap-2">
-                  <button onClick={handleAddVariation} className="flex-1 py-3 rounded-full font-semibold text-white" style={{background: '#2563EB'}}>
-                    Save Variation
-                  </button>
-                  <button onClick={() => { setShowAddVariation(false); setNewVariation('') }} className="flex-1 py-3 rounded-full font-semibold" style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>
-                    Cancel
-                  </button>
+                  <button onClick={handleAddVariation} className="flex-1 py-3 rounded-full font-semibold text-white" style={{background: '#2563EB'}}>Save Variation</button>
+                  <button onClick={() => { setShowAddVariation(false); setNewVariation('') }}
+                    className="flex-1 py-3 rounded-full font-semibold"
+                    style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>Cancel</button>
                 </div>
               </div>
             )}
@@ -323,22 +418,22 @@ export default function MachinePage() {
                     <div key={v.id}>
                       {editingVariation?.id === v.id ? (
                         <div className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            value={editingVariationName}
-                            onChange={e => setEditingVariationName(e.target.value)}
+                          <input type="text" value={editingVariationName} onChange={e => setEditingVariationName(e.target.value)}
                             className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
-                            style={{background: '#0A1628', border: '1px solid #2563EB'}}
-                          />
+                            style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
                           <button onClick={() => handleRenameVariation(v)} className="px-3 py-2 rounded-lg text-white text-sm font-semibold" style={{background: '#2563EB'}}>Save</button>
-                          <button onClick={() => { setEditingVariation(null); setEditingVariationName('') }} className="px-3 py-2 rounded-lg text-sm" style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>✕</button>
+                          <button onClick={() => { setEditingVariation(null); setEditingVariationName('') }}
+                            className="px-3 py-2 rounded-lg text-sm"
+                            style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>✕</button>
                         </div>
                       ) : (
                         <div className="flex justify-between items-center px-3 py-2 rounded-lg" style={{background: '#0A1628'}}>
                           <p className="text-white text-sm">{v.name}</p>
                           <div className="flex gap-2">
-                            <button onClick={() => { setEditingVariation(v); setEditingVariationName(v.name) }} className="text-xs px-2 py-1 rounded" style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Rename</button>
-                            <button onClick={() => handleDeleteVariation(v)} className="text-xs px-2 py-1 rounded" style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)'}}>Delete</button>
+                            <button onClick={() => { setEditingVariation(v); setEditingVariationName(v.name) }}
+                              className="text-xs px-2 py-1 rounded" style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Rename</button>
+                            <button onClick={() => handleDeleteVariation(v)}
+                              className="text-xs px-2 py-1 rounded" style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)'}}>Delete</button>
                           </div>
                         </div>
                       )}
@@ -361,7 +456,8 @@ export default function MachinePage() {
                   <p className="text-xs" style={{color: '#64748B'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
                 {!editingSession && (
-                  <button onClick={() => startEditingSession(lastSessionSets)} className="text-xs px-2 py-1 rounded" style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Edit</button>
+                  <button onClick={() => startEditingSession(lastSessionSets)}
+                    className="text-xs px-2 py-1 rounded" style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Edit</button>
                 )}
               </div>
             </div>
@@ -372,23 +468,17 @@ export default function MachinePage() {
                   <div className="flex flex-col gap-3 mb-3">
                     <div>
                       <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Duration (minutes)</label>
-                      <input
-                        type="number"
-                        value={editableSets[0]?.duration || ''}
+                      <input type="number" value={editableSets[0]?.duration || ''}
                         onChange={e => updateEditableSet(0, 'duration', e.target.value)}
                         className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
-                        style={{background: '#0A1628', border: '1px solid #2563EB'}}
-                      />
+                        style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
                     </div>
                     <div>
                       <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Distance (miles)</label>
-                      <input
-                        type="number"
-                        value={editableSets[0]?.distance || ''}
+                      <input type="number" value={editableSets[0]?.distance || ''}
                         onChange={e => updateEditableSet(0, 'distance', e.target.value)}
                         className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
-                        style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
-                      />
+                        style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
                     </div>
                   </div>
                 ) : (
@@ -401,27 +491,27 @@ export default function MachinePage() {
                     {editableSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
                         <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
-                        <input
-                          type="number"
-                          value={s.reps}
-                          onChange={e => updateEditableSet(i, 'reps', e.target.value)}
+                        <input type="number" value={s.reps} onChange={e => updateEditableSet(i, 'reps', e.target.value)}
                           className="col-span-5 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
-                          style={{background: '#0A1628', border: '1px solid #2563EB'}}
-                        />
-                        <input
-                          type="number"
-                          value={s.weight}
-                          onChange={e => updateEditableSet(i, 'weight', e.target.value)}
+                          style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
+                        <input type="number" value={s.weight} onChange={e => updateEditableSet(i, 'weight', e.target.value)}
                           className="col-span-6 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
-                          style={{background: '#0A1628', border: '1px solid #2563EB'}}
-                        />
+                          style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
                       </div>
                     ))}
                   </div>
                 )}
+                <div className="mb-3">
+                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes</label>
+                  <input type="text" value={editableSets[0]?.notes || ''} onChange={e => updateEditableSet(0, 'notes', e.target.value)}
+                    placeholder="e.g. felt strong today"
+                    className="w-full px-3 py-2 rounded-lg text-white focus:outline-none"
+                    style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+                </div>
                 <div className="flex gap-2">
                   <button onClick={saveEditedSession} className="flex-1 py-2 rounded-full font-semibold text-white text-sm" style={{background: '#2563EB'}}>Save Changes</button>
-                  <button onClick={() => setEditingSession(false)} className="flex-1 py-2 rounded-full text-sm font-semibold" style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>Cancel</button>
+                  <button onClick={() => setEditingSession(false)} className="flex-1 py-2 rounded-full text-sm font-semibold"
+                    style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>Cancel</button>
                 </div>
               </div>
             ) : (
@@ -470,32 +560,56 @@ export default function MachinePage() {
         )}
 
         {/* Log workout */}
-        <h2 className="font-semibold text-lg mb-4 text-white">Log Today's Workout</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-semibold text-lg text-white">Log Today's Workout</h2>
+          {!supersetMachine && machine.type === 'strength' && (
+            <button onClick={() => setShowSupersetPicker(true)}
+              className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+              style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
+              + Superset
+            </button>
+          )}
+        </div>
+
+        {/* Superset picker */}
+        {showSupersetPicker && (
+          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-white text-sm font-semibold">Pair with machine</p>
+              <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }} className="text-xs" style={{color: '#64748B'}}>Cancel</button>
+            </div>
+            <input type="text" value={supersetSearch} onChange={e => setSupersetSearch(e.target.value)}
+              placeholder="Search machines..."
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+              {filteredMachines.map(m => (
+                <button key={m.id} onClick={() => { setSupersetMachine(m); setShowSupersetPicker(false); setSupersetSearch('') }}
+                  className="flex justify-between items-center px-3 py-2 rounded-lg text-left"
+                  style={{background: '#0A1628'}}>
+                  <p className="text-white text-sm">{m.name}</p>
+                  <p className="text-xs" style={{color: '#3B82F6'}}>Pair</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSave} className="flex flex-col gap-4">
           {machine.type === 'cardio' ? (
             <>
               <div>
                 <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Duration (minutes)</label>
-                <input
-                  type="number"
-                  value={duration}
-                  onChange={e => setDuration(e.target.value)}
-                  placeholder="0"
-                  className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                  style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-                />
+                <input type="number" value={duration} onChange={e => setDuration(e.target.value)}
+                  placeholder="0" className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                  style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
               </div>
               <div>
                 <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Distance in miles (optional)</label>
-                <input
-                  type="number"
-                  value={distance}
-                  onChange={e => setDistance(e.target.value)}
-                  placeholder="0.0"
-                  step="0.1"
+                <input type="number" value={distance} onChange={e => setDistance(e.target.value)}
+                  placeholder="0.0" step="0.1"
                   className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                  style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-                />
+                  style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
               </div>
             </>
           ) : (
@@ -511,59 +625,31 @@ export default function MachinePage() {
                   <div className="col-span-1 text-center">
                     <p className="text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
                   </div>
-                  <input
-                    type="number"
-                    value={set.reps}
-                    onChange={e => updateSet(i, 'reps', e.target.value)}
-                    placeholder="0"
-                    className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-                  />
-                  <input
-                    type="number"
-                    value={set.weight}
-                    onChange={e => updateSet(i, 'weight', e.target.value)}
-                    placeholder="0"
-                    className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeSet(i)}
-                    className="col-span-1 text-center text-lg"
-                    style={{color: sets.length === 1 ? '#1E3A5F' : '#64748B'}}
-                  >
-                    ×
-                  </button>
+                  <input type="number" value={set.reps} onChange={e => updateSet(i, 'reps', e.target.value)}
+                    placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                  <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
+                    placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                  <button type="button" onClick={() => removeSet(i)} className="col-span-1 text-center text-lg"
+                    style={{color: sets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
                 </div>
               ))}
-              <button
-                type="button"
-                onClick={addSet}
-                className="py-3 rounded-xl font-semibold text-sm"
-                style={{background: 'transparent', border: '1px dashed #2563EB', color: '#3B82F6'}}
-              >
+              <button type="button" onClick={addSet} className="py-3 rounded-xl font-semibold text-sm"
+                style={{background: 'transparent', border: '1px dashed #2563EB', color: '#3B82F6'}}>
                 + Add Set
               </button>
             </>
           )}
           <div>
             <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
-            <input
-              type="text"
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
+            <input type="text" value={notes} onChange={e => setNotes(e.target.value)}
               placeholder="e.g. felt strong today"
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
-            />
+              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
           </div>
-          <button
-            type="submit"
-            className="py-3 rounded-full font-semibold text-white"
-            style={{background: '#2563EB'}}
-          >
-            Finish Workout
+          <button type="submit" className="py-3 rounded-full font-semibold text-white" style={{background: '#2563EB'}}>
+            {supersetMachine ? `Finish ${machine.name} — Log Superset Next` : 'Finish Workout'}
           </button>
         </form>
       </div>
