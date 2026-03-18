@@ -204,18 +204,25 @@ export default function MachinePage() {
   }
 
   async function handleSupersetSave() {
-    const validSets = supersetSets.filter(s => s.reps && s.weight)
-    if (validSets.length === 0) return
-    const inserts = validSets.map((s, i) => ({
-      user_id: user.id, machine_id: supersetMachine.id,
-      exercise_name: supersetMachine.name,
-      sets: validSets.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
-      notes: i === 0 ? supersetNotes : null, duration: null, distance: null,
-      superset: true
-    }))
-    await supabase.from('workouts').insert(inserts)
+  const validSets = supersetSets.filter(s => s.reps && s.weight)
+  if (validSets.length === 0) {
     setSupersetSaved(true)
+    return
   }
+  const inserts = validSets.map((s, i) => ({
+    user_id: user.id, machine_id: supersetMachine.id,
+    exercise_name: supersetMachine.name,
+    sets: validSets.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
+    notes: i === 0 ? supersetNotes : null, duration: null, distance: null,
+    superset: true
+  }))
+  const { error } = await supabase.from('workouts').insert(inserts)
+  if (!error) {
+    setSupersetSaved(true)
+  } else {
+    console.error('Superset save error:', error)
+  }
+}
 
   function daysSince(date: string) {
     const now = new Date()
