@@ -89,19 +89,19 @@ export default function Admin() {
   }
 
   async function downloadQR(machineId: string, machineName: string) {
-    const QRCode = await import('qrcode')
-  
-    const qrDataUrl = await QRCode.toDataURL(
+  const QRCode = await import('qrcode')
+
+  const qrDataUrl = await QRCode.toDataURL(
     'https://rep-recall.vercel.app/machine/' + machineId,
     { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
   )
 
-    const qrImage = new Image()
-    qrImage.src = qrDataUrl
+  const qrImage = new Image()
+  qrImage.src = qrDataUrl
 
-    qrImage.onload = () => {
-    const cardWidth = 300
-    const cardHeight = 420
+  qrImage.onload = () => {
+    const cardWidth = 340
+    const cardHeight = 460
     const canvas = document.createElement('canvas')
     canvas.width = cardWidth
     canvas.height = cardHeight
@@ -112,87 +112,86 @@ export default function Admin() {
     ctx.fillStyle = '#0A1628'
     ctx.fillRect(0, 0, cardWidth, cardHeight)
 
-    // Logo diamond
+    // --- LOGO MARK ---
     const cx = cardWidth / 2
-    const cy = 58
+    const cy = 85
+    const sq = 28  // outer square size
+    const inner = 17 // inner fill size
+    const gap = 7  // gap between outer and inner
+    const spread = 36 // distance from center to corner
 
-    // Outer diamond
-    ctx.beginPath()
-    ctx.moveTo(cx, cy - 38)
-    ctx.lineTo(cx + 38, cy)
-    ctx.lineTo(cx, cy + 38)
-    ctx.lineTo(cx - 38, cy)
-    ctx.closePath()
-    ctx.strokeStyle = '#2563EB'
-    ctx.lineWidth = 2
-    ctx.stroke()
+    // Helper to draw one QR corner square
+    function drawCorner(x: number, y: number) {
+      // Outer square
+      ctx.strokeStyle = '#2563EB'
+      ctx.lineWidth = 2.5
+      ctx.beginPath()
+      ctx.roundRect(x, y, sq, sq, 3)
+      ctx.stroke()
+      // Inner fill
+      ctx.fillStyle = '#2563EB'
+      ctx.beginPath()
+      ctx.roundRect(x + gap, y + gap, inner, inner, 1)
+      ctx.fill()
+    }
 
-    // Inner diamond filled
-    ctx.beginPath()
-    ctx.moveTo(cx, cy - 22)
-    ctx.lineTo(cx + 22, cy)
-    ctx.lineTo(cx, cy + 22)
-    ctx.lineTo(cx - 22, cy)
-    ctx.closePath()
-    ctx.fillStyle = '#1D4ED8'
-    ctx.fill()
+    // Four corners
+    drawCorner(cx - spread - sq, cy - spread - sq) // top left
+    drawCorner(cx + spread, cy - spread - sq)       // top right
+    drawCorner(cx - spread - sq, cy + spread)       // bottom left
+    drawCorner(cx + spread, cy + spread)             // bottom right
 
-    // S
-    ctx.fillStyle = '#FFFFFF'
-    ctx.font = 'bold 24px Helvetica'
+    // SS center — solid fill
+    ctx.font = '900 46px Helvetica'
+    ctx.fillStyle = '#2563EB'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText('S', cx, cy + 1)
+    ctx.fillText('SS', cx, cy)
 
-    // Wordmark centered
-    ctx.font = '300 20px Helvetica'
-    const scanWidth = ctx.measureText('scan').width
-    ctx.font = 'bold 20px Helvetica'
-    const setWidth = ctx.measureText('set').width
-    const totalWidth = scanWidth + setWidth
-    const startX = cx - totalWidth / 2
-
+    // --- WORDMARK ---
     ctx.textBaseline = 'alphabetic'
-    ctx.font = '300 20px Helvetica'
-    ctx.fillStyle = '#FFFFFF'
-    ctx.textAlign = 'left'
-    ctx.fillText('scan', startX, 116)
-    ctx.font = 'bold 20px Helvetica'
+    ctx.font = '300 22px Helvetica'
+    ctx.fillStyle = '#ffffff'
+    ctx.textAlign = 'right'
+    ctx.fillText('scan', cx + 2, cy + spread + sq + 22)
+    ctx.font = '900 22px Helvetica'
     ctx.fillStyle = '#2563EB'
-    ctx.fillText('set', startX + scanWidth, 116)
+    ctx.textAlign = 'left'
+    ctx.fillText('set', cx + 2, cy + spread + sq + 22)
 
     // Divider
     ctx.strokeStyle = '#1E3A5F'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(30, 128)
-    ctx.lineTo(270, 128)
+    ctx.moveTo(30, cy + spread + sq + 36)
+    ctx.lineTo(cardWidth - 30, cy + spread + sq + 36)
     ctx.stroke()
 
     // QR code
     const qrSize = 220
     const qrX = (cardWidth - qrSize) / 2
-    ctx.drawImage(qrImage, qrX, 140, qrSize, qrSize)
+    const qrY = cy + spread + sq + 48
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
 
     // Machine name
     ctx.font = '13px Helvetica'
     ctx.fillStyle = '#64748B'
     ctx.textAlign = 'center'
-    ctx.fillText(machineName, cardWidth / 2, 382)
+    ctx.fillText(machineName, cardWidth / 2, qrY + qrSize + 20)
 
     // Divider
     ctx.strokeStyle = '#1E3A5F'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(30, 392)
-    ctx.lineTo(270, 392)
+    ctx.moveTo(30, qrY + qrSize + 32)
+    ctx.lineTo(cardWidth - 30, qrY + qrSize + 32)
     ctx.stroke()
 
     // Tagline
     ctx.font = '10px Helvetica'
     ctx.fillStyle = '#2563EB'
     ctx.textAlign = 'center'
-    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 410)
+    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, qrY + qrSize + 48)
 
     // Download
     const url = canvas.toDataURL('image/png')
