@@ -92,8 +92,8 @@ export default function Admin() {
     const qrCanvas = document.getElementById('qr-' + machineId) as HTMLCanvasElement
     if (!qrCanvas) return
 
-    const cardWidth = 300
-    const cardHeight = 380
+    const cardWidth = 400
+    const cardHeight = 480
     const canvas = document.createElement('canvas')
     canvas.width = cardWidth
     canvas.height = cardHeight
@@ -104,84 +104,89 @@ export default function Admin() {
     ctx.fillStyle = '#0A1628'
     ctx.fillRect(0, 0, cardWidth, cardHeight)
 
-    // Logo — diamond mark
-    const cx = 150
-    const cy = 52
+    // Logo — diamond mark centered
+    const cx = cardWidth / 2
+    const cy = 70
 
     // Outer diamond
     ctx.beginPath()
-    ctx.moveTo(cx, cy - 38)
-    ctx.lineTo(cx + 38, cy)
-    ctx.lineTo(cx, cy + 38)
-    ctx.lineTo(cx - 38, cy)
+    ctx.moveTo(cx, cy - 45)
+    ctx.lineTo(cx + 45, cy)
+    ctx.lineTo(cx, cy + 45)
+    ctx.lineTo(cx - 45, cy)
     ctx.closePath()
     ctx.strokeStyle = '#2563EB'
-    ctx.lineWidth = 2
+    ctx.lineWidth = 2.5
     ctx.stroke()
 
     // Inner diamond filled
     ctx.beginPath()
-    ctx.moveTo(cx, cy - 22)
-    ctx.lineTo(cx + 22, cy)
-    ctx.lineTo(cx, cy + 22)
-    ctx.lineTo(cx - 22, cy)
+    ctx.moveTo(cx, cy - 26)
+    ctx.lineTo(cx + 26, cy)
+    ctx.lineTo(cx, cy + 26)
+    ctx.lineTo(cx - 26, cy)
     ctx.closePath()
     ctx.fillStyle = '#1D4ED8'
     ctx.fill()
 
     // S in diamond
     ctx.fillStyle = '#FFFFFF'
-    ctx.font = 'bold 24px Helvetica'
+    ctx.font = 'bold 28px Helvetica'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText('S', cx, cy + 1)
 
-    // Wordmark — "scan" light + "set" bold
+    // Wordmark centered — measure both parts to center together
+    const scanText = 'scan'
+    const setText = 'set'
+    ctx.font = '300 24px Helvetica'
+    const scanWidth = ctx.measureText(scanText).width
+    ctx.font = 'bold 24px Helvetica'
+    const setWidth = ctx.measureText(setText).width
+    const totalWidth = scanWidth + setWidth
+    const startX = cx - totalWidth / 2
+
     ctx.textBaseline = 'alphabetic'
-    ctx.font = '300 22px Helvetica'
+    ctx.font = '300 24px Helvetica'
     ctx.fillStyle = '#FFFFFF'
-    ctx.textAlign = 'right'
-    ctx.fillText('scan', 168, 107)
-    ctx.font = 'bold 22px Helvetica'
-    ctx.fillStyle = '#2563EB'
     ctx.textAlign = 'left'
-    ctx.fillText('set', 170, 107)
+    ctx.fillText(scanText, startX, 138)
+    ctx.font = 'bold 24px Helvetica'
+    ctx.fillStyle = '#2563EB'
+    ctx.fillText(setText, startX + scanWidth, 138)
 
     // Divider
     ctx.strokeStyle = '#1E3A5F'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(40, 120)
-    ctx.lineTo(260, 120)
+    ctx.moveTo(40, 155)
+    ctx.lineTo(360, 155)
     ctx.stroke()
 
-    // QR code
-    ctx.drawImage(qrCanvas, 75, 135, 150, 150)
+    // QR code — draw at full size for scannability
+    const qrSize = 260
+    const qrX = (cardWidth - qrSize) / 2
+    ctx.drawImage(qrCanvas, qrX, 170, qrSize, qrSize)
 
     // Machine name
-    ctx.font = '13px Helvetica'
+    ctx.font = '14px Helvetica'
     ctx.fillStyle = '#64748B'
     ctx.textAlign = 'center'
-    ctx.fillText(machineName, cardWidth / 2, 310)
+    ctx.fillText(machineName, cardWidth / 2, 455)
 
     // Divider
     ctx.strokeStyle = '#1E3A5F'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(40, 325)
-    ctx.lineTo(260, 325)
+    ctx.moveTo(40, 462)
+    ctx.lineTo(360, 462)
     ctx.stroke()
 
     // Tagline
     ctx.font = '11px Helvetica'
     ctx.fillStyle = '#2563EB'
-    ctx.letterSpacing = '3px'
     ctx.textAlign = 'center'
-    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 352)
-
-    // Bottom accent bar
-    ctx.fillStyle = '#2563EB'
-    ctx.fillRect(0, 370, cardWidth, 10)
+    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 476)
 
     // Download
     const url = canvas.toDataURL('image/png')
