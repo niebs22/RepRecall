@@ -26,13 +26,11 @@ export default function JoinGym() {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        // Store gym code in localStorage so we can link after signup
         localStorage.setItem('pending_gym_code', code)
         setStatus('join')
         return
       }
 
-      // User is logged in — link them to the gym
       await linkUserToGym(user.id, gymData.id)
     }
     load()
@@ -84,13 +82,36 @@ export default function JoinGym() {
         <h1 className="text-4xl font-bold text-white mb-1">
           <span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span>
         </h1>
-        <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#2563EB'}}>Scan. Lift. Repeat.</p>
+        <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#2563EB'}}>Scan. Log. Repeat.</p>
 
         <div className="rounded-2xl p-6 mb-6" style={{background: '#0F2040'}}>
           <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#64748B'}}>You've been invited to join</p>
           <p className="text-2xl font-bold text-white mb-1">{gym?.name}</p>
           <p className="text-sm" style={{color: '#64748B'}}>Create an account or log in to get started</p>
         </div>
+
+        {/* Add to home screen instructions */}
+        <div className="rounded-2xl p-5 mb-6 text-left" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+          <p className="text-white font-semibold text-sm mb-4">Step 1 — Add ScanSet to your home screen</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <span className="text-lg">📱</span>
+              <div>
+                <p className="text-white text-xs font-semibold">iPhone</p>
+                <p className="text-xs" style={{color: '#64748B'}}>Tap the Share button at the bottom of your browser, then tap "Add to Home Screen"</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-lg">🤖</span>
+              <div>
+                <p className="text-white text-xs font-semibold">Android</p>
+                <p className="text-xs" style={{color: '#64748B'}}>Tap the three dots in the top right of your browser, then tap "Add to Home Screen"</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-xs mb-4" style={{color: '#64748B'}}>Step 2 — Create your account</p>
 
         <div className="flex flex-col gap-3">
           

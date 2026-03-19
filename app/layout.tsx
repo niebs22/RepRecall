@@ -14,15 +14,25 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "ScanSet",
-  description: "Scan. Lift. Repeat.",
+  description: "Scan. Log. Repeat.",
   applicationName: "ScanSet",
   keywords: ["gym", "workout tracker", "fitness", "QR code", "weight training"],
   authors: [{ name: "ScanSet" }],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ScanSet",
+  },
   openGraph: {
     title: "ScanSet",
-    description: "Scan. Lift. Repeat.",
+    description: "Scan. Log. Repeat.",
     type: "website",
-    url: "https://scanset.app",
+    url: "https://rep-recall.vercel.app",
+  },
+  icons: {
+    icon: "/icon-512.png",
+    apple: "/icon-192.png",
   },
 };
 
