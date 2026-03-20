@@ -68,13 +68,26 @@ export default function Analytics() {
         .from('workouts').select('user_id, machine_id, created_at, machines(name)')
         .in('machine_id', machineIds)
 
-      const { data: gymMembers } = await supabase
-        .from('gym_members')
-        .select('user_id, created_at, profiles(full_name, email)')
-        .eq('gym_id', gym.id)
-        .order('created_at', { ascending: false })
+      const { data: gymMembersData } = await supabase
+  .from('gym_members')
+  .select('user_id, created_at')
+  .eq('gym_id', gym.id)
+  .order('created_at', { ascending: false })
 
-      if (gymMembers) setMembers(gymMembers)
+if (gymMembersData) {
+  const memberIds = gymMembersData.map(m => m.user_id)
+  const { data: profilesData } = await supabase
+    .from('profiles')
+    .select('id, full_name, email')
+    .in('id', memberIds)
+
+  const merged = gymMembersData.map(m => ({
+    ...m,
+    full_name: profilesData?.find(p => p.id === m.user_id)?.full_name || 'Unknown',
+    email: profilesData?.find(p => p.id === m.user_id)?.email || ''
+  }))
+  setMembers(merged)
+}
       setTotalMembers(gymMembers?.length || 0)
 
       const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
@@ -320,8 +333,8 @@ export default function Analytics() {
                 members.map((m, i) => (
                   <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl" style={{background: '#0A1628'}}>
                     <div>
-                      <p className="text-white text-sm font-semibold">{(m.profiles as any)?.full_name || 'Unknown'}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>{(m.profiles as any)?.email}</p>
+                      <p className="text-white text-sm font-semibold">{m.full_name}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>{m.email}</p>
                     </div>
                     <p className="text-xs" style={{color: '#64748B'}}>
                       {new Date(m.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
