@@ -13,6 +13,8 @@ export default function Dashboard() {
   const [totalSessions, setTotalSessions] = useState(0)
   const router = useRouter()
   const [gymName, setGymName] = useState('')
+  const [totalWeightLifted, setTotalWeightLifted] = useState(0)
+  const [loyalMachine, setLoyalMachine] = useState<any>(null)
 
   useEffect(() => {
     async function getUser() {
@@ -104,7 +106,6 @@ export default function Dashboard() {
       setTotalSessions(data.length)
     }
   }
-
   async function fetchAllMachines(userId: string) {
    const { data: membership } = await supabase
     .from('gym_members')
@@ -146,6 +147,27 @@ export default function Dashboard() {
       setWeekActivity(week)
       setTotalThisWeek(activeDays.size)
     }
+    async function fetchLiftStats(userId: string) {
+  const { data } = await supabase
+    .from('workouts')
+    .select('weight, reps, machine_id, machines(name)')
+    .eq('user_id', userId)
+    .not('weight', 'is', null)
+  
+  if (data) {
+    const totalWeight = data.reduce((sum, w) => sum + (w.weight * w.reps), 0)
+    setTotalWeightLifted(Math.round(totalWeight))
+
+    const machineCounts: Record<string, { name: string, count: number }> = {}
+    data.forEach(w => {
+      const name = (w.machines as any)?.name || 'Unknown'
+      if (!machineCounts[w.machine_id]) machineCounts[w.machine_id] = { name, count: 0 }
+      machineCounts[w.machine_id].count++
+    })
+    const sorted = Object.values(machineCounts).sort((a, b) => b.count - a.count)
+    setLoyalMachine(sorted[0] || null)
+  }
+}
   }
 
   async function handleLogout() {
@@ -254,7 +276,30 @@ export default function Dashboard() {
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#64748B'}}>▾</div>
           </div>
         </div>
-
+{/* Lift Stats */}
+{totalWeightLifted > 0 && (
+  <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
+    <p className="text-white font-semibold text-sm mb-4">Your Lift Stats</p>
+    <div className="grid grid-cols-2 gap-4">
+      <div>
+        <p className="text-3xl font-bold text-white">{totalWeightLifted.toLocaleString()}</p>
+        <p className="text-xs mt-0.5" style={{color: '#64748B'}}>lbs lifted all time</p>
+        <p className="text-xs mt-2" style={{color: '#2563EB'}}>
+          🐘 {(totalWeightLifted / 13000).toFixed(1)} elephants
+        </p>
+      </div>
+      {loyalMachine && (
+        <div>
+          <p className="text-3xl font-bold text-white">{loyalMachine.count}</p>
+          <p className="text-xs mt-0.5" style={{color: '#64748B'}}>sessions on your</p>
+          <p className="text-xs mt-2 font-semibold" style={{color: '#2563EB'}}>
+            🏆 {loyalMachine.name}
+          </p>
+        </div>
+      )}
+    </div>
+  </div>
+)}
         {/* Weekly activity */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <div className="flex justify-between items-center mb-4">
