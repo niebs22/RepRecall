@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: "ScanSet",
     description: "Scan. Log. Repeat.",
     type: "website",
-    url: "https://rep-recall.vercel.app",
+    url: "https://scanset.app",
   },
   icons: {
     icon: "/icon-512.png",

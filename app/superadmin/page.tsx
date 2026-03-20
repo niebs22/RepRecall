@@ -88,7 +88,7 @@ export default function SuperAdmin() {
   }
 
   function getJoinUrl(code: string) {
-    return `https://rep-recall.vercel.app/join/${code}`
+    return `https://scanset.app/join/${code}`
 }
 
   function copyJoinUrl(code: string) {
