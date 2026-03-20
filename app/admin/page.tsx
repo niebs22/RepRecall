@@ -82,11 +82,23 @@ export default function Admin() {
     setLoading(false)
   }
 
-  async function deleteMachine(id: string) {
-    await supabase.from('machines').delete().eq('id', id)
-    if (expanded === id) setExpanded(null)
-    fetchMachines(gymId)
+  async function deleteMachine(id: string, machineName: string) {
+  const { count } = await supabase
+    .from('workouts')
+    .select('*', { count: 'exact', head: true })
+    .eq('machine_id', id)
+
+  if (count && count > 0) {
+    const confirmed = window.confirm(
+      `"${machineName}" has ${count} logged session${count > 1 ? 's' : ''} from your members. Deleting it will permanently remove all of that history. Are you sure?`
+    )
+    if (!confirmed) return
   }
+
+  await supabase.from('machines').delete().eq('id', id)
+  if (expanded === id) setExpanded(null)
+  fetchMachines(gymId)
+}
 
   async function downloadQR(machineId: string, machineName: string) {
   const QRCode = await import('qrcode')
@@ -301,7 +313,7 @@ export default function Admin() {
                           Download QR
                         </button>
                         <button
-                          onClick={() => deleteMachine(machine.id)}
+                          onClick={() => deleteMachine(machine.id, machine.name)}
                           className="py-2 rounded-full text-sm font-semibold text-center"
                           style={{background: 'transparent', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#EF4444'}}
                         >
