@@ -13,6 +13,8 @@ export default function Dashboard() {
   const [totalThisWeek, setTotalThisWeek] = useState(0)
   const [totalSessions, setTotalSessions] = useState(0)
   const router = useRouter()
+  const [totalWeightLifted, setTotalWeightLifted] = useState(0)
+  const [loyalMachine, setLoyalMachine] = useState<string | null>(null)
 
   useEffect(() => {
     async function getUser() {
@@ -27,6 +29,7 @@ export default function Dashboard() {
         fetchMachineWorkouts(user.id)
         fetchAllMachines(user.id)
         fetchWeekActivity(user.id)
+        fetchLiftStats(user.id)
       }
     }
     getUser()
@@ -133,6 +136,31 @@ export default function Dashboard() {
     }
   }
 
+  async function fetchLiftStats(userId: string) {
+    const { data } = await supabase
+      .from('workouts')
+      .select('weight, reps, machine_id, machines(name)')
+      .eq('user_id', userId)
+
+    if (data) {
+      let total = 0
+      const machineCount: Record<string, { name: string; count: number }> = {}
+
+      data.forEach((w: any) => {
+        if (w.weight && w.reps) total += w.weight * w.reps
+        else if (w.weight) total += w.weight
+        if (w.machine_id) {
+          if (!machineCount[w.machine_id]) machineCount[w.machine_id] = { name: w.machines?.name || '', count: 0 }
+          machineCount[w.machine_id].count++
+        }
+      })
+
+      setTotalWeightLifted(Math.round(total))
+
+      const top = Object.values(machineCount).sort((a, b) => b.count - a.count)[0]
+      if (top) setLoyalMachine(top.name)
+    }
+  }
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
@@ -281,6 +309,25 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+
+        {/* Lift Stats */}
+        {totalWeightLifted > 0 && (
+          <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
+            <p className="text-white font-semibold text-sm mb-3">Lifetime Lift Stats</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-2xl font-bold text-white">{totalWeightLifted.toLocaleString()} <span className="text-base font-normal" style={{color: '#64748B'}}>lbs</span></p>
+                <p className="text-xs mt-1" style={{color: '#64748B'}}>🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants</p>
+              </div>
+              {loyalMachine && (
+                <div className="text-right">
+                  <p className="text-xs" style={{color: '#64748B'}}>Most loyal</p>
+                  <p className="text-sm font-semibold text-white">{loyalMachine}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Frequently Used */}
         <h2 className="font-semibold text-lg mb-4 text-white">Frequently Used</h2>
