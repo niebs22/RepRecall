@@ -88,7 +88,7 @@ if (gymMembersData) {
   }))
   setMembers(merged)
 }
-      setTotalMembers(gymMembers?.length || 0)
+      setTotalMembers(gymMembersData?.length || 0)
 
       const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
       setActiveThisWeek(activeUserIds.size)
