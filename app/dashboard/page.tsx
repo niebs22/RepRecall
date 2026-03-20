@@ -25,7 +25,7 @@ export default function Dashboard() {
         fetchProfile(user.id)
         fetchUserGym(user.id)
         fetchMachineWorkouts(user.id)
-        fetchAllMachines()
+        fetchAllMachines(user.id)
         fetchWeekActivity(user.id)
       }
     }
@@ -105,13 +105,22 @@ export default function Dashboard() {
     }
   }
 
-  async function fetchAllMachines() {
-    const { data } = await supabase
-      .from('machines')
-      .select('*')
-      .order('name', { ascending: true })
-    if (data) setAllMachines(data)
-  }
+  async function fetchAllMachines(userId: string) {
+   const { data: membership } = await supabase
+    .from('gym_members')
+    .select('gym_id')
+    .eq('user_id', userId)
+    .single()
+
+  if (!membership) return
+
+  const { data } = await supabase
+    .from('machines')
+    .select('*')
+    .eq('gym_id', membership.gym_id)
+    .order('name', { ascending: true })
+  if (data) setAllMachines(data)
+}
 
   async function fetchWeekActivity(userId: string) {
     const now = new Date()
