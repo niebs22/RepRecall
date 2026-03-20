@@ -14,6 +14,8 @@ export default function Analytics() {
   const [dayStats, setDayStats] = useState<number[]>([0,0,0,0,0,0,0])
   const [timeStats, setTimeStats] = useState({morning: 0, afternoon: 0, evening: 0})
   const [equipmentOpen, setEquipmentOpen] = useState(true)
+  const [members, setMembers] = useState<any[]>([])
+  const [membersOpen, setMembersOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -66,12 +68,13 @@ export default function Analytics() {
         .from('workouts').select('user_id, machine_id, created_at, machines(name)')
         .in('machine_id', machineIds)
 
-      // Count members via gym_members table
       const { data: gymMembers } = await supabase
         .from('gym_members')
-        .select('user_id')
+        .select('user_id, created_at, profiles(full_name, email)')
         .eq('gym_id', gym.id)
+        .order('created_at', { ascending: false })
 
+      if (gymMembers) setMembers(gymMembers)
       setTotalMembers(gymMembers?.length || 0)
 
       const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
@@ -237,6 +240,7 @@ export default function Analytics() {
           </div>
         </div>
 
+        {/* Equipment usage */}
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
           <button
             onClick={() => setEquipmentOpen(prev => !prev)}
@@ -256,9 +260,7 @@ export default function Analytics() {
               transition: 'transform 0.2s ease',
               display: 'inline-block',
               lineHeight: 1
-            }}>
-              ▾
-            </span>
+            }}>▾</span>
           </button>
 
           {equipmentOpen && (
@@ -283,6 +285,50 @@ export default function Analytics() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Member list */}
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
+          <button
+            onClick={() => setMembersOpen(prev => !prev)}
+            className="w-full flex justify-between items-center p-5"
+            style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-lg text-white">Members</h2>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+                {members.length}
+              </span>
+            </div>
+            <span style={{
+              color: '#64748B',
+              fontSize: '18px',
+              transform: membersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+              display: 'inline-block',
+              lineHeight: 1
+            }}>▾</span>
+          </button>
+
+          {membersOpen && (
+            <div className="flex flex-col gap-2 px-5 pb-5">
+              {members.length === 0 ? (
+                <p className="text-center py-4" style={{color: '#64748B'}}>No members yet.</p>
+              ) : (
+                members.map((m, i) => (
+                  <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl" style={{background: '#0A1628'}}>
+                    <div>
+                      <p className="text-white text-sm font-semibold">{(m.profiles as any)?.full_name || 'Unknown'}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>{(m.profiles as any)?.email}</p>
+                    </div>
+                    <p className="text-xs" style={{color: '#64748B'}}>
+                      {new Date(m.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           )}
         </div>
