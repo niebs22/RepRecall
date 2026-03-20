@@ -6,15 +6,13 @@ import { useRouter } from 'next/navigation'
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
+  const [gymName, setGymName] = useState('')
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
   const [totalThisWeek, setTotalThisWeek] = useState(0)
   const [totalSessions, setTotalSessions] = useState(0)
   const router = useRouter()
-  const [gymName, setGymName] = useState('')
-  const [totalWeightLifted, setTotalWeightLifted] = useState(0)
-  const [loyalMachine, setLoyalMachine] = useState<any>(null)
 
   useEffect(() => {
     async function getUser() {
@@ -29,41 +27,29 @@ export default function Dashboard() {
         fetchMachineWorkouts(user.id)
         fetchAllMachines(user.id)
         fetchWeekActivity(user.id)
-        fetchLiftStats(user.id)
       }
     }
     getUser()
   }, [])
 
   async function checkPendingGym(userId: string) {
-    // Check localStorage first
     let pendingCode = localStorage.getItem('pending_gym_code')
-
-    // Fall back to user metadata
     if (!pendingCode) {
       const { data: { user } } = await supabase.auth.getUser()
       pendingCode = user?.user_metadata?.pending_gym_code || null
     }
-
     if (!pendingCode) return
-
     const { data: gym } = await supabase
       .from('gyms')
       .select('id')
       .eq('code', pendingCode)
       .single()
-
     if (gym) {
       await supabase
         .from('gym_members')
         .upsert({ user_id: userId, gym_id: gym.id }, { onConflict: 'user_id,gym_id' })
-
-      // Clear the pending code from metadata
-      await supabase.auth.updateUser({
-        data: { pending_gym_code: null }
-      })
+      await supabase.auth.updateUser({ data: { pending_gym_code: null } })
     }
-
     localStorage.removeItem('pending_gym_code')
   }
 
@@ -76,14 +62,14 @@ export default function Dashboard() {
     if (data) setProfile(data)
   }
 
-   async function fetchUserGym(userId: string) {
-     const { data } = await supabase
-       .from('gym_members')
-       .select('gym_id, gyms(name)')
-       .eq('user_id', userId)
-       .single()
+  async function fetchUserGym(userId: string) {
+    const { data } = await supabase
+      .from('gym_members')
+      .select('gym_id, gyms(name)')
+      .eq('user_id', userId)
+      .single()
     if (data?.gyms) setGymName((data.gyms as any).name)
-}
+  }
 
   async function fetchMachineWorkouts(userId: string) {
     const { data } = await supabase
@@ -107,65 +93,44 @@ export default function Dashboard() {
       setTotalSessions(data.length)
     }
   }
+
   async function fetchAllMachines(userId: string) {
-   const { data: membership } = await supabase
-    .from('gym_members')
-    .select('gym_id')
-    .eq('user_id', userId)
-    .single()
-
-  if (!membership) return
-
-  const { data } = await supabase
-    .from('machines')
-    .select('*')
-    .eq('gym_id', membership.gym_id)
-    .order('name', { ascending: true })
-  if (data) setAllMachines(data)
-}
-
-  async function fetchLiftStats(userId: string) {
-  const { data } = await supabase
-    .from('workouts')
-    .select('weight, reps, machine_id, machines(name)')
-    .eq('user_id', userId)
-    .not('weight', 'is', null)
-
-  if (data) {
-    const totalWeight = data.reduce((sum, w) => sum + (w.weight * w.reps), 0)
-    setTotalWeightLifted(Math.round(totalWeight))
-
-    const machineCounts: Record<string, { name: string, count: number }> = {}
-    data.forEach(w => {
-      const name = (w.machines as any)?.name || 'Unknown'
-      if (!machineCounts[w.machine_id]) machineCounts[w.machine_id] = { name, count: 0 }
-      machineCounts[w.machine_id].count++
-    })
-    const sorted = Object.values(machineCounts).sort((a, b) => b.count - a.count)
-    setLoyalMachine(sorted[0] || null)
+    const { data: memberData } = await supabase
+      .from('gym_members')
+      .select('gym_id')
+      .eq('user_id', userId)
+      .single()
+    if (!memberData) return
+    const { data } = await supabase
+      .from('machines')
+      .select('*')
+      .eq('gym_id', memberData.gym_id)
+      .order('name', { ascending: true })
+    if (data) setAllMachines(data)
   }
-}
-    async function fetchLiftStats(userId: string) {
-  const { data } = await supabase
-    .from('workouts')
-    .select('weight, reps, machine_id, machines(name)')
-    .eq('user_id', userId)
-    .not('weight', 'is', null)
-  
-  if (data) {
-    const totalWeight = data.reduce((sum, w) => sum + (w.weight * w.reps), 0)
-    setTotalWeightLifted(Math.round(totalWeight))
 
-    const machineCounts: Record<string, { name: string, count: number }> = {}
-    data.forEach(w => {
-      const name = (w.machines as any)?.name || 'Unknown'
-      if (!machineCounts[w.machine_id]) machineCounts[w.machine_id] = { name, count: 0 }
-      machineCounts[w.machine_id].count++
-    })
-    const sorted = Object.values(machineCounts).sort((a, b) => b.count - a.count)
-    setLoyalMachine(sorted[0] || null)
-  }
-}
+  async function fetchWeekActivity(userId: string) {
+    const now = new Date()
+    const dayOfWeek = now.getDay()
+    const monday = new Date(now)
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    monday.setHours(0, 0, 0, 0)
+    const { data } = await supabase
+      .from('workouts')
+      .select('created_at')
+      .eq('user_id', userId)
+      .gte('created_at', monday.toISOString())
+    if (data) {
+      const activeDays = new Set<number>()
+      data.forEach(w => {
+        const day = new Date(w.created_at).getDay()
+        const adjusted = day === 0 ? 6 : day - 1
+        activeDays.add(adjusted)
+      })
+      const week = [0,1,2,3,4,5,6].map(d => activeDays.has(d))
+      setWeekActivity(week)
+      setTotalThisWeek(activeDays.size)
+    }
   }
 
   async function handleLogout() {
@@ -230,9 +195,9 @@ export default function Dashboard() {
           <div className="flex items-center gap-4">
             {profile?.role && profile.role !== 'member' && (
               <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
-           )}
-           <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
-         </div>
+            )}
+            <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
+          </div>
         </div>
 
         {/* Welcome */}
@@ -274,30 +239,7 @@ export default function Dashboard() {
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#64748B'}}>▾</div>
           </div>
         </div>
-{/* Lift Stats */}
-{totalWeightLifted > 0 && (
-  <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
-    <p className="text-white font-semibold text-sm mb-4">Your Lift Stats</p>
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <p className="text-3xl font-bold text-white">{totalWeightLifted.toLocaleString()}</p>
-        <p className="text-xs mt-0.5" style={{color: '#64748B'}}>lbs lifted all time</p>
-        <p className="text-xs mt-2" style={{color: '#2563EB'}}>
-          🐘 {(totalWeightLifted / 13000).toFixed(1)} elephants
-        </p>
-      </div>
-      {loyalMachine && (
-        <div>
-          <p className="text-3xl font-bold text-white">{loyalMachine.count}</p>
-          <p className="text-xs mt-0.5" style={{color: '#64748B'}}>sessions on your</p>
-          <p className="text-xs mt-2 font-semibold" style={{color: '#2563EB'}}>
-            🏆 {loyalMachine.name}
-          </p>
-        </div>
-      )}
-    </div>
-  </div>
-)}
+
         {/* Weekly activity */}
         <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
           <div className="flex justify-between items-center mb-4">
