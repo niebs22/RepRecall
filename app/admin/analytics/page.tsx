@@ -185,20 +185,38 @@ if (gymMembersData) {
           </div>
         </div>
 
-        {mostUsed && (
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #22C55E'}}>
-              <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Most Used</p>
-              <p className="text-white font-semibold">{mostUsed.name}</p>
-              <p className="text-xs mt-1" style={{color: '#22C55E'}}>{mostUsed.count} sessions</p>
+        {machineStats.length > 0 && (
+  <div className="grid grid-cols-2 gap-3 mb-6">
+    <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #22C55E'}}>
+      <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#22C55E'}}>Most Used</p>
+      <div className="flex flex-col gap-3">
+        {machineStats.slice(0, 3).map((m, i) => (
+          <div key={i} className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold w-4" style={{color: '#22C55E'}}>#{i + 1}</span>
+              <p className="text-white text-sm font-medium">{m.name}</p>
             </div>
-            <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #EF4444'}}>
-              <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Least Used</p>
-              <p className="text-white font-semibold">{leastUsed?.name}</p>
-              <p className="text-xs mt-1" style={{color: '#EF4444'}}>{leastUsed?.count} sessions</p>
-            </div>
+            <p className="text-xs font-semibold" style={{color: '#22C55E'}}>{m.count}</p>
           </div>
-        )}
+        ))}
+      </div>
+    </div>
+    <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #EF4444'}}>
+      <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#EF4444'}}>Least Used</p>
+      <div className="flex flex-col gap-3">
+        {[...machineStats].reverse().slice(0, 3).map((m, i) => (
+          <div key={i} className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold w-4" style={{color: '#EF4444'}}>#{i + 1}</span>
+              <p className="text-white text-sm font-medium">{m.name}</p>
+            </div>
+            <p className="text-xs font-semibold" style={{color: '#EF4444'}}>{m.count}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
 
         <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold mb-4">Busiest Days</p>
