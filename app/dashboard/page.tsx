@@ -29,6 +29,7 @@ export default function Dashboard() {
         fetchMachineWorkouts(user.id)
         fetchAllMachines(user.id)
         fetchWeekActivity(user.id)
+        fetchLiftStats(user.id)
       }
     }
     getUser()
