@@ -67,10 +67,13 @@ function LoginForm() {
             Log In
           </button>
         </form>
-        <p className="text-center mt-6" style={{color: '#64748B'}}>
-          No account?{' '}
-          <a href={gymCode ? `/signup?gym=${gymCode}` : '/signup'} style={{color: '#3B82F6'}}>Sign Up</a>
-        </p>
+        <p className="text-center mt-4">
+  <a href="/forgot-password" className="text-sm" style={{color: '#64748B'}}>Forgot password?</a>
+</p>
+<p className="text-center mt-3" style={{color: '#64748B'}}>
+  No account?{' '}
+  <a href="/signup" style={{color: '#3B82F6'}}>Sign Up</a>
+</p>
       </div>
     </main>
   )
