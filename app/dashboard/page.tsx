@@ -124,30 +124,27 @@ export default function Dashboard() {
   if (data) setAllMachines(data)
 }
 
-  async function fetchWeekActivity(userId: string) {
-    const now = new Date()
-    const dayOfWeek = now.getDay()
-    const monday = new Date(now)
-    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-    monday.setHours(0, 0, 0, 0)
+  async function fetchLiftStats(userId: string) {
+  const { data } = await supabase
+    .from('workouts')
+    .select('weight, reps, machine_id, machines(name)')
+    .eq('user_id', userId)
+    .not('weight', 'is', null)
 
-    const { data } = await supabase
-      .from('workouts')
-      .select('created_at')
-      .eq('user_id', userId)
-      .gte('created_at', monday.toISOString())
+  if (data) {
+    const totalWeight = data.reduce((sum, w) => sum + (w.weight * w.reps), 0)
+    setTotalWeightLifted(Math.round(totalWeight))
 
-    if (data) {
-      const activeDays = new Set<number>()
-      data.forEach(w => {
-        const day = new Date(w.created_at).getDay()
-        const adjusted = day === 0 ? 6 : day - 1
-        activeDays.add(adjusted)
-      })
-      const week = [0,1,2,3,4,5,6].map(d => activeDays.has(d))
-      setWeekActivity(week)
-      setTotalThisWeek(activeDays.size)
-    }
+    const machineCounts: Record<string, { name: string, count: number }> = {}
+    data.forEach(w => {
+      const name = (w.machines as any)?.name || 'Unknown'
+      if (!machineCounts[w.machine_id]) machineCounts[w.machine_id] = { name, count: 0 }
+      machineCounts[w.machine_id].count++
+    })
+    const sorted = Object.values(machineCounts).sort((a, b) => b.count - a.count)
+    setLoyalMachine(sorted[0] || null)
+  }
+}
     async function fetchLiftStats(userId: string) {
   const { data } = await supabase
     .from('workouts')
