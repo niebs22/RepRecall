@@ -276,11 +276,11 @@ export default function Admin() {
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#22C55E' : '#2563EB'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#B8860B' : '#2563EB'}}></div>
                     <p className="text-white font-medium text-sm">{machine.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                      background: machine.type === 'cardio' ? 'rgba(34,197,94,0.1)' : 'rgba(37,99,235,0.1)',
-                      color: machine.type === 'cardio' ? '#22C55E' : '#3B82F6'
+                      background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
+                      color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
                     }}>
                       {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
                     </span>

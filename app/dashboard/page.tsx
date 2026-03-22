@@ -276,7 +276,7 @@ export default function Dashboard() {
               <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Your training this week</p>
             </div>
             <div className="text-right">
-              <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#22C55E'}}>
+              <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#B8860B'}}>
                 {totalThisWeek}/7 days
               </div>
               <p className="text-xs mt-1" style={{color: '#64748B'}}>{totalSessions} total sessions</p>
@@ -290,10 +290,10 @@ export default function Dashboard() {
                   style={{
                     height: '24px',
                     background: weekActivity[i]
-                      ? 'linear-gradient(180deg, #4ADE80 0%, #22C55E 100%)'
+                      ? 'linear-gradient(180deg, #4ADE80 0%, #B8860B 100%)'
                       : '#0A1628',
                     border: i === todayIndex
-                      ? '1px solid #22C55E'
+                      ? '1px solid #B8860B'
                       : weekActivity[i]
                       ? 'none'
                       : '1px solid #1E3A5F',
@@ -302,7 +302,7 @@ export default function Dashboard() {
                   }}
                 />
                 <p className="text-xs" style={{
-                  color: i === todayIndex ? '#22C55E' : '#64748B',
+                  color: i === todayIndex ? '#B8860B' : '#64748B',
                   fontWeight: i === todayIndex ? 700 : 400
                 }}>{day}</p>
               </div>

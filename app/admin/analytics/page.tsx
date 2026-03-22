@@ -173,7 +173,7 @@ if (gymMembersData) {
           </div>
           <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Active This Week</p>
-            <p className="text-3xl font-bold" style={{color: '#22C55E'}}>{activeThisWeek}</p>
+            <p className="text-3xl font-bold" style={{color: '#B8860B'}}>{activeThisWeek}</p>
           </div>
           <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Workouts This Week</p>
@@ -187,16 +187,16 @@ if (gymMembersData) {
 
         {machineStats.length > 0 && (
   <div className="grid grid-cols-2 gap-3 mb-6">
-    <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #22C55E'}}>
-      <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#22C55E'}}>Most Used</p>
+    <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #B8860B'}}>
+      <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#B8860B'}}>Most Used</p>
       <div className="flex flex-col gap-3">
         {machineStats.slice(0, 3).map((m, i) => (
           <div key={i} className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold w-4" style={{color: '#22C55E'}}>#{i + 1}</span>
+              <span className="text-xs font-bold w-4" style={{color: '#B8860B'}}>#{i + 1}</span>
               <p className="text-white text-sm font-medium">{m.name}</p>
             </div>
-            <p className="text-xs font-semibold" style={{color: '#22C55E'}}>{m.count}</p>
+            <p className="text-xs font-semibold" style={{color: '#B8860B'}}>{m.count}</p>
           </div>
         ))}
       </div>
@@ -231,7 +231,7 @@ if (gymMembersData) {
                     background: i === todayIndex
                       ? '#3B82F6'
                       : dayStats[i] === Math.max(...dayStats)
-                      ? '#22C55E'
+                      ? '#B8860B'
                       : '#1E3A5F'
                   }}
                 />

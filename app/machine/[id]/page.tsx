@@ -305,7 +305,7 @@ function getHistoryGrouped() {
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
         {supersetMachine && (
           <span className="text-xs px-3 py-1 rounded-full inline-block mb-3"
-            style={{background: 'rgba(34,197,94,0.15)', color: '#22C55E'}}>
+            style={{background: 'rgba(184,134,11,0.15)', color: '#B8860B'}}>
             SS — Superset logged
           </span>
         )}
@@ -339,8 +339,8 @@ function getHistoryGrouped() {
         <div className="flex items-center gap-3 mb-1">
           <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
           <span className="text-xs px-2 py-0.5 rounded-full" style={{
-            background: machine.type === 'cardio' ? 'rgba(34,197,94,0.1)' : 'rgba(37,99,235,0.1)',
-            color: machine.type === 'cardio' ? '#22C55E' : '#3B82F6'
+            background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
+            color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
           }}>
             {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
           </span>
@@ -474,9 +474,9 @@ function getHistoryGrouped() {
                   <div className="flex flex-col gap-2 mb-3">
                       <div className="grid grid-cols-12 gap-2 mb-1 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
                           <p className="col-span-1"></p>
-                          <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
-                          <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
-                          <p className="col-span-1"></p>
+                          <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
+                          <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
+                          <p className="col-span-3"></p>
                     </div>
                     {editableSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
@@ -535,11 +535,11 @@ function getHistoryGrouped() {
                     {lastSessionSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
                          <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
-                         <p className="col-span-5 text-white font-semibold">{s.reps}</p>
-                         <p className="col-span-5 text-white font-semibold">{s.weight} lbs</p>
-                         <div className="col-span-1 flex justify-center">
+                         <p className="col-span-4 text-white font-semibold">{s.reps}</p>
+                         <p className="col-span-4 text-white font-semibold">{s.weight} lbs</p>
+                         <div className="col-span-3 flex justify-center">
                            {s.superset && (
-                                <span className="text-xs font-bold" style={{color: '#22C55E'}}>
+                                <span className="text-xs font-bold" style={{color: '#B8860B'}}>
                                   SS{s.superset_exercise_name ? ` · ${s.superset_exercise_name}` : ''}
                                 </span>
                               )}
@@ -594,7 +594,7 @@ function getHistoryGrouped() {
               <p className="text-white text-sm font-semibold">{group.label}</p>
               <p className="text-xs" style={{color: '#64748B'}}>({group.ago})</p>
               {group.workouts[0]?.superset && (
-                  <span className="text-xs font-bold" style={{color: '#22C55E'}}>
+                  <span className="text-xs font-bold" style={{color: '#B8860B'}}>
                     SS{group.workouts[0]?.superset_exercise_name ? ` · ${group.workouts[0].superset_exercise_name}` : ''}
                   </span>
                 )}
@@ -712,7 +712,7 @@ function getHistoryGrouped() {
                 onClick={() => setActiveTab('B')}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm"
                 style={{
-                  background: activeTab === 'B' ? '#22C55E' : '#0F2040',
+                  background: activeTab === 'B' ? '#B8860B' : '#0F2040',
                   color: activeTab === 'B' ? '#fff' : '#64748B',
                   border: activeTab === 'B' ? 'none' : '1px solid #1E3A5F'
                 }}
@@ -798,7 +798,7 @@ function getHistoryGrouped() {
       value={supersetExercise}
       onChange={e => setSupersetExercise(e.target.value)}
       className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-      style={{background: '#0F2040', border: '1px solid #22C55E'}}
+      style={{background: '#0F2040', border: '1px solid #B8860B'}}
     >
       <option value={supersetMachine.name}>{supersetMachine.name} (default)</option>
       {supersetMachine.id === id
@@ -818,7 +818,7 @@ function getHistoryGrouped() {
     {supersetSets.map((set, i) => (
       <div key={i} className="grid grid-cols-12 gap-2 items-center">
         <div className="col-span-1 text-center">
-          <p className="text-xs font-bold" style={{color: '#22C55E'}}>{i + 1}</p>
+          <p className="text-xs font-bold" style={{color: '#B8860B'}}>{i + 1}</p>
         </div>
         <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
           placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
@@ -831,7 +831,7 @@ function getHistoryGrouped() {
       </div>
     ))}
     <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
-      style={{background: 'transparent', border: '1px dashed #22C55E', color: '#22C55E'}}>
+      style={{background: 'transparent', border: '1px dashed #B8860B', color: '#B8860B'}}>
       + Add Set
     </button>
     <div>
@@ -843,7 +843,7 @@ function getHistoryGrouped() {
     </div>
     <button onClick={() => setActiveTab('A')}
       className="py-3 rounded-full font-semibold text-white"
-      style={{background: '#22C55E'}}>
+      style={{background: '#B8860B'}}>
       Switch to A: {selectedExercise}
     </button>
   </div>

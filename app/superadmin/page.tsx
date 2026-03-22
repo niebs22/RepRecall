@@ -146,11 +146,11 @@ export default function SuperAdmin() {
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#22C55E' : '#64748B'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#B8860B' : '#64748B'}}></div>
                     <p className="text-white font-medium text-sm">{gym.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                      background: gym.owner_id ? 'rgba(34,197,94,0.1)' : 'rgba(100,116,139,0.1)',
-                      color: gym.owner_id ? '#22C55E' : '#64748B'
+                      background: gym.owner_id ? 'rgba(184,134,11,0.1)' : 'rgba(100,116,139,0.1)',
+                      color: gym.owner_id ? '#B8860B' : '#64748B'
                     }}>
                       {gym.owner_id ? 'Owner set' : 'No owner'}
                     </span>
