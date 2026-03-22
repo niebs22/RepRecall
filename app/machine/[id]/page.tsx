@@ -692,7 +692,7 @@ function getHistoryGrouped() {
                   border: activeTab === 'A' ? 'none' : '1px solid #1E3A5F'
                 }}
               >
-                A: {machine.name}
+                A: {selectedExercise}
                 {validSetsACount > 0 && (
                   <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full"
                     style={{background: 'rgba(255,255,255,0.2)', color: '#fff'}}>
