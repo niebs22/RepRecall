@@ -193,7 +193,7 @@ export default function MachinePage() {
     if (validSetsB.length > 0) {
       const insertsB = validSetsB.map((s, i) => ({
         user_id: user.id, machine_id: supersetMachine.id,
-        exercise_name: supersetMachine.name,
+        exercise_name: supersetExercise || supersetMachine.name,
         sets: validSetsB.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
         notes: i === 0 ? supersetNotes : null, duration: null, distance: null,
         superset: true
@@ -758,47 +758,66 @@ function getHistoryGrouped() {
             )}
 
             {/* Tab B — Machine B sets */}
-            {activeTab === 'B' && (
-              <div className="flex flex-col gap-4 mb-4">
-                <div className="grid grid-cols-12 gap-2 px-1">
-                  <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
-                  <p className="col-span-1"></p>
-                </div>
-                {supersetSets.map((set, i) => (
-                  <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                    <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#22C55E'}}>{i + 1}</p>
-                    </div>
-                    <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
-                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
-                    <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
-                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
-                    <button type="button" onClick={() => removeSupersetSet(i)} className="col-span-1 text-center text-lg"
-                      style={{color: supersetSets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
-                  </div>
-                ))}
-                <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #22C55E', color: '#22C55E'}}>
-                  + Add Set
-                </button>
-                <div>
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
-                  <input type="text" value={supersetNotes} onChange={e => setSupersetNotes(e.target.value)}
-                    placeholder="e.g. felt strong today"
-                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
-                </div>
-                <button onClick={() => setActiveTab('A')}
-                  className="py-3 rounded-full font-semibold text-white"
-                  style={{background: '#22C55E'}}>
-                  Switch to A: {supersetExercise || supersetMachine.name}
-                </button>
-              </div>
-            )}
+{activeTab === 'B' && (
+  <div className="flex flex-col gap-4 mb-4">
+
+    {/* Variation selector — only shows when same machine is selected */}
+    {supersetMachine.id === id && (
+      <div>
+        <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (B)</label>
+        <select
+          value={supersetExercise}
+          onChange={e => setSupersetExercise(e.target.value)}
+          className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+          style={{background: '#0F2040', border: '1px solid #22C55E'}}
+        >
+          <option value={machine.name}>{machine.name} (default)</option>
+          {variations.map(v => (
+            <option key={v.id} value={v.name}>{v.name}</option>
+          ))}
+        </select>
+      </div>
+    )}
+
+    <div className="grid grid-cols-12 gap-2 px-1">
+      <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
+      <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
+      <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+      <p className="col-span-1"></p>
+    </div>
+    {supersetSets.map((set, i) => (
+      <div key={i} className="grid grid-cols-12 gap-2 items-center">
+        <div className="col-span-1 text-center">
+          <p className="text-xs font-bold" style={{color: '#22C55E'}}>{i + 1}</p>
+        </div>
+        <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
+          placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+          style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+        <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
+          placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+          style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+        <button type="button" onClick={() => removeSupersetSet(i)} className="col-span-1 text-center text-lg"
+          style={{color: supersetSets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
+      </div>
+    ))}
+    <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
+      style={{background: 'transparent', border: '1px dashed #22C55E', color: '#22C55E'}}>
+      + Add Set
+    </button>
+    <div>
+      <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
+      <input type="text" value={supersetNotes} onChange={e => setSupersetNotes(e.target.value)}
+        placeholder="e.g. felt strong today"
+        className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+        style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+    </div>
+    <button onClick={() => setActiveTab('A')}
+      className="py-3 rounded-full font-semibold text-white"
+      style={{background: '#22C55E'}}>
+      Switch to A: {machine.name}
+    </button>
+  </div>
+)}
 
             {/* Remove superset + Finish */}
             <div className="flex flex-col gap-3 mt-2">
