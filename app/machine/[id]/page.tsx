@@ -717,6 +717,23 @@ function getHistoryGrouped() {
             {/* Tab A — Machine A sets */}
             {activeTab === 'A' && (
               <div className="flex flex-col gap-4 mb-4">
+                {/* Variation selector for A — only shows when same machine is selected for B */}
+{supersetMachine.id === id && (
+  <div>
+    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (A)</label>
+    <select
+      value={selectedExercise}
+      onChange={e => setSelectedExercise(e.target.value)}
+      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+      style={{background: '#0F2040', border: '1px solid #2563EB'}}
+    >
+      <option value={machine.name}>{machine.name} (default)</option>
+      {variations.map(v => (
+        <option key={v.id} value={v.name}>{v.name}</option>
+      ))}
+    </select>
+  </div>
+)}
                 <div className="grid grid-cols-12 gap-2 px-1">
                   <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
                   <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
