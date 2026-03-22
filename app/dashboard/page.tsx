@@ -290,7 +290,7 @@ export default function Dashboard() {
                   style={{
                     height: '24px',
                     background: weekActivity[i]
-                      ? 'linear-gradient(180deg, #4ADE80 0%, #B8860B 100%)'
+                      ? 'linear-gradient(180deg, #B8860B 0%, #92700A 100%)'
                       : '#0A1628',
                     border: i === todayIndex
                       ? '1px solid #B8860B'
@@ -298,7 +298,7 @@ export default function Dashboard() {
                       ? 'none'
                       : '1px solid #1E3A5F',
                     opacity: i > todayIndex ? 0.35 : 1,
-                    boxShadow: weekActivity[i] ? '0 0 8px rgba(34, 197, 94, 0.4)' : 'none'
+                    boxShadow: weekActivity[i] ? '0 0 8px rgba(184, 134, 11, 0.4)' : 'none'
                   }}
                 />
                 <p className="text-xs" style={{
