@@ -26,6 +26,7 @@ export default function MachinePage() {
   const [editingSession, setEditingSession] = useState(false)
   const [editableSets, setEditableSets] = useState<any[]>([])
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [supersetExercise, setSupersetExercise] = useState('')
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -65,7 +66,12 @@ export default function MachinePage() {
 
         const { data: machinesData } = await supabase
           .from('machines').select('*').order('name', { ascending: true })
-        if (machinesData) setAllMachines(machinesData.filter(m => m.id !== id))
+
+          // BEFORE
+          if (machinesData) setAllMachines(machinesData.filter(m => m.id !== id))
+
+          // AFTER
+          if (machinesData) setAllMachines(machinesData)
 
       } catch (err) {
         setError('Something went wrong. Please try again.')
@@ -631,31 +637,41 @@ function getHistoryGrouped() {
           )}
         </div>
 
-        {/* Superset picker */}
         {showSupersetPicker && (
-          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-white text-sm font-semibold">Pair with machine</p>
-              <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }}
-                className="text-xs" style={{color: '#64748B'}}>Cancel</button>
-            </div>
-            <input type="text" value={supersetSearch} onChange={e => setSupersetSearch(e.target.value)}
-              placeholder="Search machines..."
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
-            <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
-              {filteredMachines.map(m => (
-                <button key={m.id}
-                  onClick={() => { setSupersetMachine(m); setShowSupersetPicker(false); setSupersetSearch(''); setActiveTab('A') }}
-                  className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
-                  style={{background: '#0A1628'}}>
-                  <p className="text-white text-sm">{m.name}</p>
-                  <p className="text-xs" style={{color: '#3B82F6'}}>Pair</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+  <div className="rounded-2xl p-4 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+    <div className="flex justify-between items-center mb-3">
+      <p className="text-white text-sm font-semibold">Pair with machine</p>
+      <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }}
+        className="text-xs" style={{color: '#64748B'}}>Cancel</button>
+    </div>
+    <input type="text" value={supersetSearch} onChange={e => setSupersetSearch(e.target.value)}
+      placeholder="Search machines..."
+      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+      style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+    <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
+      {filteredMachines.map(m => (
+        <button key={m.id}
+          onClick={() => {
+            setSupersetMachine(m)
+            setShowSupersetPicker(false)
+            setSupersetSearch('')
+            setActiveTab('A')
+            // If same machine, default B to first variation or machine name
+            if (m.id === id) {
+              setSupersetExercise(variations.length > 0 ? variations[0].name : machine.name)
+            } else {
+              setSupersetExercise(m.name)
+            }
+          }}
+          className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
+          style={{background: '#0A1628'}}>
+          <p className="text-white text-sm">{m.name}{m.id === id ? ' (same)' : ''}</p>
+          <p className="text-xs" style={{color: '#3B82F6'}}>Pair</p>
+        </button>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* Superset tab view */}
         {supersetMachine ? (
@@ -688,7 +704,7 @@ function getHistoryGrouped() {
                   border: activeTab === 'B' ? 'none' : '1px solid #1E3A5F'
                 }}
               >
-                B: {supersetMachine.name}
+                B: {supersetExercise}
                 {validSetsBCount > 0 && (
                   <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full"
                     style={{background: 'rgba(255,255,255,0.2)', color: '#fff'}}>
@@ -779,7 +795,7 @@ function getHistoryGrouped() {
                 <button onClick={() => setActiveTab('A')}
                   className="py-3 rounded-full font-semibold text-white"
                   style={{background: '#22C55E'}}>
-                  Switch to A: {machine.name}
+                  Switch to A: {supersetExercise || supersetMachine.name}
                 </button>
               </div>
             )}
