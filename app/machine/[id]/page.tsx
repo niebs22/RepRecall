@@ -27,6 +27,7 @@ export default function MachinePage() {
   const [editableSets, setEditableSets] = useState<any[]>([])
   const [historyOpen, setHistoryOpen] = useState(false)
   const [supersetExercise, setSupersetExercise] = useState('')
+  const [supersetVariations, setSupersetVariations] = useState<any[]>([])
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -651,17 +652,21 @@ function getHistoryGrouped() {
     <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
       {filteredMachines.map(m => (
         <button key={m.id}
-          onClick={() => {
+          onClick={async () => {
             setSupersetMachine(m)
             setShowSupersetPicker(false)
             setSupersetSearch('')
             setActiveTab('A')
-            // If same machine, default B to first variation or machine name
-            if (m.id === id) {
-              setSupersetExercise(variations.length > 0 ? variations[0].name : machine.name)
-            } else {
-              setSupersetExercise(m.name)
-            }
+            setSupersetExercise(m.name)
+
+            // Fetch variations for the selected machine
+            const { data: varData } = await supabase
+              .from('variations')
+              .select('*')
+              .eq('user_id', user.id)
+              .eq('machine_id', m.id)
+              .order('created_at', { ascending: true })
+            setSupersetVariations(varData || [])
           }}
           className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
           style={{background: '#0A1628'}}>
@@ -718,7 +723,7 @@ function getHistoryGrouped() {
             {activeTab === 'A' && (
               <div className="flex flex-col gap-4 mb-4">
                 {/* Variation selector for A — only shows when same machine is selected for B */}
-{supersetMachine.id === id && (
+{variations.length > 0 && (
   <div>
     <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (A)</label>
     <select
@@ -778,23 +783,23 @@ function getHistoryGrouped() {
 {activeTab === 'B' && (
   <div className="flex flex-col gap-4 mb-4">
 
-    {/* Variation selector — only shows when same machine is selected */}
-    {supersetMachine.id === id && (
-      <div>
-        <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (B)</label>
-        <select
-          value={supersetExercise}
-          onChange={e => setSupersetExercise(e.target.value)}
-          className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-          style={{background: '#0F2040', border: '1px solid #22C55E'}}
-        >
-          <option value={machine.name}>{machine.name} (default)</option>
-          {variations.map(v => (
-            <option key={v.id} value={v.name}>{v.name}</option>
-          ))}
-        </select>
-      </div>
-    )}
+    {(supersetVariations.length > 0 || supersetMachine.id === id) && (
+  <div>
+    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (B)</label>
+    <select
+      value={supersetExercise}
+      onChange={e => setSupersetExercise(e.target.value)}
+      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+      style={{background: '#0F2040', border: '1px solid #22C55E'}}
+    >
+      <option value={supersetMachine.name}>{supersetMachine.name} (default)</option>
+      {supersetMachine.id === id
+        ? variations.map(v => <option key={v.id} value={v.name}>{v.name}</option>)
+        : supersetVariations.map(v => <option key={v.id} value={v.name}>{v.name}</option>)
+      }
+    </select>
+  </div>
+)}
 
     <div className="grid grid-cols-12 gap-2 px-1">
       <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
@@ -831,7 +836,7 @@ function getHistoryGrouped() {
     <button onClick={() => setActiveTab('A')}
       className="py-3 rounded-full font-semibold text-white"
       style={{background: '#22C55E'}}>
-      Switch to A: {machine.name}
+      Switch to A: {selectedExercise}
     </button>
   </div>
 )}
