@@ -539,8 +539,10 @@ function getHistoryGrouped() {
                          <p className="col-span-5 text-white font-semibold">{s.weight} lbs</p>
                          <div className="col-span-1 flex justify-center">
                            {s.superset && (
-                              <span className="text-xs font-bold" style={{color: '#22C55E'}}>SS</span>
-                           )}
+                                <span className="text-xs font-bold" style={{color: '#22C55E'}}>
+                                  SS{s.superset_exercise_name ? ` · ${s.superset_exercise_name}` : ''}
+                                </span>
+                              )}
                          </div>
                        </div>
                      ))}
