@@ -184,7 +184,9 @@ export default function MachinePage() {
         exercise_name: selectedExercise,
         sets: validSetsA.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
         notes: i === 0 ? notes : null, duration: null, distance: null,
-        superset: true
+        superset: true,
+        superset_machine_id: supersetMachine.id,
+        superset_exercise_name: supersetExercise || supersetMachine.name
       }))
       await supabase.from('workouts').insert(insertsA)
     }
@@ -197,7 +199,9 @@ export default function MachinePage() {
         exercise_name: supersetExercise || supersetMachine.name,
         sets: validSetsB.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
         notes: i === 0 ? supersetNotes : null, duration: null, distance: null,
-        superset: true
+        superset: true,
+        superset_machine_id: id,
+        superset_exercise_name: selectedExercise
       }))
       await supabase.from('workouts').insert(insertsB)
     }
@@ -588,8 +592,10 @@ function getHistoryGrouped() {
               <p className="text-white text-sm font-semibold">{group.label}</p>
               <p className="text-xs" style={{color: '#64748B'}}>({group.ago})</p>
               {group.workouts[0]?.superset && (
-                <span className="text-xs font-bold" style={{color: '#22C55E'}}>SS</span>
-              )}
+                  <span className="text-xs font-bold" style={{color: '#22C55E'}}>
+                    SS{group.workouts[0]?.superset_exercise_name ? ` · ${group.workouts[0].superset_exercise_name}` : ''}
+                  </span>
+                )}
             </div>
             {group.workouts[0]?.duration ? (
               <div className="flex gap-4">
