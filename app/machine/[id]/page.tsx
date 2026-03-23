@@ -44,7 +44,22 @@ export default function MachinePage() {
       try {
         if (!id) { setError('Invalid machine ID'); return }
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) { router.push('/login'); return }
+if (!user) {
+  // Look up which gym this machine belongs to and redirect to join flow
+  const { data: machineGym } = await supabase
+    .from('machines')
+    .select('gym_id, gyms(code)')
+    .eq('id', id)
+    .single()
+  
+  if (machineGym?.gyms) {
+    const code = (machineGym.gyms as any).code
+    router.push(`/join/${code}?next=/machine/${id}`)
+  } else {
+    router.push('/login')
+  }
+  return
+}
         setUser(user)
         // Auto-assign to gym if not already a member
 const { data: existingMembership } = await supabase
