@@ -290,8 +290,8 @@ export default function Dashboard() {
                   style={{
                     height: '24px',
                     background: weekActivity[i]
-                      ? 'linear-gradient(180deg, #B8860B 0%, #92700A 100%)'
-                      : '#0A1628',
+                          ? 'linear-gradient(180deg, #B8860B 0%, #92700A 100%)'
+                          : '#0A1628',
                     border: i === todayIndex
                       ? '1px solid #B8860B'
                       : weekActivity[i]
