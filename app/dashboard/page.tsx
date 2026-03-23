@@ -139,7 +139,7 @@ export default function Dashboard() {
   async function fetchLiftStats(userId: string) {
     const { data } = await supabase
       .from('workouts')
-      .select('weight, reps, machine_id, machines(name)')
+      .select('weight, reps, machine_id, machines!workouts_machine_id_fkey(name)')
       .eq('user_id', userId)
 
     if (data) {
