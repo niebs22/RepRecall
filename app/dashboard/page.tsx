@@ -76,10 +76,10 @@ export default function Dashboard() {
 
   async function fetchMachineWorkouts(userId: string) {
     const { data } = await supabase
-      .from('workouts')
-      .select('*, machines(name, type)')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+          .from('workouts')
+          .select('*, machines!workouts_machine_id_fkey(name, type)')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
     if (data) {
       const seen = new Set()
       const countMap: Record<string, number> = {}
