@@ -67,6 +67,9 @@ export default function Analytics() {
       const { data: allWorkouts } = await supabase
         .from('workouts').select('user_id, machine_id, created_at, machines(name)')
         .in('machine_id', machineIds)
+        console.log('gym:', gym)
+        console.log('machineIds:', machineIds)
+        console.log('allWorkouts:', allWorkouts)
 
       const { data: gymMembersData } = await supabase
   .from('gym_members')
