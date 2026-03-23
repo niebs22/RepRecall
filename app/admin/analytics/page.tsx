@@ -60,17 +60,15 @@ export default function Analytics() {
       const machineIds = machines?.map(m => m.id) || []
 
       const { data: weekWorkouts } = await supabase
-        .from('workouts').select('*, machines(name)')
+        .from('workouts')
+        .select('*, machines!workouts_machine_id_fkey(name)')
         .in('machine_id', machineIds)
         .gte('created_at', monday.toISOString())
 
-      const { data: allWorkouts, error: allWorkoutsError } = await supabase
-  .from('workouts').select('user_id, machine_id, created_at, machines(name)')
+      const { data: allWorkouts } = await supabase
+  .from('workouts')
+  .select('user_id, machine_id, created_at, machines!workouts_machine_id_fkey(name)')
   .in('machine_id', machineIds)
-        console.log('gym:', gym)
-        console.log('machineIds:', machineIds)
-        console.log('allWorkouts:', allWorkouts)
-        console.log('allWorkoutsError:', allWorkoutsError)
 
       const { data: gymMembersData } = await supabase
   .from('gym_members')
