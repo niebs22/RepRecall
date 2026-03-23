@@ -64,12 +64,13 @@ export default function Analytics() {
         .in('machine_id', machineIds)
         .gte('created_at', monday.toISOString())
 
-      const { data: allWorkouts } = await supabase
-        .from('workouts').select('user_id, machine_id, created_at, machines(name)')
-        .in('machine_id', machineIds)
+      const { data: allWorkouts, error: allWorkoutsError } = await supabase
+  .from('workouts').select('user_id, machine_id, created_at, machines(name)')
+  .in('machine_id', machineIds)
         console.log('gym:', gym)
         console.log('machineIds:', machineIds)
         console.log('allWorkouts:', allWorkouts)
+        console.log('allWorkoutsError:', allWorkoutsError)
 
       const { data: gymMembersData } = await supabase
   .from('gym_members')
