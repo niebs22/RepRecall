@@ -46,6 +46,26 @@ export default function MachinePage() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) { router.push('/login'); return }
         setUser(user)
+        // Auto-assign to gym if not already a member
+const { data: existingMembership } = await supabase
+  .from('gym_members')
+  .select('gym_id')
+  .eq('user_id', user.id)
+  .single()
+
+if (!existingMembership) {
+  const { data: machineGym } = await supabase
+    .from('machines')
+    .select('gym_id')
+    .eq('id', id)
+    .single()
+  
+  if (machineGym) {
+    await supabase
+      .from('gym_members')
+      .insert({ user_id: user.id, gym_id: machineGym.gym_id })
+  }
+}
 
         const { data: machineData, error: machineError } = await supabase
           .from('machines').select('*').eq('id', id).single()
