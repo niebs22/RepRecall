@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 
 export default function Analytics() {
   const [loading, setLoading] = useState(true)
+  const [gyms, setGyms] = useState<any[]>([])
+  const [selectedGymId, setSelectedGymId] = useState<string>('')
+  const [gymName, setGymName] = useState('')
   const [totalMembers, setTotalMembers] = useState(0)
   const [activeThisWeek, setActiveThisWeek] = useState(0)
   const [totalWorkoutsThisWeek, setTotalWorkoutsThisWeek] = useState(0)
@@ -31,116 +34,127 @@ export default function Analytics() {
 
       if (!profile) { router.push('/dashboard'); return }
 
-      let gym = null
+      let ownedGyms: any[] = []
 
       if (profile.role === 'super_admin') {
-  const { data: memberData } = await supabase
-    .from('gym_members')
-    .select('gym_id')
-    .eq('user_id', user.id)
-    .single()
-  if (memberData) {
-    const { data } = await supabase
-      .from('gyms').select('*').eq('id', memberData.gym_id).single()
-    gym = data
-  }
-} else if (profile.role === 'gym_owner') {
+        const { data: memberData } = await supabase
+          .from('gym_members')
+          .select('gym_id')
+          .eq('user_id', user.id)
+        if (memberData) {
+          const gymIds = memberData.map(m => m.gym_id)
+          const { data } = await supabase
+            .from('gyms').select('*').in('id', gymIds)
+          ownedGyms = data || []
+        }
+      } else if (profile.role === 'gym_owner') {
         const { data } = await supabase
-          .from('gyms').select('*').eq('owner_id', user.id).single()
-        gym = data
+          .from('gyms').select('*').eq('owner_id', user.id)
+        ownedGyms = data || []
       } else {
         router.push('/dashboard')
         return
       }
 
-      if (!gym) return
-
-      const now = new Date()
-      const monday = new Date(now)
-      const dayOfWeek = now.getDay()
-      monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-      monday.setHours(0, 0, 0, 0)
-
-      const { data: machines } = await supabase
-        .from('machines').select('*').eq('gym_id', gym.id)
-
-      const machineIds = machines?.map(m => m.id) || []
-
-      const { data: weekWorkouts } = await supabase
-        .from('workouts')
-        .select('*, machines!workouts_machine_id_fkey(name)')
-        .in('machine_id', machineIds)
-        .gte('created_at', monday.toISOString())
-
-      const { data: allWorkouts } = await supabase
-  .from('workouts')
-  .select('user_id, machine_id, created_at, machines!workouts_machine_id_fkey(name)')
-  .in('machine_id', machineIds)
-
-      const { data: gymMembersData } = await supabase
-  .from('gym_members')
-  .select('user_id, created_at')
-  .eq('gym_id', gym.id)
-  .order('created_at', { ascending: false })
-
-if (gymMembersData) {
-  const memberIds = gymMembersData.map(m => m.user_id)
-  const { data: profilesData } = await supabase
-    .from('profiles')
-    .select('id, full_name, email')
-    .in('id', memberIds)
-
-  const merged = gymMembersData.map(m => ({
-    ...m,
-    full_name: profilesData?.find(p => p.id === m.user_id)?.full_name || 'Unknown',
-    email: profilesData?.find(p => p.id === m.user_id)?.email || ''
-  }))
-  setMembers(merged)
-}
-      setTotalMembers(gymMembersData?.length || 0)
-
-      const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
-      setActiveThisWeek(activeUserIds.size)
-      setTotalWorkoutsThisWeek(weekWorkouts?.length || 0)
-
-      const usageMap: Record<string, { name: string, count: number, lastUsed: string | null }> = {}
-      machines?.forEach(m => {
-        usageMap[m.id] = { name: m.name, count: 0, lastUsed: null }
-      })
-      allWorkouts?.forEach(w => {
-        if (usageMap[w.machine_id]) {
-          usageMap[w.machine_id].count++
-          if (!usageMap[w.machine_id].lastUsed || w.created_at > usageMap[w.machine_id].lastUsed!) {
-            usageMap[w.machine_id].lastUsed = w.created_at
-          }
-        }
-      })
-      const stats = Object.values(usageMap).sort((a, b) => b.count - a.count)
-      setMachineStats(stats)
-      setMostUsed(stats[0] || null)
-      setLeastUsed(stats[stats.length - 1] || null)
-
-      const days = [0,0,0,0,0,0,0]
-      allWorkouts?.forEach(w => {
-        const day = new Date(w.created_at).getDay()
-        const adjusted = day === 0 ? 6 : day - 1
-        days[adjusted]++
-      })
-      setDayStats(days)
-
-      const times = { morning: 0, afternoon: 0, evening: 0 }
-      allWorkouts?.forEach(w => {
-        const hour = new Date(w.created_at).getHours()
-        if (hour >= 5 && hour < 11) times.morning++
-        else if (hour >= 11 && hour < 17) times.afternoon++
-        else if (hour >= 17 && hour < 22) times.evening++
-      })
-      setTimeStats(times)
-
-      setLoading(false)
+      if (ownedGyms.length === 0) return
+      setGyms(ownedGyms)
+      setSelectedGymId(ownedGyms[0].id)
+      setGymName(ownedGyms[0].name)
     }
     load()
   }, [])
+
+  useEffect(() => {
+    if (!selectedGymId) return
+    loadAnalytics(selectedGymId)
+  }, [selectedGymId])
+
+  async function loadAnalytics(gymId: string) {
+    setLoading(true)
+
+    const now = new Date()
+    const monday = new Date(now)
+    const dayOfWeek = now.getDay()
+    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    monday.setHours(0, 0, 0, 0)
+
+    const { data: machines } = await supabase
+      .from('machines').select('*').eq('gym_id', gymId)
+
+    const machineIds = machines?.map(m => m.id) || []
+
+    const { data: weekWorkouts } = await supabase
+      .from('workouts')
+      .select('*, machines!workouts_machine_id_fkey(name)')
+      .in('machine_id', machineIds)
+      .gte('created_at', monday.toISOString())
+
+    const { data: allWorkouts } = await supabase
+      .from('workouts')
+      .select('user_id, machine_id, created_at, machines!workouts_machine_id_fkey(name)')
+      .in('machine_id', machineIds)
+
+    const { data: gymMembersData } = await supabase
+      .from('gym_members')
+      .select('user_id, created_at')
+      .eq('gym_id', gymId)
+      .order('created_at', { ascending: false })
+
+    if (gymMembersData) {
+      const memberIds = gymMembersData.map(m => m.user_id)
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', memberIds)
+      const merged = gymMembersData.map(m => ({
+        ...m,
+        full_name: profilesData?.find(p => p.id === m.user_id)?.full_name || 'Unknown',
+        email: profilesData?.find(p => p.id === m.user_id)?.email || ''
+      }))
+      setMembers(merged)
+    }
+
+    setTotalMembers(gymMembersData?.length || 0)
+
+    const activeUserIds = new Set(weekWorkouts?.map(w => w.user_id))
+    setActiveThisWeek(activeUserIds.size)
+    setTotalWorkoutsThisWeek(weekWorkouts?.length || 0)
+
+    const usageMap: Record<string, { name: string, count: number, lastUsed: string | null }> = {}
+    machines?.forEach(m => {
+      usageMap[m.id] = { name: m.name, count: 0, lastUsed: null }
+    })
+    allWorkouts?.forEach(w => {
+      if (usageMap[w.machine_id]) {
+        usageMap[w.machine_id].count++
+        if (!usageMap[w.machine_id].lastUsed || w.created_at > usageMap[w.machine_id].lastUsed!) {
+          usageMap[w.machine_id].lastUsed = w.created_at
+        }
+      }
+    })
+    const stats = Object.values(usageMap).sort((a, b) => b.count - a.count)
+    setMachineStats(stats)
+    setMostUsed(stats[0] || null)
+    setLeastUsed(stats[stats.length - 1] || null)
+
+    const days = [0,0,0,0,0,0,0]
+    allWorkouts?.forEach(w => {
+      const day = new Date(w.created_at).getDay()
+      const adjusted = day === 0 ? 6 : day - 1
+      days[adjusted]++
+    })
+    setDayStats(days)
+
+    const times = { morning: 0, afternoon: 0, evening: 0 }
+    allWorkouts?.forEach(w => {
+      const hour = new Date(w.created_at).getHours()
+      if (hour >= 5 && hour < 11) times.morning++
+      else if (hour >= 11 && hour < 17) times.afternoon++
+      else if (hour >= 17 && hour < 22) times.evening++
+    })
+    setTimeStats(times)
+    setLoading(false)
+  }
 
   function daysSince(date: string | null) {
     if (!date) return 'Never'
@@ -175,6 +189,25 @@ if (gymMembersData) {
           <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
         </div>
 
+        {gyms.length > 1 && (
+          <div className="mb-6">
+            <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Viewing</label>
+            <select
+              value={selectedGymId}
+              onChange={e => {
+                setSelectedGymId(e.target.value)
+                setGymName(gyms.find(g => g.id === e.target.value)?.name || '')
+              }}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+            >
+              {gyms.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Total Members</p>
@@ -195,37 +228,37 @@ if (gymMembersData) {
         </div>
 
         {machineStats.length > 0 && (
-  <div className="grid grid-cols-2 gap-3 mb-6">
-    <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #B8860B'}}>
-      <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#B8860B'}}>Most Used</p>
-      <div className="flex flex-col gap-3">
-        {machineStats.slice(0, 3).map((m, i) => (
-          <div key={i} className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold w-4" style={{color: '#B8860B'}}>#{i + 1}</span>
-              <p className="text-white text-sm font-medium">{m.name}</p>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #B8860B'}}>
+              <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#B8860B'}}>Most Used</p>
+              <div className="flex flex-col gap-3">
+                {machineStats.slice(0, 3).map((m, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold w-4" style={{color: '#B8860B'}}>#{i + 1}</span>
+                      <p className="text-white text-sm font-medium">{m.name}</p>
+                    </div>
+                    <p className="text-xs font-semibold" style={{color: '#B8860B'}}>{m.count}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-xs font-semibold" style={{color: '#B8860B'}}>{m.count}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #EF4444'}}>
-      <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#EF4444'}}>Least Used</p>
-      <div className="flex flex-col gap-3">
-        {[...machineStats].reverse().slice(0, 3).map((m, i) => (
-          <div key={i} className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold w-4" style={{color: '#EF4444'}}>#{i + 1}</span>
-              <p className="text-white text-sm font-medium">{m.name}</p>
+            <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #EF4444'}}>
+              <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#EF4444'}}>Least Used</p>
+              <div className="flex flex-col gap-3">
+                {[...machineStats].reverse().slice(0, 3).map((m, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold w-4" style={{color: '#EF4444'}}>#{i + 1}</span>
+                      <p className="text-white text-sm font-medium">{m.name}</p>
+                    </div>
+                    <p className="text-xs font-semibold" style={{color: '#EF4444'}}>{m.count}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <p className="text-xs font-semibold" style={{color: '#EF4444'}}>{m.count}</p>
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
+        )}
 
         <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
           <p className="text-white font-semibold mb-4">Busiest Days</p>
@@ -280,7 +313,6 @@ if (gymMembersData) {
           </div>
         </div>
 
-        {/* Equipment usage */}
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
           <button
             onClick={() => setEquipmentOpen(prev => !prev)}
@@ -329,7 +361,6 @@ if (gymMembersData) {
           )}
         </div>
 
-        {/* Member list */}
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
           <button
             onClick={() => setMembersOpen(prev => !prev)}
