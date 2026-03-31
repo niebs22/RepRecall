@@ -28,6 +28,7 @@ export default function MachinePage() {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [supersetExercise, setSupersetExercise] = useState('')
   const [supersetVariations, setSupersetVariations] = useState<any[]>([])
+  const [validationError, setValidationError] = useState('')
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -157,10 +158,11 @@ export default function MachinePage() {
     setSets(sets.filter((_, i) => i !== index))
   }
   function updateSet(index: number, field: string, value: string) {
-    const updated = [...sets]
-    updated[index] = {...updated[index], [field]: value}
-    setSets(updated)
-  }
+  const updated = [...sets]
+  updated[index] = {...updated[index], [field]: value}
+  setSets(updated)
+  setValidationError('')
+}
 
   function addSupersetSet() { setSupersetSets([...supersetSets, {reps: '', weight: ''}]) }
   function removeSupersetSet(index: number) {
@@ -250,7 +252,7 @@ export default function MachinePage() {
     } else {
       const validSets = sets.filter(s => s.reps && s.weight)
 if (validSets.length === 0) {
-  setError('Please enter reps and weight for at least one set.')
+  setValidationError('Please enter reps and weight for at least one set.')
   return
 }
       const inserts = validSets.map((s, i) => ({
@@ -959,10 +961,16 @@ if (validSets.length === 0) {
                 className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
                 style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
             </div>
-            <button type="submit" className="py-3 rounded-full font-semibold text-white"
-              style={{background: '#2563EB'}}>
-              Finish Workout
-            </button>
+            {validationError && (
+  <div className="flex justify-between items-center px-4 py-3 rounded-lg" style={{background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)'}}>
+    <p className="text-sm" style={{color: '#EF4444'}}>{validationError}</p>
+    <button onClick={() => setValidationError('')} style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
+  </div>
+)}
+<button type="submit" className="py-3 rounded-full font-semibold text-white"
+  style={{background: '#2563EB'}}>
+  Finish Workout
+</button>
           </form>
         )}
       </div>
