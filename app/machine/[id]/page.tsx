@@ -29,6 +29,9 @@ export default function MachinePage() {
   const [supersetExercise, setSupersetExercise] = useState('')
   const [supersetVariations, setSupersetVariations] = useState<any[]>([])
   const [validationError, setValidationError] = useState('')
+  const [showVariationPicker, setShowVariationPicker] = useState(true)
+  const [newQuickVariation, setNewQuickVariation] = useState('')
+  const [showQuickAdd, setShowQuickAdd] = useState(false)
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -90,7 +93,13 @@ export default function MachinePage() {
           .from('variations').select('*')
           .eq('user_id', user.id).eq('machine_id', id)
           .order('created_at', { ascending: true })
-        if (variationData) setVariations(variationData)
+        if (variationData) {
+           setVariations(variationData)
+        if (variationData.length === 1) {
+           setSelectedExercise(variationData[0].name)
+           setShowVariationPicker(false)
+      }
+     }
 
         const { data: workoutData } = await supabase
           .from('workouts').select('*')
@@ -381,8 +390,82 @@ if (validSets.length === 0) {
           <p className="mb-4" style={{color: '#64748B'}}>{machine.description}</p>
         )}
 
-        {/* Exercise selector */}
-        {machine.type === 'strength' && (
+{/* Variation picker — shows for strength machines */}
+{machine.type === 'strength' && showVariationPicker && (
+  <div className="mb-6">
+    <p className="text-white font-semibold text-lg mb-4">What are you doing today?</p>
+    
+    <div className="flex flex-col gap-3 mb-4">
+      <button
+        onClick={() => { setSelectedExercise(machine.name); setShowVariationPicker(false) }}
+        className="w-full py-4 rounded-xl font-semibold text-white text-left px-5"
+        style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+        {machine.name} (default)
+      </button>
+
+      {variations.map(v => (
+        <button
+          key={v.id}
+          onClick={() => { setSelectedExercise(v.name); setShowVariationPicker(false) }}
+          className="w-full py-4 rounded-xl font-semibold text-white text-left px-5"
+          style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+          {v.name}
+        </button>
+      ))}
+    </div>
+
+    {showQuickAdd ? (
+      <div className="rounded-xl p-4" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+        <p className="text-white text-sm font-semibold mb-3">Name this exercise</p>
+        <input
+          type="text"
+          value={newQuickVariation}
+          onChange={e => setNewQuickVariation(e.target.value)}
+          placeholder="e.g. Back Squat"
+          className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+          style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+          autoFocus
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={async () => {
+              if (!newQuickVariation.trim()) return
+              const { data } = await supabase.from('variations').insert({
+                user_id: user.id, machine_id: id, name: newQuickVariation.trim()
+              }).select().single()
+              if (data) {
+                setVariations([...variations, data])
+                setSelectedExercise(data.name)
+                setShowVariationPicker(false)
+              }
+              setNewQuickVariation('')
+              setShowQuickAdd(false)
+            }}
+            className="flex-1 py-3 rounded-full font-semibold text-white"
+            style={{background: '#2563EB'}}>
+            Save & Start Logging
+          </button>
+          <button
+            onClick={() => { setShowQuickAdd(false); setNewQuickVariation('') }}
+            className="flex-1 py-3 rounded-full font-semibold"
+            style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    ) : (
+      <button
+        onClick={() => setShowQuickAdd(true)}
+        className="w-full py-3 rounded-xl text-sm font-semibold"
+        style={{background: 'transparent', border: '1px dashed #2563EB', color: '#3B82F6'}}>
+        + Add exercise
+      </button>
+    )}
+  </div>
+)}
+
+            {/* Exercise selector */}
+             {machine.type === 'strength' && !showVariationPicker && (
           <div className="mb-6">
             <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise</label>
             <select
@@ -676,9 +759,10 @@ if (validSets.length === 0) {
           </div>
         )}
 
-        {/* Log workout header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg text-white">Log Today's Workout</h2>
+              {!showVariationPicker && (
+<div>
+<div className="flex justify-between items-center mb-4">
+  <h2 className="font-semibold text-lg text-white">Log Today's Workout</h2>
           {!supersetMachine && machine.type === 'strength' && (
             <button onClick={() => setShowSupersetPicker(true)}
               className="text-xs px-3 py-1.5 rounded-lg font-semibold"
@@ -973,6 +1057,8 @@ if (validSets.length === 0) {
 </button>
           </form>
         )}
+</div>
+)}
       </div>
     </main>
   )
