@@ -378,14 +378,14 @@ if (validSets.length === 0) {
         </a>
 
         <div className="flex items-center gap-3 mb-1">
-          <a href="/dashboard"><h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1></a>
-          <span className="text-xs px-2 py-0.5 rounded-full" style={{
-            background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
-            color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
-          }}>
-            {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
-          </span>
-        </div>
+  <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
+  <span className="text-xs px-2 py-0.5 rounded-full" style={{
+    background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
+    color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
+  }}>
+    {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
+  </span>
+</div>
         {machine.description && (
           <p className="mb-4" style={{color: '#64748B'}}>{machine.description}</p>
         )}
