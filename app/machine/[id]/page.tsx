@@ -391,7 +391,7 @@ if (validSets.length === 0) {
         )}
 
 {/* Variation picker — shows for strength machines */}
-{machine.type === 'strength' && showVariationPicker && (
+{machine.type === 'strength' && showVariationPicker && variations.length > 0 && (
   <div className="mb-6">
     <p className="text-white font-semibold text-lg mb-4">What are you doing today?</p>
     
@@ -478,7 +478,7 @@ if (validSets.length === 0) {
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
               style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
             >
-              <option value={machine.name}>{machine.name} (default)</option>
+              <option value={machine.name}>{machine.name}</option>
               {variations.map(v => (
                 <option key={v.id} value={v.name}>{v.name}</option>
               ))}
@@ -549,7 +549,7 @@ if (validSets.length === 0) {
         )}
 
         {/* Last session */}
-        {lastSessionSets.length > 0 ? (
+        {!showVariationPicker && lastSessionSets.length > 0 ? (
           <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
             <div className="flex justify-between items-center mb-4">
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Last Session</p>
@@ -675,11 +675,11 @@ if (validSets.length === 0) {
               </>
             )}
           </div>
-        ) : (
-          <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F2040'}}>
-            <p style={{color: '#64748B'}}>No previous session recorded</p>
-          </div>
-        )}
+        ) : (!showVariationPicker && (
+  <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F2040'}}>
+    <p style={{color: '#64748B'}}>No previous session recorded</p>
+  </div>
+))}
 
         {/* History */}
         {allWorkouts.length > 1 && (
