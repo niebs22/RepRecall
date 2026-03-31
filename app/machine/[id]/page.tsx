@@ -29,7 +29,7 @@ export default function MachinePage() {
   const [supersetExercise, setSupersetExercise] = useState('')
   const [supersetVariations, setSupersetVariations] = useState<any[]>([])
   const [validationError, setValidationError] = useState('')
-  const [showVariationPicker, setShowVariationPicker] = useState(true)
+  const [showVariationPicker, setShowVariationPicker] = useState(false)
   const [newQuickVariation, setNewQuickVariation] = useState('')
   const [showQuickAdd, setShowQuickAdd] = useState(false)
 
@@ -94,12 +94,16 @@ export default function MachinePage() {
           .eq('user_id', user.id).eq('machine_id', id)
           .order('created_at', { ascending: true })
         if (variationData) {
-           setVariations(variationData)
-        if (variationData.length === 1) {
-           setSelectedExercise(variationData[0].name)
-           setShowVariationPicker(false)
-      }
-     }
+  setVariations(variationData)
+  if (variationData.length === 1) {
+    setSelectedExercise(variationData[0].name)
+    setShowVariationPicker(false)
+  } else if (variationData.length > 1) {
+    setShowVariationPicker(true)
+  } else {
+    setShowVariationPicker(false)
+  }
+}
 
         const { data: workoutData } = await supabase
           .from('workouts').select('*')
