@@ -44,43 +44,40 @@ export default function MachinePage() {
       try {
         if (!id) { setError('Invalid machine ID'); return }
         const { data: { user } } = await supabase.auth.getUser()
-if (!user) {
-  // Look up which gym this machine belongs to and redirect to join flow
-  const { data: machineGym } = await supabase
-    .from('machines')
-    .select('gym_id, gyms(code)')
-    .eq('id', id)
-    .single()
-  
-  if (machineGym?.gyms) {
-    const code = (machineGym.gyms as any).code
-    router.push(`/join/${code}?next=/machine/${id}`)
-  } else {
-    router.push('/login')
-  }
-  return
-}
+        if (!user) {
+          const { data: machineGym } = await supabase
+            .from('machines')
+            .select('gym_id, gyms(code)')
+            .eq('id', id)
+            .single()
+          if (machineGym?.gyms) {
+            const code = (machineGym.gyms as any).code
+            router.push(`/join/${code}?next=/machine/${id}`)
+          } else {
+            router.push('/login')
+          }
+          return
+        }
         setUser(user)
-        // Auto-assign to gym if not already a member
-const { data: existingMembership } = await supabase
-  .from('gym_members')
-  .select('gym_id')
-  .eq('user_id', user.id)
-  .single()
 
-if (!existingMembership) {
-  const { data: machineGym } = await supabase
-    .from('machines')
-    .select('gym_id')
-    .eq('id', id)
-    .single()
-  
-  if (machineGym) {
-    await supabase
-      .from('gym_members')
-      .insert({ user_id: user.id, gym_id: machineGym.gym_id })
-  }
-}
+        const { data: existingMembership } = await supabase
+          .from('gym_members')
+          .select('gym_id')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!existingMembership) {
+          const { data: machineGym } = await supabase
+            .from('machines')
+            .select('gym_id')
+            .eq('id', id)
+            .single()
+          if (machineGym) {
+            await supabase
+              .from('gym_members')
+              .insert({ user_id: user.id, gym_id: machineGym.gym_id })
+          }
+        }
 
         const { data: machineData, error: machineError } = await supabase
           .from('machines').select('*').eq('id', id).single()
@@ -102,12 +99,7 @@ if (!existingMembership) {
 
         const { data: machinesData } = await supabase
           .from('machines').select('*').order('name', { ascending: true })
-
-          // BEFORE
-          if (machinesData) setAllMachines(machinesData.filter(m => m.id !== id))
-
-          // AFTER
-          if (machinesData) setAllMachines(machinesData)
+        if (machinesData) setAllMachines(machinesData)
 
       } catch (err) {
         setError('Something went wrong. Please try again.')
@@ -211,7 +203,6 @@ if (!existingMembership) {
   }
 
   async function handleFinishSuperset() {
-    // Save Machine A sets
     const validSetsA = sets.filter(s => s.reps && s.weight)
     if (validSetsA.length > 0) {
       const insertsA = validSetsA.map((s, i) => ({
@@ -226,7 +217,6 @@ if (!existingMembership) {
       await supabase.from('workouts').insert(insertsA)
     }
 
-    // Save Machine B sets
     const validSetsB = supersetSets.filter(s => s.reps && s.weight)
     if (validSetsB.length > 0) {
       const insertsB = validSetsB.map((s, i) => ({
@@ -250,8 +240,10 @@ if (!existingMembership) {
       if (!duration) return
       const { error } = await supabase.from('workouts').insert({
         user_id: user.id, machine_id: id, exercise_name: selectedExercise,
-        duration: parseFloat(duration), distance: distance ? parseFloat(distance) : null,
-        notes: notes || null, sets: null, reps: null, weight: null,
+        duration: parseFloat(duration),
+        distance: distance ? parseFloat(distance) : null,
+        reps: sets[0]?.reps ? parseInt(sets[0].reps) : null,
+        notes: notes || null, sets: null, weight: null,
         superset: false
       })
       if (!error) setSaved(true)
@@ -282,36 +274,36 @@ if (!existingMembership) {
   }
 
   function formatHistoryDate(date: string) {
-  const d = new Date(date)
-  const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  const diffMs = new Date().getTime() - d.getTime()
-  const diffHours = diffMs / (1000 * 60 * 60)
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-  let ago = ''
-  if (diffHours < 24) ago = 'Today'
-  else if (diffDays === 1) ago = 'Yesterday'
-  else ago = diffDays + ' days ago'
-  return { label, ago }
-}
+    const d = new Date(date)
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const diffMs = new Date().getTime() - d.getTime()
+    const diffHours = diffMs / (1000 * 60 * 60)
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    let ago = ''
+    if (diffHours < 24) ago = 'Today'
+    else if (diffDays === 1) ago = 'Yesterday'
+    else ago = diffDays + ' days ago'
+    return { label, ago }
+  }
 
-function getHistoryGrouped() {
-  const skipDate = allWorkouts.length > 0
-    ? new Date(allWorkouts[0].created_at).toDateString()
-    : null
+  function getHistoryGrouped() {
+    const skipDate = allWorkouts.length > 0
+      ? new Date(allWorkouts[0].created_at).toDateString()
+      : null
+    const grouped: Record<string, any[]> = {}
+    allWorkouts.forEach(w => {
+      const dateStr = new Date(w.created_at).toDateString()
+      if (dateStr === skipDate) return
+      if (!grouped[dateStr]) grouped[dateStr] = []
+      grouped[dateStr].push(w)
+    })
+    return Object.entries(grouped).map(([date, workouts]) => ({
+      date,
+      workouts,
+      ...formatHistoryDate(workouts[0].created_at)
+    }))
+  }
 
-  const grouped: Record<string, any[]> = {}
-  allWorkouts.forEach(w => {
-    const dateStr = new Date(w.created_at).toDateString()
-    if (dateStr === skipDate) return
-    if (!grouped[dateStr]) grouped[dateStr] = []
-    grouped[dateStr].push(w)
-  })
-  return Object.entries(grouped).map(([date, workouts]) => ({
-    date,
-    workouts,
-    ...formatHistoryDate(workouts[0].created_at)
-  }))
-}
   const filteredMachines = allMachines.filter(m =>
     m.name.toLowerCase().includes(supersetSearch.toLowerCase())
   )
@@ -346,16 +338,16 @@ function getHistoryGrouped() {
         )}
         <p className="mb-8" style={{color: '#64748B'}}>Keep it up!</p>
         <div className="flex flex-col gap-3">
-       <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#2563EB'}}>
-         Scan Next Machine
-        </a>
-        <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
-       Back to {machine?.name}
-         </a>
-        <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#64748B'}}>
-      Back to Dashboard
-      </a>
-    </div>
+          <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#2563EB'}}>
+            Scan Next Machine
+          </a>
+          <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
+            Back to {machine?.name}
+          </a>
+          <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#64748B'}}>
+            Back to Dashboard
+          </a>
+        </div>
       </div>
     </main>
   )
@@ -507,11 +499,11 @@ function getHistoryGrouped() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2 mb-3">
-                      <div className="grid grid-cols-12 gap-2 mb-1 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
-                          <p className="col-span-1"></p>
-                          <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
-                          <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
-                          <p className="col-span-3"></p>
+                    <div className="grid grid-cols-12 gap-2 mb-1 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
+                      <p className="col-span-1"></p>
+                      <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
+                      <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
+                      <p className="col-span-3"></p>
                     </div>
                     {editableSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
@@ -553,6 +545,12 @@ function getHistoryGrouped() {
                       <p className="text-white font-bold text-lg">{lastSessionSets[0].duration}</p>
                       <p className="text-xs" style={{color: '#64748B'}}>Minutes</p>
                     </div>
+                    {lastSessionSets[0].reps && (
+                      <div>
+                        <p className="text-white font-bold text-lg">{lastSessionSets[0].reps}</p>
+                        <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
+                      </div>
+                    )}
                     {lastSessionSets[0].distance && (
                       <div>
                         <p className="text-white font-bold text-lg">{lastSessionSets[0].distance}</p>
@@ -569,18 +567,16 @@ function getHistoryGrouped() {
                     </div>
                     {lastSessionSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                         <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
-                         <p className="col-span-4 text-white font-semibold">{s.reps}</p>
-                         <p className="col-span-4 text-white font-semibold">{s.weight} lbs</p>
-                         <div className="col-span-3 flex justify-center">
-                           {s.superset && (
-                                <span className="text-xs font-bold" style={{color: '#B8860B'}}>
-                                  SS{s.superset_exercise_name ? ` · ${s.superset_exercise_name}` : ''}
-                                </span>
-                              )}
-                         </div>
-                       </div>
-                     ))}
+                        <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                        <p className="col-span-5 text-white font-semibold">{s.reps}</p>
+                        <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
+                      </div>
+                    ))}
+                    {lastSessionSets[0]?.superset && (
+                      <p className="text-xs font-bold mt-2" style={{color: '#B8860B'}}>
+                        SS{lastSessionSets[0]?.superset_exercise_name ? ` · ${lastSessionSets[0].superset_exercise_name}` : ''}
+                      </p>
+                    )}
                   </div>
                 )}
                 {lastSessionNotes && (
@@ -596,78 +592,84 @@ function getHistoryGrouped() {
             <p style={{color: '#64748B'}}>No previous session recorded</p>
           </div>
         )}
-        
-          {/* History */}
-{allWorkouts.length > 1 && (
-  <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F2040'}}>
-    <button
-      onClick={() => setHistoryOpen(prev => !prev)}
-      className="w-full flex justify-between items-center p-5"
-      style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
-    >
-      <div className="flex items-center gap-2">
-        <h2 className="font-semibold text-white">History</h2>
-        <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
-          {getHistoryGrouped().length} sessions
-        </span>
-      </div>
-      <span style={{
-        color: '#64748B',
-        fontSize: '18px',
-        transform: historyOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-        transition: 'transform 0.2s ease',
-        display: 'inline-block',
-        lineHeight: 1
-      }}>▾</span>
-    </button>
 
-    {historyOpen && (
-      <div className="flex flex-col gap-4 px-5 pb-5">
-        {getHistoryGrouped().map((group, i) => (
-          <div key={i}>
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-white text-sm font-semibold">{group.label}</p>
-              <p className="text-xs" style={{color: '#64748B'}}>({group.ago})</p>
-              {group.workouts[0]?.superset && (
-                  <span className="text-xs font-bold" style={{color: '#B8860B'}}>
-                    SS{group.workouts[0]?.superset_exercise_name ? ` · ${group.workouts[0].superset_exercise_name}` : ''}
-                  </span>
-                )}
-            </div>
-            {group.workouts[0]?.duration ? (
-              <div className="flex gap-4">
-                <div>
-                  <p className="text-white font-semibold">{group.workouts[0].duration}</p>
-                  <p className="text-xs" style={{color: '#64748B'}}>min</p>
-                </div>
-                {group.workouts[0].distance && (
-                  <div>
-                    <p className="text-white font-semibold">{group.workouts[0].distance}</p>
-                    <p className="text-xs" style={{color: '#64748B'}}>mi</p>
-                  </div>
-                )}
+        {/* History */}
+        {allWorkouts.length > 1 && (
+          <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F2040'}}>
+            <button
+              onClick={() => setHistoryOpen(prev => !prev)}
+              className="w-full flex justify-between items-center p-5"
+              style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+            >
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold text-white">History</h2>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+                  {getHistoryGrouped().length} sessions
+                </span>
               </div>
-            ) : (
-              <div className="flex flex-col gap-1">
-                {group.workouts.map((w, j) => (
-                  <div key={j} className="flex gap-3 items-center">
-                    <p className="text-xs font-bold w-4" style={{color: '#3B82F6'}}>{j + 1}</p>
-                    <p className="text-sm text-white">{w.reps} reps</p>
-                    <p className="text-sm text-white">·</p>
-                    <p className="text-sm text-white">{w.weight} lbs</p>
+              <span style={{
+                color: '#64748B',
+                fontSize: '18px',
+                transform: historyOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+                display: 'inline-block',
+                lineHeight: 1
+              }}>▾</span>
+            </button>
+
+            {historyOpen && (
+              <div className="flex flex-col gap-4 px-5 pb-5">
+                {getHistoryGrouped().map((group, i) => (
+                  <div key={i}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="text-white text-sm font-semibold">{group.label}</p>
+                      <p className="text-xs" style={{color: '#64748B'}}>({group.ago})</p>
+                      {group.workouts[0]?.superset && (
+                        <span className="text-xs font-bold" style={{color: '#B8860B'}}>
+                          SS{group.workouts[0]?.superset_exercise_name ? ` · ${group.workouts[0].superset_exercise_name}` : ''}
+                        </span>
+                      )}
+                    </div>
+                    {group.workouts[0]?.duration ? (
+                      <div className="flex gap-4">
+                        <div>
+                          <p className="text-white font-semibold">{group.workouts[0].duration}</p>
+                          <p className="text-xs" style={{color: '#64748B'}}>min</p>
+                        </div>
+                        {group.workouts[0].reps && (
+                          <div>
+                            <p className="text-white font-semibold">{group.workouts[0].reps}</p>
+                            <p className="text-xs" style={{color: '#64748B'}}>reps</p>
+                          </div>
+                        )}
+                        {group.workouts[0].distance && (
+                          <div>
+                            <p className="text-white font-semibold">{group.workouts[0].distance}</p>
+                            <p className="text-xs" style={{color: '#64748B'}}>mi</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {group.workouts.map((w, j) => (
+                          <div key={j} className="flex gap-3 items-center">
+                            <p className="text-xs font-bold w-4" style={{color: '#3B82F6'}}>{j + 1}</p>
+                            <p className="text-sm text-white">{w.reps} reps</p>
+                            <p className="text-sm text-white">·</p>
+                            <p className="text-sm text-white">{w.weight} lbs</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {i < getHistoryGrouped().length - 1 && (
+                      <div className="mt-3" style={{borderBottom: '1px solid #1E3A5F'}}/>
+                    )}
                   </div>
                 ))}
               </div>
             )}
-            {i < getHistoryGrouped().length - 1 && (
-              <div className="mt-3" style={{borderBottom: '1px solid #1E3A5F'}}/>
-            )}
           </div>
-        ))}
-      </div>
-    )}
-  </div>
-)}
+        )}
 
         {/* Log workout header */}
         <div className="flex justify-between items-center mb-4">
@@ -681,50 +683,48 @@ function getHistoryGrouped() {
           )}
         </div>
 
+        {/* Superset picker */}
         {showSupersetPicker && (
-  <div className="rounded-2xl p-4 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
-    <div className="flex justify-between items-center mb-3">
-      <p className="text-white text-sm font-semibold">Pair with machine</p>
-      <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }}
-        className="text-xs" style={{color: '#64748B'}}>Cancel</button>
-    </div>
-    <input type="text" value={supersetSearch} onChange={e => setSupersetSearch(e.target.value)}
-      placeholder="Search machines..."
-      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
-      style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
-    <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
-      {filteredMachines.map(m => (
-        <button key={m.id}
-          onClick={async () => {
-            setSupersetMachine(m)
-            setShowSupersetPicker(false)
-            setSupersetSearch('')
-            setActiveTab('A')
-            setSupersetExercise(m.name)
-
-            // Fetch variations for the selected machine
-            const { data: varData } = await supabase
-              .from('variations')
-              .select('*')
-              .eq('user_id', user.id)
-              .eq('machine_id', m.id)
-              .order('created_at', { ascending: true })
-            setSupersetVariations(varData || [])
-          }}
-          className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
-          style={{background: '#0A1628'}}>
-          <p className="text-white text-sm">{m.name}{m.id === id ? ' (same)' : ''}</p>
-          <p className="text-xs" style={{color: '#3B82F6'}}>Pair</p>
-        </button>
-      ))}
-    </div>
-  </div>
-)}
+          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-white text-sm font-semibold">Pair with machine</p>
+              <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }}
+                className="text-xs" style={{color: '#64748B'}}>Cancel</button>
+            </div>
+            <input type="text" value={supersetSearch} onChange={e => setSupersetSearch(e.target.value)}
+              placeholder="Search machines..."
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+            <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
+              {filteredMachines.map(m => (
+                <button key={m.id}
+                  onClick={async () => {
+                    setSupersetMachine(m)
+                    setShowSupersetPicker(false)
+                    setSupersetSearch('')
+                    setActiveTab('A')
+                    setSupersetExercise(m.name)
+                    const { data: varData } = await supabase
+                      .from('variations')
+                      .select('*')
+                      .eq('user_id', user.id)
+                      .eq('machine_id', m.id)
+                      .order('created_at', { ascending: true })
+                    setSupersetVariations(varData || [])
+                  }}
+                  className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
+                  style={{background: '#0A1628'}}>
+                  <p className="text-white text-sm">{m.name}{m.id === id ? ' (same)' : ''}</p>
+                  <p className="text-xs" style={{color: '#3B82F6'}}>Pair</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Superset tab view */}
         {supersetMachine ? (
           <div>
-            {/* Tabs */}
             <div className="flex gap-2 mb-4">
               <button
                 onClick={() => setActiveTab('A')}
@@ -762,26 +762,25 @@ function getHistoryGrouped() {
               </button>
             </div>
 
-            {/* Tab A — Machine A sets */}
+            {/* Tab A */}
             {activeTab === 'A' && (
               <div className="flex flex-col gap-4 mb-4">
-                {/* Variation selector for A — only shows when same machine is selected for B */}
-{variations.length > 0 && (
-  <div>
-    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (A)</label>
-    <select
-      value={selectedExercise}
-      onChange={e => setSelectedExercise(e.target.value)}
-      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-      style={{background: '#0F2040', border: '1px solid #2563EB'}}
-    >
-      <option value={machine.name}>{machine.name} (default)</option>
-      {variations.map(v => (
-        <option key={v.id} value={v.name}>{v.name}</option>
-      ))}
-    </select>
-  </div>
-)}
+                {variations.length > 0 && (
+                  <div>
+                    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (A)</label>
+                    <select
+                      value={selectedExercise}
+                      onChange={e => setSelectedExercise(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+                      style={{background: '#0F2040', border: '1px solid #2563EB'}}
+                    >
+                      <option value={machine.name}>{machine.name} (default)</option>
+                      {variations.map(v => (
+                        <option key={v.id} value={v.name}>{v.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="grid grid-cols-12 gap-2 px-1">
                   <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
                   <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
@@ -817,74 +816,71 @@ function getHistoryGrouped() {
                 <button onClick={() => setActiveTab('B')}
                   className="py-3 rounded-full font-semibold text-white"
                   style={{background: '#2563EB'}}>
-                  Switch to B: {supersetMachine.name}
+                  Switch to B: {supersetExercise || supersetMachine.name}
                 </button>
               </div>
             )}
 
-            {/* Tab B — Machine B sets */}
-{activeTab === 'B' && (
-  <div className="flex flex-col gap-4 mb-4">
+            {/* Tab B */}
+            {activeTab === 'B' && (
+              <div className="flex flex-col gap-4 mb-4">
+                {(supersetVariations.length > 0 || supersetMachine.id === id) && (
+                  <div>
+                    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (B)</label>
+                    <select
+                      value={supersetExercise}
+                      onChange={e => setSupersetExercise(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+                      style={{background: '#0F2040', border: '1px solid #B8860B'}}
+                    >
+                      <option value={supersetMachine.name}>{supersetMachine.name} (default)</option>
+                      {supersetMachine.id === id
+                        ? variations.map(v => <option key={v.id} value={v.name}>{v.name}</option>)
+                        : supersetVariations.map(v => <option key={v.id} value={v.name}>{v.name}</option>)
+                      }
+                    </select>
+                  </div>
+                )}
+                <div className="grid grid-cols-12 gap-2 px-1">
+                  <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
+                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
+                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+                  <p className="col-span-1"></p>
+                </div>
+                {supersetSets.map((set, i) => (
+                  <div key={i} className="grid grid-cols-12 gap-2 items-center">
+                    <div className="col-span-1 text-center">
+                      <p className="text-xs font-bold" style={{color: '#B8860B'}}>{i + 1}</p>
+                    </div>
+                    <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
+                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
+                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    <button type="button" onClick={() => removeSupersetSet(i)} className="col-span-1 text-center text-lg"
+                      style={{color: supersetSets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
+                  </div>
+                ))}
+                <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
+                  style={{background: 'transparent', border: '1px dashed #B8860B', color: '#B8860B'}}>
+                  + Add Set
+                </button>
+                <div>
+                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
+                  <input type="text" value={supersetNotes} onChange={e => setSupersetNotes(e.target.value)}
+                    placeholder="e.g. felt strong today"
+                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                </div>
+                <button onClick={() => setActiveTab('A')}
+                  className="py-3 rounded-full font-semibold text-white"
+                  style={{background: '#B8860B'}}>
+                  Switch to A: {selectedExercise}
+                </button>
+              </div>
+            )}
 
-    {(supersetVariations.length > 0 || supersetMachine.id === id) && (
-  <div>
-    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (B)</label>
-    <select
-      value={supersetExercise}
-      onChange={e => setSupersetExercise(e.target.value)}
-      className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-      style={{background: '#0F2040', border: '1px solid #B8860B'}}
-    >
-      <option value={supersetMachine.name}>{supersetMachine.name} (default)</option>
-      {supersetMachine.id === id
-        ? variations.map(v => <option key={v.id} value={v.name}>{v.name}</option>)
-        : supersetVariations.map(v => <option key={v.id} value={v.name}>{v.name}</option>)
-      }
-    </select>
-  </div>
-)}
-
-    <div className="grid grid-cols-12 gap-2 px-1">
-      <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
-      <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
-      <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
-      <p className="col-span-1"></p>
-    </div>
-    {supersetSets.map((set, i) => (
-      <div key={i} className="grid grid-cols-12 gap-2 items-center">
-        <div className="col-span-1 text-center">
-          <p className="text-xs font-bold" style={{color: '#B8860B'}}>{i + 1}</p>
-        </div>
-        <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
-          placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-          style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
-        <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
-          placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-          style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
-        <button type="button" onClick={() => removeSupersetSet(i)} className="col-span-1 text-center text-lg"
-          style={{color: supersetSets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
-      </div>
-    ))}
-    <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
-      style={{background: 'transparent', border: '1px dashed #B8860B', color: '#B8860B'}}>
-      + Add Set
-    </button>
-    <div>
-      <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
-      <input type="text" value={supersetNotes} onChange={e => setSupersetNotes(e.target.value)}
-        placeholder="e.g. felt strong today"
-        className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-        style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
-    </div>
-    <button onClick={() => setActiveTab('A')}
-      className="py-3 rounded-full font-semibold text-white"
-      style={{background: '#B8860B'}}>
-      Switch to A: {selectedExercise}
-    </button>
-  </div>
-)}
-
-            {/* Remove superset + Finish */}
             <div className="flex flex-col gap-3 mt-2">
               <button onClick={handleFinishSuperset}
                 className="py-3 rounded-full font-semibold text-white"
@@ -907,6 +903,13 @@ function getHistoryGrouped() {
                   <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Duration (minutes)</label>
                   <input type="number" value={duration} onChange={e => setDuration(e.target.value)}
                     placeholder="0" className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                </div>
+                <div>
+                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Reps (optional)</label>
+                  <input type="number" value={sets[0]?.reps || ''} onChange={e => updateSet(0, 'reps', e.target.value)}
+                    placeholder="0"
+                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
                     style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
                 </div>
                 <div>
