@@ -249,7 +249,10 @@ export default function MachinePage() {
       if (!error) setSaved(true)
     } else {
       const validSets = sets.filter(s => s.reps && s.weight)
-      if (validSets.length === 0) return
+if (validSets.length === 0) {
+  setError('Please enter reps and weight for at least one set.')
+  return
+}
       const inserts = validSets.map((s, i) => ({
         user_id: user.id, machine_id: id, exercise_name: selectedExercise,
         sets: validSets.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
@@ -364,7 +367,7 @@ export default function MachinePage() {
         </a>
 
         <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
+          <a href="/dashboard"><h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1></a>
           <span className="text-xs px-2 py-0.5 rounded-full" style={{
             background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
             color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
