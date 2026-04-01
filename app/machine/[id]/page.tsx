@@ -383,48 +383,7 @@ if (validSets.length === 0) {
   }}>
     {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
   </span>
-  {machine.type === 'strength' && (
-    <button onClick={() => setShowInlineAdd(true)} className="text-xs font-semibold" style={{color: '#2563EB', background: 'transparent', border: 'none', cursor: 'pointer'}}>
-      + variation
-    </button>
-  )}
 </div>
-{showInlineAdd && (
-  <div className="flex gap-2 items-center mb-3 mt-1">
-    <input
-      type="text"
-      value={newQuickVariation}
-      onChange={e => setNewQuickVariation(e.target.value)}
-      placeholder="e.g. Bicep Curls"
-      className="flex-1 px-3 py-2 rounded-lg text-white focus:outline-none text-sm"
-      style={{background: '#0F2040', border: '1px solid #2563EB'}}
-      autoFocus
-    />
-    <button
-      onClick={async () => {
-        if (!newQuickVariation.trim()) return
-        const { data } = await supabase.from('variations').insert({
-          user_id: user.id, machine_id: id, name: newQuickVariation.trim()
-        }).select().single()
-        if (data) {
-          setVariations(prev => [...prev, data])
-          setSelectedExercise(data.name)
-        }
-        setNewQuickVariation('')
-        setShowInlineAdd(false)
-      }}
-      className="px-3 py-2 rounded-lg text-white text-sm font-semibold"
-      style={{background: '#2563EB'}}>
-      Save
-    </button>
-    <button
-      onClick={() => { setShowInlineAdd(false); setNewQuickVariation('') }}
-      className="px-3 py-2 rounded-lg text-sm"
-      style={{background: 'transparent', border: '1px solid #1E3A5F', color: '#64748B'}}>
-      ✕
-    </button>
-  </div>
-)}
         {machine.description && (
           <p className="mb-4" style={{color: '#64748B'}}>{machine.description}</p>
         )}
@@ -450,6 +409,52 @@ if (validSets.length === 0) {
               <option value="__add__">+ Add variation...</option>
               {variations.length > 0 && <option value="__manage__">✎ Manage variations...</option>}
             </select>
+
+            {!showInlineAdd && (
+              <button
+                onClick={() => setShowInlineAdd(true)}
+                className="text-xs font-semibold mt-1 mb-2 inline-block"
+                style={{color: '#2563EB', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                + Add {machine.name} variation
+              </button>
+            )}
+
+            {showInlineAdd && (
+              <div className="flex gap-2 items-center mb-2 mt-1">
+                <input
+                  type="text"
+                  value={newQuickVariation}
+                  onChange={e => setNewQuickVariation(e.target.value)}
+                  placeholder={`e.g. Bicep Curls`}
+                  className="flex-1 px-3 py-2 rounded-lg text-white focus:outline-none text-sm"
+                  style={{background: '#0F2040', border: '1px solid #2563EB'}}
+                  autoFocus
+                />
+                <button
+                  onClick={async () => {
+                    if (!newQuickVariation.trim()) return
+                    const { data } = await supabase.from('variations').insert({
+                      user_id: user.id, machine_id: id, name: newQuickVariation.trim()
+                    }).select().single()
+                    if (data) {
+                      setVariations(prev => [...prev, data])
+                      setSelectedExercise(data.name)
+                    }
+                    setNewQuickVariation('')
+                    setShowInlineAdd(false)
+                  }}
+                  className="px-3 py-2 rounded-lg text-white text-sm font-semibold"
+                  style={{background: '#2563EB'}}>
+                  Save
+                </button>
+                <button
+                  onClick={() => { setShowInlineAdd(false); setNewQuickVariation('') }}
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{background: 'transparent', border: '1px solid #1E3A5F', color: '#64748B'}}>
+                  ✕
+                </button>
+              </div>
+            )}
 
             {showAddVariation && (
               <div className="rounded-xl p-4 mb-2" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
