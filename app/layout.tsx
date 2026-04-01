@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   keywords: ["gym", "workout tracker", "fitness", "QR code", "weight training"],
   authors: [{ name: "ScanSet" }],
   manifest: "/manifest.json",
-  themeColor: "#080808",
+  themeColor: "#C23B0A",
   other: {
     "mobile-web-app-capable": "yes",
   },
@@ -47,11 +47,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content="#080808" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>
     </html>
-  );
+  )
 }
