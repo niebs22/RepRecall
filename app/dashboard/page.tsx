@@ -345,8 +345,19 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* My Stats link */}
+        <a href="/my-stats" className="flex justify-between items-center rounded-xl p-4 mb-4"
+          style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
+          <div>
+            <p className="font-semibold" style={{color: '#E8E0D8'}}>My Stats</p>
+            <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>PRs, trends, top equipment</p>
+          </div>
+          <span style={{color: '#C23B0A', fontSize: '18px'}}>→</span>
+        </a>
+
         {/* Frequently Used */}
         <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
+        
         {machineWorkouts.length === 0 ? (
           <p className="text-center py-8" style={{color: '#6B5E55'}}>No workouts yet. Scan a machine to get started.</p>
         ) : (
