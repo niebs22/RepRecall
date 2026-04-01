@@ -324,39 +324,39 @@ if (validSets.length === 0) {
   const validSetsBCount = supersetSets.filter(s => s.reps && s.weight).length
 
   if (error) return (
-    <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex items-center justify-center" style={{background: '#080808'}}>
       <p className="text-red-400">{error}</p>
     </main>
   )
 
   if (!machine) return (
-    <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
-      <p style={{color: '#64748B'}}>Loading...</p>
+    <main className="min-h-screen flex items-center justify-center" style={{background: '#080808'}}>
+      <p style={{color: '#6B5E55'}}>Loading...</p>
     </main>
   )
 
   if (saved) return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#2563EB'}}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#C23B0A'}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
         {supersetMachine && (
           <span className="text-xs px-3 py-1 rounded-full inline-block mb-3"
-            style={{background: 'rgba(184,134,11,0.15)', color: '#B8860B'}}>
+            style={{background: 'rgba(184,134,11,0.15)', color: '#C23B0A'}}>
             SS — Superset logged
           </span>
         )}
-        <p className="mb-8" style={{color: '#64748B'}}>Keep it up!</p>
+        <p className="mb-8" style={{color: '#6B5E55'}}>Keep it up!</p>
         <div className="flex flex-col gap-3">
-          <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#2563EB'}}>
+          <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#C23B0A'}}>
             Scan Next Machine
           </a>
-          <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
+          <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
             Back to {machine?.name}
           </a>
-          <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#64748B'}}>
+          <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#6B5E55'}}>
             Back to Dashboard
           </a>
         </div>
@@ -369,9 +369,9 @@ if (validSets.length === 0) {
   const lastSessionNotes = lastSessionSets.find(s => s.notes)?.notes
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
-        <a href="/dashboard" className="text-sm mb-6 inline-block" style={{color: '#64748B'}}>
+        <a href="/dashboard" className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
           Back to Dashboard
         </a>
 
@@ -379,19 +379,19 @@ if (validSets.length === 0) {
   <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
   <span className="text-xs px-2 py-0.5 rounded-full" style={{
     background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
-    color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
+    color: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'
   }}>
     {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
   </span>
 </div>
         {machine.description && (
-          <p className="mb-4" style={{color: '#64748B'}}>{machine.description}</p>
+          <p className="mb-4" style={{color: '#6B5E55'}}>{machine.description}</p>
         )}
 
             {/* Exercise selector */}
              {machine.type === 'strength' && (
           <div className="mb-6">
-            <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise</label>
+            <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Exercise</label>
             <select
               value={selectedExercise}
               onChange={e => {
@@ -400,7 +400,7 @@ if (validSets.length === 0) {
                 else { setSelectedExercise(e.target.value); setShowAddVariation(false) }
               }}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
-              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
             >
               <option value={machine.name}>{machine.name}</option>
               {variations.map(v => (
@@ -414,7 +414,7 @@ if (validSets.length === 0) {
               <button
                 onClick={() => setShowInlineAdd(true)}
                 className="text-sm font-semibold mt-1 mb-2 inline-block"
-                style={{color: '#B8860B', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                style={{color: '#C23B0A', background: 'transparent', border: 'none', cursor: 'pointer'}}>
                 + Add {machine.name} variation
               </button>
             )}
@@ -427,7 +427,7 @@ if (validSets.length === 0) {
                   onChange={e => setNewQuickVariation(e.target.value)}
                   placeholder={`e.g. Bicep Curls`}
                   className="flex-1 px-3 py-2 rounded-lg text-white focus:outline-none text-sm"
-                  style={{background: '#0F2040', border: '1px solid #2563EB'}}
+                  style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
                   autoFocus
                 />
                 <button
@@ -444,41 +444,41 @@ if (validSets.length === 0) {
                     setShowInlineAdd(false)
                   }}
                   className="px-3 py-2 rounded-lg text-white text-sm font-semibold"
-                  style={{background: '#2563EB'}}>
+                  style={{background: '#C23B0A'}}>
                   Save
                 </button>
                 <button
                   onClick={() => { setShowInlineAdd(false); setNewQuickVariation('') }}
                   className="px-3 py-2 rounded-lg text-sm"
-                  style={{background: 'transparent', border: '1px solid #1E3A5F', color: '#64748B'}}>
+                  style={{background: 'transparent', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
                   ✕
                 </button>
               </div>
             )}
 
             {showAddVariation && (
-              <div className="rounded-xl p-4 mb-2" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+              <div className="rounded-xl p-4 mb-2" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
                 <p className="text-white text-sm font-semibold mb-3">Add a variation</p>
                 <input type="text" value={newVariation} onChange={e => setNewVariation(e.target.value)}
                   placeholder="e.g. Close Grip Bench Press"
                   className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
-                  style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+                  style={{background: '#080808', border: '1px solid #1A1A1A'}}/>
                 <div className="flex gap-2">
                   <button onClick={handleAddVariation} className="flex-1 py-3 rounded-full font-semibold text-white"
-                    style={{background: '#2563EB'}}>Save Variation</button>
+                    style={{background: '#C23B0A'}}>Save Variation</button>
                   <button onClick={() => { setShowAddVariation(false); setNewVariation('') }}
                     className="flex-1 py-3 rounded-full font-semibold"
-                    style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>Cancel</button>
+                    style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>Cancel</button>
                 </div>
               </div>
             )}
 
             {showManageVariations && (
-              <div className="rounded-xl p-4 mb-2" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+              <div className="rounded-xl p-4 mb-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-white text-sm font-semibold">Manage Variations</p>
                   <button onClick={() => { setShowManageVariations(false); setEditingVariation(null) }}
-                    className="text-xs" style={{color: '#64748B'}}>Done</button>
+                    className="text-xs" style={{color: '#6B5E55'}}>Done</button>
                 </div>
                 <div className="flex flex-col gap-2">
                   {variations.map(v => (
@@ -488,22 +488,22 @@ if (validSets.length === 0) {
                           <input type="text" value={editingVariationName}
                             onChange={e => setEditingVariationName(e.target.value)}
                             className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
-                            style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
+                            style={{background: '#080808', border: '1px solid #C23B0A'}}/>
                           <button onClick={() => handleRenameVariation(v)}
                             className="px-3 py-2 rounded-lg text-white text-sm font-semibold"
-                            style={{background: '#2563EB'}}>Save</button>
+                            style={{background: '#C23B0A'}}>Save</button>
                           <button onClick={() => { setEditingVariation(null); setEditingVariationName('') }}
                             className="px-3 py-2 rounded-lg text-sm"
-                            style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>✕</button>
+                            style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>✕</button>
                         </div>
                       ) : (
                         <div className="flex justify-between items-center px-3 py-2 rounded-lg"
-                          style={{background: '#0A1628'}}>
+                          style={{background: '#080808'}}>
                           <p className="text-white text-sm">{v.name}</p>
                           <div className="flex gap-2">
                             <button onClick={() => { setEditingVariation(v); setEditingVariationName(v.name) }}
                               className="text-xs px-2 py-1 rounded"
-                              style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Rename</button>
+                              style={{color: '#C23B0A', background: 'rgba(59,130,246,0.1)'}}>Rename</button>
                             <button onClick={() => handleDeleteVariation(v)}
                               className="text-xs px-2 py-1 rounded"
                               style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)'}}>Delete</button>
@@ -520,18 +520,18 @@ if (validSets.length === 0) {
 
         {/* Last session */}
         {lastSessionSets.length > 0 ? (
-          <div className="rounded-2xl p-5 mb-8" style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}>
+          <div className="rounded-2xl p-5 mb-8" style={{background: '#0F0F0F', borderLeft: '3px solid #C23B0A'}}>
             <div className="flex justify-between items-center mb-4">
-              <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Last Session</p>
+              <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
               <div className="flex gap-3 items-center">
                 <div className="flex gap-2 items-center">
-                  <p className="text-xs" style={{color: '#3B82F6'}}>{daysSince(lastSessionDate)}</p>
-                  <p className="text-xs" style={{color: '#64748B'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                  <p className="text-xs" style={{color: '#C23B0A'}}>{daysSince(lastSessionDate)}</p>
+                  <p className="text-xs" style={{color: '#6B5E55'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
                 {!editingSession && (
                   <button onClick={() => startEditingSession(lastSessionSets)}
                     className="text-xs px-2 py-1 rounded"
-                    style={{color: '#3B82F6', background: 'rgba(59,130,246,0.1)'}}>Edit</button>
+                    style={{color: '#C23B0A', background: 'rgba(59,130,246,0.1)'}}>Edit</button>
                 )}
               </div>
             </div>
@@ -541,58 +541,58 @@ if (validSets.length === 0) {
                 {machine.type === 'cardio' ? (
                   <div className="flex flex-col gap-3 mb-3">
                     <div>
-                      <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Duration (minutes)</label>
+                      <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
                       <input type="number" value={editableSets[0]?.duration || ''}
                         onChange={e => updateEditableSet(0, 'duration', e.target.value)}
                         className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
-                        style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
+                        style={{background: '#080808', border: '1px solid #C23B0A'}}/>
                     </div>
                     <div>
-                      <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Distance (miles)</label>
+                      <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Distance (miles)</label>
                       <input type="number" value={editableSets[0]?.distance || ''}
                         onChange={e => updateEditableSet(0, 'distance', e.target.value)}
                         className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
-                        style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+                        style={{background: '#080808', border: '1px solid #1A1A1A'}}/>
                     </div>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2 mb-3">
-                    <div className="grid grid-cols-12 gap-2 mb-1 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
+                    <div className="grid grid-cols-12 gap-2 mb-1 pb-2" style={{borderBottom: '1px solid #1A1A1A'}}>
                       <p className="col-span-1"></p>
-                      <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
-                      <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
+                      <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Reps</p>
+                      <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Weight</p>
                       <p className="col-span-3"></p>
                     </div>
                     {editableSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                        <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                        <p className="col-span-1 text-xs font-bold" style={{color: '#C23B0A'}}>{i + 1}</p>
                         <input type="number" value={s.reps}
                           onChange={e => updateEditableSet(i, 'reps', e.target.value)}
                           className="col-span-5 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
-                          style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
+                          style={{background: '#080808', border: '1px solid #C23B0A'}}/>
                         <input type="number" value={s.weight}
                           onChange={e => updateEditableSet(i, 'weight', e.target.value)}
                           className="col-span-6 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
-                          style={{background: '#0A1628', border: '1px solid #2563EB'}}/>
+                          style={{background: '#080808', border: '1px solid #C23B0A'}}/>
                       </div>
                     ))}
                   </div>
                 )}
                 <div className="mb-3">
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes</label>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes</label>
                   <input type="text" value={editableSets[0]?.notes || ''}
                     onChange={e => updateEditableSet(0, 'notes', e.target.value)}
                     placeholder="e.g. felt strong today"
                     className="w-full px-3 py-2 rounded-lg text-white focus:outline-none"
-                    style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+                    style={{background: '#080808', border: '1px solid #1A1A1A'}}/>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={saveEditedSession}
                     className="flex-1 py-2 rounded-full font-semibold text-white text-sm"
-                    style={{background: '#2563EB'}}>Save Changes</button>
+                    style={{background: '#C23B0A'}}>Save Changes</button>
                   <button onClick={() => setEditingSession(false)}
                     className="flex-1 py-2 rounded-full text-sm font-semibold"
-                    style={{background: '#0A1628', border: '1px solid #1E3A5F', color: '#64748B'}}>Cancel</button>
+                    style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>Cancel</button>
                 </div>
               </div>
             ) : (
@@ -601,44 +601,44 @@ if (validSets.length === 0) {
                   <div className="flex gap-6">
                     <div>
                       <p className="text-white font-bold text-lg">{lastSessionSets[0].duration}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>Minutes</p>
+                      <p className="text-xs" style={{color: '#6B5E55'}}>Minutes</p>
                     </div>
                     {lastSessionSets[0].reps && (
                       <div>
                         <p className="text-white font-bold text-lg">{lastSessionSets[0].reps}</p>
-                        <p className="text-xs" style={{color: '#64748B'}}>Reps</p>
+                        <p className="text-xs" style={{color: '#6B5E55'}}>Reps</p>
                       </div>
                     )}
                     {lastSessionSets[0].distance && (
                       <div>
                         <p className="text-white font-bold text-lg">{lastSessionSets[0].distance}</p>
-                        <p className="text-xs" style={{color: '#64748B'}}>Miles</p>
+                        <p className="text-xs" style={{color: '#6B5E55'}}>Miles</p>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <div className="grid grid-cols-12 gap-2 mb-2 pb-2" style={{borderBottom: '1px solid #1E3A5F'}}>
+                    <div className="grid grid-cols-12 gap-2 mb-2 pb-2" style={{borderBottom: '1px solid #1A1A1A'}}>
                       <p className="col-span-1"></p>
-                      <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Reps</p>
-                      <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#64748B'}}>Weight</p>
+                      <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Reps</p>
+                      <p className="col-span-6 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Weight</p>
                     </div>
                     {lastSessionSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                        <p className="col-span-1 text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                        <p className="col-span-1 text-xs font-bold" style={{color: '#C23B0A'}}>{i + 1}</p>
                         <p className="col-span-5 text-white font-semibold">{s.reps}</p>
                         <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
                       </div>
                     ))}
                     {lastSessionSets[0]?.superset && (
-                      <p className="text-xs font-bold mt-2" style={{color: '#B8860B'}}>
+                      <p className="text-xs font-bold mt-2" style={{color: '#C23B0A'}}>
                         SS{lastSessionSets[0]?.superset_exercise_name ? ` · ${lastSessionSets[0].superset_exercise_name}` : ''}
                       </p>
                     )}
                   </div>
                 )}
                 {lastSessionNotes && (
-                  <p className="text-xs italic pt-3 mt-3" style={{color: '#64748B', borderTop: '1px solid #1E3A5F'}}>
+                  <p className="text-xs italic pt-3 mt-3" style={{color: '#6B5E55', borderTop: '1px solid #1A1A1A'}}>
                     "{lastSessionNotes}"
                   </p>
                 )}
@@ -646,14 +646,14 @@ if (validSets.length === 0) {
             )}
           </div>
         ) : (
-  <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F2040'}}>
-    <p style={{color: '#64748B'}}>No previous session recorded</p>
+  <div className="rounded-2xl p-5 mb-8 text-center" style={{background: '#0F0F0F'}}>
+    <p style={{color: '#6B5E55'}}>No previous session recorded</p>
   </div>
 )}
 
         {/* History */}
         {allWorkouts.length > 1 && (
-          <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F2040'}}>
+          <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F0F0F'}}>
             <button
               onClick={() => setHistoryOpen(prev => !prev)}
               className="w-full flex justify-between items-center p-5"
@@ -661,12 +661,12 @@ if (validSets.length === 0) {
             >
               <div className="flex items-center gap-2">
                 <h2 className="font-semibold text-white">History</h2>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
                   {getHistoryGrouped().length} sessions
                 </span>
               </div>
               <span style={{
-                color: '#64748B',
+                color: '#6B5E55',
                 fontSize: '18px',
                 transform: historyOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s ease',
@@ -681,9 +681,9 @@ if (validSets.length === 0) {
                   <div key={i}>
                     <div className="flex items-center gap-2 mb-2">
                       <p className="text-white text-sm font-semibold">{group.label}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>({group.ago})</p>
+                      <p className="text-xs" style={{color: '#6B5E55'}}>({group.ago})</p>
                       {group.workouts[0]?.superset && (
-                        <span className="text-xs font-bold" style={{color: '#B8860B'}}>
+                        <span className="text-xs font-bold" style={{color: '#C23B0A'}}>
                           SS{group.workouts[0]?.superset_exercise_name ? ` · ${group.workouts[0].superset_exercise_name}` : ''}
                         </span>
                       )}
@@ -692,18 +692,18 @@ if (validSets.length === 0) {
                       <div className="flex gap-4">
                         <div>
                           <p className="text-white font-semibold">{group.workouts[0].duration}</p>
-                          <p className="text-xs" style={{color: '#64748B'}}>min</p>
+                          <p className="text-xs" style={{color: '#6B5E55'}}>min</p>
                         </div>
                         {group.workouts[0].reps && (
                           <div>
                             <p className="text-white font-semibold">{group.workouts[0].reps}</p>
-                            <p className="text-xs" style={{color: '#64748B'}}>reps</p>
+                            <p className="text-xs" style={{color: '#6B5E55'}}>reps</p>
                           </div>
                         )}
                         {group.workouts[0].distance && (
                           <div>
                             <p className="text-white font-semibold">{group.workouts[0].distance}</p>
-                            <p className="text-xs" style={{color: '#64748B'}}>mi</p>
+                            <p className="text-xs" style={{color: '#6B5E55'}}>mi</p>
                           </div>
                         )}
                       </div>
@@ -711,7 +711,7 @@ if (validSets.length === 0) {
                       <div className="flex flex-col gap-1">
                         {group.workouts.map((w, j) => (
                           <div key={j} className="flex gap-3 items-center">
-                            <p className="text-xs font-bold w-4" style={{color: '#3B82F6'}}>{j + 1}</p>
+                            <p className="text-xs font-bold w-4" style={{color: '#C23B0A'}}>{j + 1}</p>
                             <p className="text-sm text-white">{w.reps} reps</p>
                             <p className="text-sm text-white">·</p>
                             <p className="text-sm text-white">{w.weight} lbs</p>
@@ -720,7 +720,7 @@ if (validSets.length === 0) {
                       </div>
                     )}
                     {i < getHistoryGrouped().length - 1 && (
-                      <div className="mt-3" style={{borderBottom: '1px solid #1E3A5F'}}/>
+                      <div className="mt-3" style={{borderBottom: '1px solid #1A1A1A'}}/>
                     )}
                   </div>
                 ))}
@@ -736,7 +736,7 @@ if (validSets.length === 0) {
           {!supersetMachine && machine.type === 'strength' && (
             <button onClick={() => setShowSupersetPicker(true)}
               className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-              style={{border: '1px solid #2563EB', color: '#3B82F6'}}>
+              style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
               + Superset
             </button>
           )}
@@ -744,16 +744,16 @@ if (validSets.length === 0) {
 
         {/* Superset picker */}
         {showSupersetPicker && (
-          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
             <div className="flex justify-between items-center mb-3">
               <p className="text-white text-sm font-semibold">Pair with machine</p>
               <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }}
-                className="text-xs" style={{color: '#64748B'}}>Cancel</button>
+                className="text-xs" style={{color: '#6B5E55'}}>Cancel</button>
             </div>
             <input type="text" value={supersetSearch} onChange={e => setSupersetSearch(e.target.value)}
               placeholder="Search machines..."
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}/>
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}/>
             <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
               {filteredMachines.map(m => (
                 <button key={m.id}
@@ -772,9 +772,9 @@ if (validSets.length === 0) {
                     setSupersetVariations(varData || [])
                   }}
                   className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
-                  style={{background: '#0A1628'}}>
+                  style={{background: '#080808'}}>
                   <p className="text-white text-sm">{m.name}{m.id === id ? ' (same)' : ''}</p>
-                  <p className="text-xs" style={{color: '#3B82F6'}}>Pair</p>
+                  <p className="text-xs" style={{color: '#C23B0A'}}>Pair</p>
                 </button>
               ))}
             </div>
@@ -789,9 +789,9 @@ if (validSets.length === 0) {
                 onClick={() => setActiveTab('A')}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm"
                 style={{
-                  background: activeTab === 'A' ? '#2563EB' : '#0F2040',
-                  color: activeTab === 'A' ? '#fff' : '#64748B',
-                  border: activeTab === 'A' ? 'none' : '1px solid #1E3A5F'
+                  background: activeTab === 'A' ? '#C23B0A' : '#0F0F0F',
+                  color: activeTab === 'A' ? '#fff' : '#6B5E55',
+                  border: activeTab === 'A' ? 'none' : '1px solid #1A1A1A'
                 }}
               >
                 A: {selectedExercise}
@@ -806,9 +806,9 @@ if (validSets.length === 0) {
                 onClick={() => setActiveTab('B')}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm"
                 style={{
-                  background: activeTab === 'B' ? '#B8860B' : '#0F2040',
-                  color: activeTab === 'B' ? '#fff' : '#64748B',
-                  border: activeTab === 'B' ? 'none' : '1px solid #1E3A5F'
+                  background: activeTab === 'B' ? '#C23B0A' : '#0F0F0F',
+                  color: activeTab === 'B' ? '#fff' : '#6B5E55',
+                  border: activeTab === 'B' ? 'none' : '1px solid #1A1A1A'
                 }}
               >
                 B: {supersetExercise}
@@ -826,12 +826,12 @@ if (validSets.length === 0) {
               <div className="flex flex-col gap-4 mb-4">
                 {variations.length > 0 && (
                   <div>
-                    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (A)</label>
+                    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Exercise (A)</label>
                     <select
                       value={selectedExercise}
                       onChange={e => setSelectedExercise(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                      style={{background: '#0F2040', border: '1px solid #2563EB'}}
+                      style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
                     >
                       <option value={machine.name}>{machine.name} (default)</option>
                       {variations.map(v => (
@@ -841,40 +841,40 @@ if (validSets.length === 0) {
                   </div>
                 )}
                 <div className="grid grid-cols-12 gap-2 px-1">
-                  <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+                  <p className="col-span-1 text-xs" style={{color: '#6B5E55'}}></p>
+                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Reps</p>
+                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p>
                   <p className="col-span-1"></p>
                 </div>
                 {sets.map((set, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                      <p className="text-xs font-bold" style={{color: '#C23B0A'}}>{i + 1}</p>
                     </div>
                     <input type="number" value={set.reps} onChange={e => updateSet(i, 'reps', e.target.value)}
                       placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                     <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
                       placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                     <button type="button" onClick={() => removeSet(i)} className="col-span-1 text-center text-lg"
-                      style={{color: sets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
+                      style={{color: sets.length === 1 ? '#1A1A1A' : '#6B5E55'}}>×</button>
                   </div>
                 ))}
                 <button type="button" onClick={addSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #2563EB', color: '#3B82F6'}}>
+                  style={{background: 'transparent', border: '1px dashed #C23B0A', color: '#C23B0A'}}>
                   + Add Set
                 </button>
                 <div>
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
                   <input type="text" value={notes} onChange={e => setNotes(e.target.value)}
                     placeholder="e.g. felt strong today"
                     className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                 </div>
                 <button onClick={() => setActiveTab('B')}
                   className="py-3 rounded-full font-semibold text-white"
-                  style={{background: '#2563EB'}}>
+                  style={{background: '#C23B0A'}}>
                   Switch to B: {supersetExercise || supersetMachine.name}
                 </button>
               </div>
@@ -885,12 +885,12 @@ if (validSets.length === 0) {
               <div className="flex flex-col gap-4 mb-4">
                 {(supersetVariations.length > 0 || supersetMachine.id === id) && (
                   <div>
-                    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Exercise (B)</label>
+                    <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Exercise (B)</label>
                     <select
                       value={supersetExercise}
                       onChange={e => setSupersetExercise(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                      style={{background: '#0F2040', border: '1px solid #B8860B'}}
+                      style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
                     >
                       <option value={supersetMachine.name}>{supersetMachine.name} (default)</option>
                       {supersetMachine.id === id
@@ -901,40 +901,40 @@ if (validSets.length === 0) {
                   </div>
                 )}
                 <div className="grid grid-cols-12 gap-2 px-1">
-                  <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+                  <p className="col-span-1 text-xs" style={{color: '#6B5E55'}}></p>
+                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Reps</p>
+                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p>
                   <p className="col-span-1"></p>
                 </div>
                 {supersetSets.map((set, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#B8860B'}}>{i + 1}</p>
+                      <p className="text-xs font-bold" style={{color: '#C23B0A'}}>{i + 1}</p>
                     </div>
                     <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
                       placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                     <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
                       placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                     <button type="button" onClick={() => removeSupersetSet(i)} className="col-span-1 text-center text-lg"
-                      style={{color: supersetSets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
+                      style={{color: supersetSets.length === 1 ? '#1A1A1A' : '#6B5E55'}}>×</button>
                   </div>
                 ))}
                 <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #B8860B', color: '#B8860B'}}>
+                  style={{background: 'transparent', border: '1px dashed #C23B0A', color: '#C23B0A'}}>
                   + Add Set
                 </button>
                 <div>
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
                   <input type="text" value={supersetNotes} onChange={e => setSupersetNotes(e.target.value)}
                     placeholder="e.g. felt strong today"
                     className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                 </div>
                 <button onClick={() => setActiveTab('A')}
                   className="py-3 rounded-full font-semibold text-white"
-                  style={{background: '#B8860B'}}>
+                  style={{background: '#C23B0A'}}>
                   Switch to A: {selectedExercise}
                 </button>
               </div>
@@ -943,12 +943,12 @@ if (validSets.length === 0) {
             <div className="flex flex-col gap-3 mt-2">
               <button onClick={handleFinishSuperset}
                 className="py-3 rounded-full font-semibold text-white"
-                style={{background: '#2563EB'}}>
+                style={{background: '#C23B0A'}}>
                 Finish Superset
               </button>
               <button onClick={() => { setSupersetMachine(null); setActiveTab('A'); setSupersetSets([{reps: '', weight: ''}]) }}
                 className="py-2 rounded-full text-sm font-semibold"
-                style={{background: 'transparent', border: '1px solid #1E3A5F', color: '#64748B'}}>
+                style={{background: 'transparent', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
                 Remove Superset
               </button>
             </div>
@@ -959,61 +959,61 @@ if (validSets.length === 0) {
             {machine.type === 'cardio' ? (
               <>
                 <div>
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Duration (minutes)</label>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
                   <input type="number" value={duration} onChange={e => setDuration(e.target.value)}
                     placeholder="0" className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                 </div>
                 <div>
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Reps (optional)</label>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Reps (optional)</label>
                   <input type="number" value={sets[0]?.reps || ''} onChange={e => updateSet(0, 'reps', e.target.value)}
                     placeholder="0"
                     className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                 </div>
                 <div>
-                  <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Distance in miles (optional)</label>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Distance in miles (optional)</label>
                   <input type="number" value={distance} onChange={e => setDistance(e.target.value)}
                     placeholder="0.0" step="0.1"
                     className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                 </div>
               </>
             ) : (
               <>
                 <div className="grid grid-cols-12 gap-2 px-1">
-                  <p className="col-span-1 text-xs" style={{color: '#64748B'}}></p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#64748B'}}>Weight (lbs)</p>
+                  <p className="col-span-1 text-xs" style={{color: '#6B5E55'}}></p>
+                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Reps</p>
+                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p>
                   <p className="col-span-1"></p>
                 </div>
                 {sets.map((set, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#3B82F6'}}>{i + 1}</p>
+                      <p className="text-xs font-bold" style={{color: '#C23B0A'}}>{i + 1}</p>
                     </div>
                     <input type="number" value={set.reps} onChange={e => updateSet(i, 'reps', e.target.value)}
                       placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                     <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
                       placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
                     <button type="button" onClick={() => removeSet(i)} className="col-span-1 text-center text-lg"
-                      style={{color: sets.length === 1 ? '#1E3A5F' : '#64748B'}}>×</button>
+                      style={{color: sets.length === 1 ? '#1A1A1A' : '#6B5E55'}}>×</button>
                   </div>
                 ))}
                 <button type="button" onClick={addSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #2563EB', color: '#3B82F6'}}>
+                  style={{background: 'transparent', border: '1px dashed #C23B0A', color: '#C23B0A'}}>
                   + Add Set
                 </button>
               </>
             )}
             <div>
-              <label className="text-xs mb-1 block" style={{color: '#64748B'}}>Notes (optional)</label>
+              <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
               <input type="text" value={notes} onChange={e => setNotes(e.target.value)}
                 placeholder="e.g. felt strong today"
                 className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                style={{background: '#0F2040', border: '1px solid #1E3A5F'}}/>
+                style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}/>
             </div>
             {validationError && (
   <div className="flex justify-between items-center px-4 py-3 rounded-lg" style={{background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)'}}>
@@ -1022,7 +1022,7 @@ if (validSets.length === 0) {
   </div>
 )}
 <button type="submit" className="py-3 rounded-full font-semibold text-white"
-  style={{background: '#2563EB'}}>
+  style={{background: '#C23B0A'}}>
   Finish Workout
 </button>
           </form>

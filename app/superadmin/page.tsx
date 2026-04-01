@@ -97,18 +97,18 @@ export default function SuperAdmin() {
   }
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
-            <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Super Admin</p>
+            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span></h1>
+            <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Super Admin</p>
           </div>
-          <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>Dashboard</a>
+          <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Dashboard</a>
         </div>
 
         {/* Add gym */}
-        <div className="rounded-2xl p-6 mb-8" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
           <h2 className="text-white font-semibold text-lg mb-4">Add Gym</h2>
           <form onSubmit={addGym} className="flex flex-col gap-3">
             <input
@@ -117,13 +117,13 @@ export default function SuperAdmin() {
               value={newGymName}
               onChange={e => setNewGymName(e.target.value)}
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
             />
             <button
               type="submit"
               disabled={loading}
               className="py-3 rounded-full font-semibold text-white"
-              style={{background: '#2563EB'}}
+              style={{background: '#C23B0A'}}
             >
               {loading ? 'Adding...' : 'Add Gym'}
             </button>
@@ -132,48 +132,48 @@ export default function SuperAdmin() {
 
         {/* Gym list */}
         <h2 className="font-semibold text-lg mb-4 text-white">
-          All Gyms <span className="text-sm font-normal" style={{color: '#64748B'}}>({gyms.length})</span>
+          All Gyms <span className="text-sm font-normal" style={{color: '#6B5E55'}}>({gyms.length})</span>
         </h2>
 
         {gyms.length === 0 ? (
-          <p className="text-center py-8" style={{color: '#64748B'}}>No gyms yet. Add one above.</p>
+          <p className="text-center py-8" style={{color: '#6B5E55'}}>No gyms yet. Add one above.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {gyms.map(gym => (
-              <div key={gym.id} className="rounded-xl overflow-hidden" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+              <div key={gym.id} className="rounded-xl overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
                 <button
                   onClick={() => toggleExpand(gym.id)}
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#B8860B' : '#64748B'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#C23B0A' : '#6B5E55'}}></div>
                     <p className="text-white font-medium text-sm">{gym.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
                       background: gym.owner_id ? 'rgba(184,134,11,0.1)' : 'rgba(100,116,139,0.1)',
-                      color: gym.owner_id ? '#B8860B' : '#64748B'
+                      color: gym.owner_id ? '#C23B0A' : '#6B5E55'
                     }}>
                       {gym.owner_id ? 'Owner set' : 'No owner'}
                     </span>
                   </div>
-                  <span style={{color: '#64748B', transform: expanded === gym.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
+                  <span style={{color: '#6B5E55', transform: expanded === gym.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
                     ▾
                   </span>
                 </button>
 
                 {expanded === gym.id && (
-                  <div className="px-4 pb-4 pt-2 flex flex-col gap-3" style={{borderTop: '1px solid #1E3A5F'}}>
+                  <div className="px-4 pb-4 pt-2 flex flex-col gap-3" style={{borderTop: '1px solid #1A1A1A'}}>
 
                     {/* Join URL */}
                     <div>
-                      <p className="text-xs mb-1" style={{color: '#64748B'}}>Member Join URL</p>
+                      <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Member Join URL</p>
                       <div className="flex gap-2">
-                        <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#0A1628', color: '#3B82F6'}}>
+                        <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#080808', color: '#C23B0A'}}>
                           /join/{gym.code}
                         </p>
                         <button
                           onClick={() => copyJoinUrl(gym.code)}
                           className="text-xs px-3 py-2 rounded-lg font-semibold text-white"
-                          style={{background: '#2563EB'}}
+                          style={{background: '#C23B0A'}}
                         >
                           Copy
                         </button>
@@ -182,7 +182,7 @@ export default function SuperAdmin() {
 
                     {/* Assign owner */}
                     <div>
-                      <p className="text-xs mb-1" style={{color: '#64748B'}}>Assign Gym Owner</p>
+                      <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Assign Gym Owner</p>
                       <div className="flex gap-2">
                         <input
                           type="email"
@@ -190,12 +190,12 @@ export default function SuperAdmin() {
                           value={ownerEmail[gym.id] || ''}
                           onChange={e => setOwnerEmail({...ownerEmail, [gym.id]: e.target.value})}
                           className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
-                          style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+                          style={{background: '#080808', border: '1px solid #1A1A1A'}}
                         />
                         <button
                           onClick={() => assignOwner(gym.id)}
                           className="text-xs px-3 py-2 rounded-lg font-semibold text-white"
-                          style={{background: '#2563EB'}}
+                          style={{background: '#C23B0A'}}
                         >
                           Assign
                         </button>

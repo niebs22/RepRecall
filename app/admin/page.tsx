@@ -121,7 +121,7 @@ export default function Admin() {
     if (!ctx) return
 
     // Background
-    ctx.fillStyle = '#0A1628'
+    ctx.fillStyle = '#080808'
     ctx.fillRect(0, 0, cardWidth, cardHeight)
 
     // Wordmark centered
@@ -140,11 +140,11 @@ export default function Admin() {
     ctx.textAlign = 'left'
     ctx.fillText('scan', startX, 44)
     ctx.font = '900 26px Helvetica'
-    ctx.fillStyle = '#2563EB'
+    ctx.fillStyle = '#C23B0A'
     ctx.fillText('set', startX + scanWidth, 44)
 
     // Divider
-    ctx.strokeStyle = '#1E3A5F'
+    ctx.strokeStyle = '#1A1A1A'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(30, 58)
@@ -158,12 +158,12 @@ export default function Admin() {
 
     // Machine name
     ctx.font = '13px Helvetica'
-    ctx.fillStyle = '#64748B'
+    ctx.fillStyle = '#6B5E55'
     ctx.textAlign = 'center'
     ctx.fillText(machineName, cardWidth / 2, 314)
 
     // Divider
-    ctx.strokeStyle = '#1E3A5F'
+    ctx.strokeStyle = '#1A1A1A'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(30, 326)
@@ -172,7 +172,7 @@ export default function Admin() {
 
     // Tagline
     ctx.font = '10px Helvetica'
-    ctx.fillStyle = '#2563EB'
+    ctx.fillStyle = '#C23B0A'
     ctx.textAlign = 'center'
     ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 346)
 
@@ -190,24 +190,24 @@ export default function Admin() {
   }
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1></a>
-            <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
+            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span></h1></a>
+            <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
           <div className="flex gap-4">
-            <a href="/admin/analytics" className="text-sm" style={{color: '#3B82F6'}}>Analytics</a>
+            <a href="/admin/analytics" className="text-sm" style={{color: '#C23B0A'}}>Analytics</a>
             {role === 'super_admin' && (
-              <a href="/superadmin" className="text-sm" style={{color: '#64748B'}}>Super Admin</a>
+              <a href="/superadmin" className="text-sm" style={{color: '#6B5E55'}}>Super Admin</a>
             )}
-            <a href="/dashboard" className="text-sm" style={{color: '#64748B'}}>Dashboard</a>
+            <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Dashboard</a>
           </div>
         </div>
 
         {/* Add machine form */}
-        <div className="rounded-2xl p-6 mb-8" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
           <h2 className="text-white font-semibold text-lg mb-4">Add Machine</h2>
           <form onSubmit={addMachine} className="flex flex-col gap-3">
             <input
@@ -216,7 +216,7 @@ export default function Admin() {
               value={newMachine}
               onChange={e => setNewMachine(e.target.value)}
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
             />
             <input
               type="text"
@@ -224,16 +224,16 @@ export default function Admin() {
               value={newDescription}
               onChange={e => setNewDescription(e.target.value)}
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
             />
-            <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1E3A5F'}}>
+            <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1A1A1A'}}>
               <button
                 type="button"
                 onClick={() => setNewType('strength')}
                 className="flex-1 py-3 text-sm font-semibold transition-colors"
                 style={{
-                  background: newType === 'strength' ? '#2563EB' : '#0A1628',
-                  color: newType === 'strength' ? '#fff' : '#64748B'
+                  background: newType === 'strength' ? '#C23B0A' : '#080808',
+                  color: newType === 'strength' ? '#fff' : '#6B5E55'
                 }}
               >
                 💪 Strength
@@ -243,8 +243,8 @@ export default function Admin() {
                 onClick={() => setNewType('cardio')}
                 className="flex-1 py-3 text-sm font-semibold transition-colors"
                 style={{
-                  background: newType === 'cardio' ? '#2563EB' : '#0A1628',
-                  color: newType === 'cardio' ? '#fff' : '#64748B'
+                  background: newType === 'cardio' ? '#C23B0A' : '#080808',
+                  color: newType === 'cardio' ? '#fff' : '#6B5E55'
                 }}
               >
                 🏃 Cardio
@@ -254,7 +254,7 @@ export default function Admin() {
               type="submit"
               disabled={loading}
               className="py-3 rounded-full font-semibold text-white"
-              style={{background: '#2563EB'}}
+              style={{background: '#C23B0A'}}
             >
               {loading ? 'Adding...' : 'Add Machine'}
             </button>
@@ -262,38 +262,38 @@ export default function Admin() {
         </div>
 
         <h2 className="font-semibold text-lg mb-4 text-white">
-          Your Machines <span className="text-sm font-normal" style={{color: '#64748B'}}>({machines.length})</span>
+          Your Machines <span className="text-sm font-normal" style={{color: '#6B5E55'}}>({machines.length})</span>
         </h2>
 
         {machines.length === 0 ? (
-          <p className="text-center py-8" style={{color: '#64748B'}}>No machines yet. Add one above.</p>
+          <p className="text-center py-8" style={{color: '#6B5E55'}}>No machines yet. Add one above.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {machines.map(machine => (
-              <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#0F2040', border: '1px solid #1E3A5F'}}>
+              <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
                 <button
                   onClick={() => toggleExpand(machine.id)}
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#B8860B' : '#2563EB'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'}}></div>
                     <p className="text-white font-medium text-sm">{machine.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
                       background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
-                      color: machine.type === 'cardio' ? '#B8860B' : '#3B82F6'
+                      color: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'
                     }}>
                       {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
                     </span>
                   </div>
-                  <span style={{color: '#64748B', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
+                  <span style={{color: '#6B5E55', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
                     ▾
                   </span>
                 </button>
 
                 {expanded === machine.id && (
-                  <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #1E3A5F'}}>
+                  <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #1A1A1A'}}>
                     {machine.description && (
-                      <p className="text-xs mb-4" style={{color: '#64748B'}}>{machine.description}</p>
+                      <p className="text-xs mb-4" style={{color: '#6B5E55'}}>{machine.description}</p>
                     )}
                     <div className="flex items-center gap-4">
                       <div className="p-2 rounded-lg" style={{background: 'white'}}>
@@ -308,7 +308,7 @@ export default function Admin() {
                         <button
                           onClick={() => downloadQR(machine.id, machine.name)}
                           className="py-2 rounded-full text-sm font-semibold text-white text-center"
-                          style={{background: '#2563EB'}}
+                          style={{background: '#C23B0A'}}
                         >
                           Download QR
                         </button>

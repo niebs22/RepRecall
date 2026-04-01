@@ -173,25 +173,25 @@ export default function Analytics() {
   const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
 
   if (loading) return (
-    <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
-      <p style={{color: '#64748B'}}>Loading analytics...</p>
+    <main className="min-h-screen flex items-center justify-center" style={{background: '#080808'}}>
+      <p style={{color: '#6B5E55'}}>Loading analytics...</p>
     </main>
   )
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1></a>
-            <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Gym Analytics</p>
+            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span></h1></a>
+            <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Gym Analytics</p>
           </div>
-          <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
+          <a href="/admin" className="text-sm" style={{color: '#6B5E55'}}>Admin</a>
         </div>
 
         {gyms.length > 1 && (
           <div className="mb-6">
-            <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#64748B'}}>Viewing</label>
+            <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Viewing</label>
             <select
               value={selectedGymId}
               onChange={e => {
@@ -199,7 +199,7 @@ export default function Analytics() {
                 setGymName(gyms.find(g => g.id === e.target.value)?.name || '')
               }}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
             >
               {gyms.map(g => (
                 <option key={g.id} value={g.id}>{g.name}</option>
@@ -209,41 +209,41 @@ export default function Analytics() {
         )}
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
-            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Total Members</p>
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Total Members</p>
             <p className="text-3xl font-bold text-white">{totalMembers}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
-            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Active This Week</p>
-            <p className="text-3xl font-bold" style={{color: '#B8860B'}}>{activeThisWeek}</p>
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Active This Week</p>
+            <p className="text-3xl font-bold" style={{color: '#C23B0A'}}>{activeThisWeek}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
-            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Workouts This Week</p>
-            <p className="text-3xl font-bold" style={{color: '#2563EB'}}>{totalWorkoutsThisWeek}</p>
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Workouts This Week</p>
+            <p className="text-3xl font-bold" style={{color: '#C23B0A'}}>{totalWorkoutsThisWeek}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F2040'}}>
-            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#64748B'}}>Total Machines</p>
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+            <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Total Machines</p>
             <p className="text-3xl font-bold text-white">{machineStats.length}</p>
           </div>
         </div>
 
         {machineStats.length > 0 && (
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #B8860B'}}>
-              <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#B8860B'}}>Most Used</p>
+            <div className="rounded-2xl p-4" style={{background: '#0F0F0F', borderLeft: '3px solid #C23B0A'}}>
+              <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#C23B0A'}}>Most Used</p>
               <div className="flex flex-col gap-3">
                 {machineStats.slice(0, 3).map((m, i) => (
                   <div key={i} className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold w-4" style={{color: '#B8860B'}}>#{i + 1}</span>
+                      <span className="text-xs font-bold w-4" style={{color: '#C23B0A'}}>#{i + 1}</span>
                       <p className="text-white text-sm font-medium">{m.name}</p>
                     </div>
-                    <p className="text-xs font-semibold" style={{color: '#B8860B'}}>{m.count}</p>
+                    <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{m.count}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl p-4" style={{background: '#0F2040', borderLeft: '3px solid #EF4444'}}>
+            <div className="rounded-2xl p-4" style={{background: '#0F0F0F', borderLeft: '3px solid #EF4444'}}>
               <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#EF4444'}}>Least Used</p>
               <div className="flex flex-col gap-3">
                 {[...machineStats].reverse().slice(0, 3).map((m, i) => (
@@ -260,46 +260,46 @@ export default function Analytics() {
           </div>
         )}
 
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F'}}>
           <p className="text-white font-semibold mb-4">Busiest Days</p>
           <div className="flex gap-1.5 items-end justify-between">
             {dayLabels.map((day, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
-                <p className="text-xs" style={{color: '#64748B'}}>{dayStats[i]}</p>
+                <p className="text-xs" style={{color: '#6B5E55'}}>{dayStats[i]}</p>
                 <div
                   className="w-full rounded"
                   style={{
                     height: dayStats[i] === 0 ? '4px' : Math.max(4, dayStats[i] / maxDayCount * 60) + 'px',
                     background: i === todayIndex
-                      ? '#3B82F6'
+                      ? '#C23B0A'
                       : dayStats[i] === Math.max(...dayStats)
-                      ? '#B8860B'
-                      : '#1E3A5F'
+                      ? '#C23B0A'
+                      : '#1A1A1A'
                   }}
                 />
-                <p className="text-xs" style={{color: i === todayIndex ? '#3B82F6' : '#64748B'}}>{day}</p>
+                <p className="text-xs" style={{color: i === todayIndex ? '#C23B0A' : '#6B5E55'}}>{day}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F0F0F'}}>
           <p className="text-white font-semibold mb-4">Busiest Times</p>
           <div className="flex flex-col gap-3">
             {[
               { label: 'Morning', sublabel: '5am – 11am', count: timeStats.morning, color: '#F59E0B' },
-              { label: 'Afternoon', sublabel: '11am – 5pm', count: timeStats.afternoon, color: '#2563EB' },
+              { label: 'Afternoon', sublabel: '11am – 5pm', count: timeStats.afternoon, color: '#C23B0A' },
               { label: 'Evening', sublabel: '5pm – 10pm', count: timeStats.evening, color: '#8B5CF6' }
             ].map((slot, i) => (
               <div key={i}>
                 <div className="flex justify-between items-center mb-1">
                   <div>
                     <span className="text-white text-sm font-medium">{slot.label}</span>
-                    <span className="text-xs ml-2" style={{color: '#64748B'}}>{slot.sublabel}</span>
+                    <span className="text-xs ml-2" style={{color: '#6B5E55'}}>{slot.sublabel}</span>
                   </div>
                   <p className="text-xs font-semibold" style={{color: slot.color}}>{slot.count} sessions</p>
                 </div>
-                <div className="w-full rounded-full h-2" style={{background: '#0A1628'}}>
+                <div className="w-full rounded-full h-2" style={{background: '#080808'}}>
                   <div
                     className="h-2 rounded-full"
                     style={{
@@ -313,7 +313,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
           <button
             onClick={() => setEquipmentOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
@@ -321,12 +321,12 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-lg text-white">Equipment Usage</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
                 {machineStats.length}
               </span>
             </div>
             <span style={{
-              color: '#64748B',
+              color: '#6B5E55',
               fontSize: '18px',
               transform: equipmentOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s ease',
@@ -338,20 +338,20 @@ export default function Analytics() {
           {equipmentOpen && (
             <div className="flex flex-col gap-3 px-5 pb-5">
               {machineStats.map((machine, i) => (
-                <div key={i} className="rounded-xl p-4" style={{background: '#0A1628'}}>
+                <div key={i} className="rounded-xl p-4" style={{background: '#080808'}}>
                   <div className="flex justify-between items-center mb-2">
                     <p className="text-white text-sm font-medium">{machine.name}</p>
                     <div className="text-right">
-                      <p className="text-xs font-semibold" style={{color: '#2563EB'}}>{machine.count} sessions</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>{daysSince(machine.lastUsed)}</p>
+                      <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{machine.count} sessions</p>
+                      <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(machine.lastUsed)}</p>
                     </div>
                   </div>
-                  <div className="w-full rounded-full h-1.5" style={{background: '#1E3A5F'}}>
+                  <div className="w-full rounded-full h-1.5" style={{background: '#1A1A1A'}}>
                     <div
                       className="h-1.5 rounded-full"
                       style={{
                         width: machine.count === 0 ? '2%' : (machine.count / maxCount * 100) + '%',
-                        background: machine.count === 0 ? '#1E3A5F' : 'linear-gradient(90deg, #2563EB, #3B82F6)'
+                        background: machine.count === 0 ? '#1A1A1A' : 'linear-gradient(90deg, #C23B0A, #C23B0A)'
                       }}
                     />
                   </div>
@@ -361,7 +361,7 @@ export default function Analytics() {
           )}
         </div>
 
-        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
           <button
             onClick={() => setMembersOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
@@ -369,12 +369,12 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-lg text-white">Members</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1E3A5F', color: '#64748B'}}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
                 {members.length}
               </span>
             </div>
             <span style={{
-              color: '#64748B',
+              color: '#6B5E55',
               fontSize: '18px',
               transform: membersOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s ease',
@@ -386,15 +386,15 @@ export default function Analytics() {
           {membersOpen && (
             <div className="flex flex-col gap-2 px-5 pb-5">
               {members.length === 0 ? (
-                <p className="text-center py-4" style={{color: '#64748B'}}>No members yet.</p>
+                <p className="text-center py-4" style={{color: '#6B5E55'}}>No members yet.</p>
               ) : (
                 members.map((m, i) => (
-                  <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl" style={{background: '#0A1628'}}>
+                  <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl" style={{background: '#080808'}}>
                     <div>
                       <p className="text-white text-sm font-semibold">{m.full_name}</p>
-                      <p className="text-xs" style={{color: '#64748B'}}>{m.email}</p>
+                      <p className="text-xs" style={{color: '#6B5E55'}}>{m.email}</p>
                     </div>
-                    <p className="text-xs" style={{color: '#64748B'}}>
+                    <p className="text-xs" style={{color: '#6B5E55'}}>
                       {new Date(m.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}
                     </p>
                   </div>

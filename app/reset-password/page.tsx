@@ -30,25 +30,25 @@ export default function ResetPassword() {
   }
 
   if (done) return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#2563EB'}}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#C23B0A'}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Password Updated</h2>
-        <p style={{color: '#64748B'}}>Taking you to the app...</p>
+        <p style={{color: '#6B5E55'}}>Taking you to the app...</p>
       </div>
     </main>
   )
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-1">
-            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span>
+            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span>
           </h1>
-          <p className="text-sm tracking-widest uppercase" style={{color: '#2563EB'}}>New Password</p>
+          <p className="text-sm tracking-widest uppercase" style={{color: '#C23B0A'}}>New Password</p>
         </div>
         <form onSubmit={handleUpdate} className="flex flex-col gap-4">
           <input
@@ -57,7 +57,7 @@ export default function ResetPassword() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
-            style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
           />
           <input
             type="password"
@@ -65,13 +65,13 @@ export default function ResetPassword() {
             value={confirm}
             onChange={e => setConfirm(e.target.value)}
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
-            style={{background: '#0F2040', border: '1px solid #1E3A5F'}}
+            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
           />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
             type="submit"
             className="py-3 rounded-full font-semibold text-white"
-            style={{background: '#2563EB'}}
+            style={{background: '#C23B0A'}}
           >
             Update Password
           </button>

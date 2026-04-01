@@ -4,8 +4,8 @@
   "description": "Scan. Log. Repeat.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0A1628",
-  "theme_color": "#2563EB",
+  "background_color": "#080808",
+  "theme_color": "#C23B0A",
   "orientation": "portrait",
   "icons": [
     {
