@@ -256,7 +256,7 @@ export default function Dashboard() {
             <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
-            style={{background: '#B03508', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
+            style={{background: '##D44010', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
             <span style={{fontSize: '20px'}}></span> Scan Equipment
           </a>
           <div className="relative">
