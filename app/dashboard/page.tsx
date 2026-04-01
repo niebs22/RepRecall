@@ -15,6 +15,7 @@ export default function Dashboard() {
   const router = useRouter()
   const [totalWeightLifted, setTotalWeightLifted] = useState(0)
   const [loyalMachine, setLoyalMachine] = useState<string | null>(null)
+  const [fourWeekData, setFourWeekData] = useState<number[]>([0, 0, 0, 0])
 
   useEffect(() => {
     async function getUser() {
@@ -30,6 +31,7 @@ export default function Dashboard() {
         fetchAllMachines(user.id)
         fetchWeekActivity(user.id)
         fetchLiftStats(user.id)
+        fetchFourWeekData(user.id)
       }
     }
     getUser()
@@ -134,6 +136,34 @@ export default function Dashboard() {
       setWeekActivity(week)
       setTotalThisWeek(activeDays.size)
     }
+  }
+
+  async function fetchFourWeekData(userId: string) {
+    const { data } = await supabase
+      .from('workouts')
+      .select('created_at')
+      .eq('user_id', userId)
+    if (!data) return
+    const now = new Date()
+    const dayOfWeek = now.getDay()
+    const thisMonday = new Date(now)
+    thisMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    thisMonday.setHours(0, 0, 0, 0)
+    const weeks = [0, 1, 2, 3].map(w => {
+      const start = new Date(thisMonday)
+      start.setDate(thisMonday.getDate() - w * 7)
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      end.setHours(23, 59, 59, 999)
+      const days = new Set(
+        data.filter(wo => {
+          const d = new Date(wo.created_at)
+          return d >= start && d <= end
+        }).map(wo => new Date(wo.created_at).toDateString())
+      )
+      return days.size
+    }).reverse()
+    setFourWeekData(weeks)
   }
 
   async function fetchLiftStats(userId: string) {
@@ -274,68 +304,62 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Weekly activity */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Weekly Activity</p>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full"
-              style={{background: '#141414', border: '1px solid #222', color: '#6B5E55'}}>
-              {totalThisWeek} / 7
-            </span>
-          </div>
-          <div className="flex gap-1.5 items-end" style={{height: '64px'}}>
-            {dayLabels.map((day, i) => (
-              <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
-                <div
-                  className="w-full rounded"
-                  style={{
-                    height: weekActivity[i] ? `${barHeights[i]}px` : '8px',
-                    background: weekActivity[i]
-                      ? `linear-gradient(180deg, #D44A18 0%, #8C2A06 100%)`
-                      : '#1A1A1A',
-                    border: i === todayIndex && !weekActivity[i] ? '1px solid #C23B0A' : 'none',
-                    opacity: i > todayIndex ? 0.35 : 1,
-                  }}
-                />
-                <p className="text-xs" style={{
-                  color: i === todayIndex ? '#C23B0A' : '#6B5E55',
-                  fontWeight: i === todayIndex ? 700 : 400
-                }}>{day}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Two box row */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
 
-        {/* Lift Stats */}
-        {totalWeightLifted > 0 && (
-          <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime Lift Stats</p>
-            <div className="flex justify-between items-end">
-              <div>
-                <p style={{fontSize: '36px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
-                  {totalWeightLifted.toLocaleString()}<sup className="text-sm font-medium" style={{color: '#6B5E55'}}>lbs</sup>
-                </p>
-                <p className="text-xs mt-1.5" style={{color: '#C23B0A'}}>🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants</p>
-              </div>
-              {loyalMachine && (
-                <div className="text-right">
-                  <p className="text-xs mb-0.5" style={{color: '#6B5E55'}}>Most loyal</p>
-                  <p className="text-sm font-bold" style={{color: '#E8E0D8'}}>{loyalMachine}</p>
-                </div>
-              )}
+          {/* Elephant box */}
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime</p>
+            <p style={{fontSize: '26px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
+              {totalWeightLifted.toLocaleString()}
+            </p>
+            <p className="text-xs mt-1" style={{color: '#6B5E55'}}>lbs lifted</p>
+            <p className="text-xs mt-2 font-semibold" style={{color: '#C23B0A'}}>
+              🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants
+            </p>
+          </div>
+
+          {/* My Stats box with sparkline */}
+          <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
+            style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderTop: '2px solid #C23B0A'}}>
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>My Stats</p>
+              <p className="text-sm font-semibold" style={{color: '#E8E0D8'}}>PRs & trends</p>
             </div>
-          </div>
-        )}
+            {/* Sparkline */}
+            <div className="mt-3">
+              {(() => {
+                const max = Math.max(...fourWeekData, 1)
+                const w = 100
+                const h = 32
+                const points = fourWeekData.map((v, i) => {
+                  const x = (i / (fourWeekData.length - 1)) * w
+                  const y = h - (v / max) * (h - 4)
+                  return `${x},${y}`
+                }).join(' ')
+                return (
+                  <svg viewBox={`0 0 ${w} ${h}`} style={{width: '100%', height: '32px', overflow: 'visible'}}>
+                    <polyline
+                      points={points}
+                      fill="none"
+                      stroke="#C23B0A"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {fourWeekData.map((v, i) => {
+                      const x = (i / (fourWeekData.length - 1)) * w
+                      const y = h - (v / max) * (h - 4)
+                      return <circle key={i} cx={x} cy={y} r="2.5" fill="#C23B0A" />
+                    })}
+                  </svg>
+                )
+              })()}
+              <p className="text-xs mt-1" style={{color: '#6B5E55'}}>4-week activity</p>
+            </div>
+          </a>
 
-        {/* My Stats link */}
-        <a href="/my-stats" className="flex justify-between items-center rounded-xl p-4 mb-4"
-          style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
-          <div>
-            <p className="font-semibold" style={{color: '#E8E0D8'}}>My Stats</p>
-            <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>PRs, trends, top equipment</p>
-          </div>
-          <span style={{color: '#C23B0A', fontSize: '18px'}}>→</span>
-        </a>
+        </div>
 
         {/* Frequently Used */}
         <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
