@@ -344,7 +344,7 @@ if (validSets.length === 0) {
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
         {supersetMachine && (
           <span className="text-xs px-3 py-1 rounded-full inline-block mb-3"
-            style={{background: 'rgba(184,134,11,0.15)', color: '#C23B0A'}}>
+            style={{background: 'rgba(194,59,10,0.12)', color: '#C23B0A'}}>
             SS — Superset logged
           </span>
         )}
@@ -378,7 +378,7 @@ if (validSets.length === 0) {
         <div className="flex items-center gap-3 mb-1">
   <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
   <span className="text-xs px-2 py-0.5 rounded-full" style={{
-    background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
+    background: machine.type === 'cardio' ? 'rgba(194,59,10,0.1)' : 'rgba(37,99,235,0.1)',
     color: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'
   }}>
     {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
@@ -503,7 +503,7 @@ if (validSets.length === 0) {
                           <div className="flex gap-2">
                             <button onClick={() => { setEditingVariation(v); setEditingVariationName(v.name) }}
                               className="text-xs px-2 py-1 rounded"
-                              style={{color: '#C23B0A', background: 'rgba(59,130,246,0.1)'}}>Rename</button>
+                              style={{color: '#C23B0A', background: 'rgba(194,59,10,0.1)'}}>Rename</button>
                             <button onClick={() => handleDeleteVariation(v)}
                               className="text-xs px-2 py-1 rounded"
                               style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)'}}>Delete</button>
@@ -531,7 +531,7 @@ if (validSets.length === 0) {
                 {!editingSession && (
                   <button onClick={() => startEditingSession(lastSessionSets)}
                     className="text-xs px-2 py-1 rounded"
-                    style={{color: '#C23B0A', background: 'rgba(59,130,246,0.1)'}}>Edit</button>
+                    style={{color: '#C23B0A', background: 'rgba(194,59,10,0.1)'}}>Edit</button>
                 )}
               </div>
             </div>
