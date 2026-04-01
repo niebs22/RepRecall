@@ -100,8 +100,8 @@ export default function MachinePage() {
     setShowVariationPicker(false)
   } else if (variationData.length > 1) {
     setShowVariationPicker(true)
-  } else {
-    setShowVariationPicker(false)
+   } else {
+    setShowVariationPicker(true)
   }
 }
 
@@ -395,7 +395,7 @@ if (validSets.length === 0) {
         )}
 
 {/* Variation picker — shows for strength machines */}
-{machine.type === 'strength' && showVariationPicker && variations.length > 0 && (
+{machine.type === 'strength' && showVariationPicker && (
   <div className="mb-6">
     <p className="text-white font-semibold text-lg mb-4">What are you doing today?</p>
     
