@@ -76,10 +76,10 @@ export default function Dashboard() {
 
   async function fetchMachineWorkouts(userId: string) {
     const { data } = await supabase
-          .from('workouts')
-          .select('*, machines!workouts_machine_id_fkey(name, type)')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
+      .from('workouts')
+      .select('*, machines!workouts_machine_id_fkey(name, type)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
     if (data) {
       const seen = new Set()
       const countMap: Record<string, number> = {}
@@ -141,11 +141,9 @@ export default function Dashboard() {
       .from('workouts')
       .select('weight, reps, machine_id, machines!workouts_machine_id_fkey(name)')
       .eq('user_id', userId)
-
     if (data) {
       let total = 0
       const machineCount: Record<string, { name: string; count: number }> = {}
-
       data.forEach((w: any) => {
         if (w.weight && w.reps) total += w.weight * w.reps
         else if (w.weight) total += w.weight
@@ -154,13 +152,12 @@ export default function Dashboard() {
           machineCount[w.machine_id].count++
         }
       })
-
       setTotalWeightLifted(Math.round(total))
-
       const top = Object.values(machineCount).sort((a, b) => b.count - a.count)[0]
       if (top) setLoyalMachine(top.name)
     }
   }
+
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
@@ -213,28 +210,39 @@ export default function Dashboard() {
   const today = new Date().getDay()
   const todayIndex = today === 0 ? 6 : today - 1
 
+  // Bar heights based on session volume per day would go here — for now proportional placeholder
+  const barHeights = [40, 28, 48, 20, 36, 8, 8]
+
   return (
-    <main className="min-h-screen p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span></h1>
+          <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
+            scan<span style={{fontWeight: 900, color: '#C23B0A'}}>set</span>
+          </h1>
           <div className="flex items-center gap-4">
             {profile?.role && profile.role !== 'member' && (
-              <a href="/admin" className="text-sm" style={{color: '#64748B'}}>Admin</a>
+              <a href="/admin" className="text-sm" style={{color: '#6B5E55'}}>Admin</a>
             )}
-            <button onClick={handleLogout} className="text-sm" style={{color: '#64748B'}}>Log Out</button>
+            <button onClick={handleLogout} className="text-sm" style={{color: '#6B5E55'}}>Log Out</button>
           </div>
         </div>
 
         {/* Welcome */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white">{getGreeting()}, {getFirstName()}</h2>
+          <h2 className="text-3xl font-bold" style={{color: '#E8E0D8', letterSpacing: '-0.5px'}}>
+            {getGreeting()}, {getFirstName()}
+          </h2>
           {gymName && (
-            <p className="text-xs mt-0.5 mb-1" style={{color: '#2563EB'}}>📍 {gymName}</p>
+            <p className="text-xs font-bold tracking-widest mt-1 mb-1 flex items-center gap-1.5"
+              style={{color: '#C23B0A', textTransform: 'uppercase', letterSpacing: '2px'}}>
+              <span style={{width: '5px', height: '5px', borderRadius: '50%', background: '#C23B0A', display: 'inline-block'}}></span>
+              {gymName}
+            </p>
           )}
-          <p className="text-sm mt-1" style={{color: '#64748B'}}>
+          <p className="text-sm mt-1" style={{color: '#6B5E55'}}>
             {totalThisWeek === 0
               ? "You haven't trained yet this week."
               : `You've trained ${totalThisWeek} day${totalThisWeek > 1 ? 's' : ''} this week.`}
@@ -242,67 +250,73 @@ export default function Dashboard() {
         </div>
 
         {/* Scan card */}
-        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
-          <p className="text-white font-semibold text-lg mb-3">Ready to train?</p>
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Ready to train?</p>
           
             <a
             href="/scan"
-            className="flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-white text-lg w-full text-center mb-3"
-            style={{background: 'linear-gradient(135deg, #2563EB, #3B82F6)', boxShadow: '0 0 24px rgba(37, 99, 235, 0.4)'}}
-          >
-            <span style={{fontSize: '22px'}}>📷</span> Scan Equipment
+            className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
+            style={{background: '#C23B0A', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
+            <span style={{fontSize: '20px'}}>📷</span> Scan Equipment
           </a>
           <div className="relative">
             <select
               onChange={handleMachineSelect}
               defaultValue=""
-              className="w-full px-4 py-3 rounded-lg text-white appearance-none focus:outline-none"
-              style={{background: '#0A1628', border: '1px solid #1E3A5F'}}
-            >
+              className="w-full px-4 py-3 rounded-lg appearance-none focus:outline-none"
+              style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
               <option value="" disabled>Select equipment manually</option>
               {allMachines.map(machine => (
                 <option key={machine.id} value={machine.id}>{machine.name}</option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#64748B'}}>▾</div>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#6B5E55'}}>▾</div>
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>This Week</p>
+            <p className="font-bold" style={{fontSize: '32px', color: '#E8E0D8', letterSpacing: '-1.5px', lineHeight: 1}}>
+              {totalThisWeek}<sup className="text-sm font-medium" style={{color: '#6B5E55'}}> /7</sup>
+            </p>
+            <p className="text-xs mt-1" style={{color: '#C23B0A'}}>{totalSessions} sessions</p>
+          </div>
+          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Lifetime</p>
+            <p className="font-bold" style={{fontSize: '32px', color: '#E8E0D8', letterSpacing: '-1.5px', lineHeight: 1}}>
+              {totalWeightLifted > 0 ? `${Math.round(totalWeightLifted/1000)}k` : '—'}<sup className="text-sm font-medium" style={{color: '#6B5E55'}}>lbs</sup>
+            </p>
+            <p className="text-xs mt-1" style={{color: '#C23B0A'}}>🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants</p>
           </div>
         </div>
 
         {/* Weekly activity */}
-        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
           <div className="flex justify-between items-center mb-4">
-            <div>
-              <p className="text-white font-semibold text-sm">Weekly Activity</p>
-              <p className="text-xs mt-0.5" style={{color: '#64748B'}}>Your training this week</p>
-            </div>
-            <div className="text-right">
-              <div className="px-3 py-1 rounded-full text-xs font-bold" style={{background: 'rgba(34, 197, 94, 0.15)', color: '#B8860B'}}>
-                {totalThisWeek}/7 days
-              </div>
-              <p className="text-xs mt-1" style={{color: '#64748B'}}>{totalSessions} total sessions</p>
-            </div>
+            <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Weekly Activity</p>
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full"
+              style={{background: '#141414', border: '1px solid #222', color: '#6B5E55'}}>
+              {totalThisWeek} / 7
+            </span>
           </div>
-          <div className="flex gap-2 items-end justify-between">
+          <div className="flex gap-1.5 items-end" style={{height: '64px'}}>
             {dayLabels.map((day, i) => (
               <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
                 <div
                   className="w-full rounded"
                   style={{
-                    height: '24px',
+                    height: weekActivity[i] ? `${barHeights[i]}px` : '8px',
                     background: weekActivity[i]
-                          ? 'linear-gradient(180deg, #B8860B 0%, #92700A 100%)'
-                          : '#0A1628',
-                    border: i === todayIndex
-                      ? '1px solid #B8860B'
-                      : weekActivity[i]
-                      ? 'none'
-                      : '1px solid #1E3A5F',
+                      ? `linear-gradient(180deg, #D44A18 0%, #8C2A06 100%)`
+                      : '#1A1A1A',
+                    border: i === todayIndex && !weekActivity[i] ? '1px solid #C23B0A' : 'none',
                     opacity: i > todayIndex ? 0.35 : 1,
-                    boxShadow: weekActivity[i] ? '0 0 8px rgba(184, 134, 11, 0.4)' : 'none'
                   }}
                 />
                 <p className="text-xs" style={{
-                  color: i === todayIndex ? '#B8860B' : '#64748B',
+                  color: i === todayIndex ? '#C23B0A' : '#6B5E55',
                   fontWeight: i === todayIndex ? 700 : 400
                 }}>{day}</p>
               </div>
@@ -312,17 +326,19 @@ export default function Dashboard() {
 
         {/* Lift Stats */}
         {totalWeightLifted > 0 && (
-          <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040'}}>
-            <p className="text-white font-semibold text-sm mb-3">Lifetime Lift Stats</p>
-            <div className="flex justify-between items-center">
+          <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime Lift Stats</p>
+            <div className="flex justify-between items-end">
               <div>
-                <p className="text-2xl font-bold text-white">{totalWeightLifted.toLocaleString()} <span className="text-base font-normal" style={{color: '#64748B'}}>lbs</span></p>
-                <p className="text-xs mt-1" style={{color: '#64748B'}}>🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants</p>
+                <p style={{fontSize: '36px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
+                  {totalWeightLifted.toLocaleString()}<sup className="text-sm font-medium" style={{color: '#6B5E55'}}>lbs</sup>
+                </p>
+                <p className="text-xs mt-1.5" style={{color: '#C23B0A'}}>🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants</p>
               </div>
               {loyalMachine && (
                 <div className="text-right">
-                  <p className="text-xs" style={{color: '#64748B'}}>Most loyal</p>
-                  <p className="text-sm font-semibold text-white">{loyalMachine}</p>
+                  <p className="text-xs mb-0.5" style={{color: '#6B5E55'}}>Most loyal</p>
+                  <p className="text-sm font-bold" style={{color: '#E8E0D8'}}>{loyalMachine}</p>
                 </div>
               )}
             </div>
@@ -330,26 +346,25 @@ export default function Dashboard() {
         )}
 
         {/* Frequently Used */}
-        <h2 className="font-semibold text-lg mb-4 text-white">Frequently Used</h2>
+        <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
         {machineWorkouts.length === 0 ? (
-          <p className="text-center py-8" style={{color: '#64748B'}}>No workouts yet. Scan a machine to get started.</p>
+          <p className="text-center py-8" style={{color: '#6B5E55'}}>No workouts yet. Scan a machine to get started.</p>
         ) : (
-          <div className="flex flex-col gap-3 mb-6">
+          <div className="flex flex-col gap-2 mb-6">
             {machineWorkouts.map(workout => (
               
                 <a
                 key={workout.machine_id}
                 href={'/machine/' + workout.machine_id}
                 className="rounded-xl p-4 flex justify-between items-center"
-                style={{background: '#0F2040', borderLeft: '3px solid #2563EB'}}
-              >
+                style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
                 <div>
-                  <p className="text-white font-semibold">{workout.exercise_name || workout.machines?.name}</p>
-                  <p className="text-sm mt-1" style={{color: '#64748B'}}>{formatWorkoutSummary(workout)}</p>
+                  <p className="font-semibold" style={{color: '#E8E0D8'}}>{workout.exercise_name || workout.machines?.name}</p>
+                  <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{formatWorkoutSummary(workout)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-medium" style={{color: '#3B82F6'}}>{daysSince(workout.created_at)}</p>
-                  <p className="text-xs mt-0.5" style={{color: '#64748B'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                  <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{daysSince(workout.created_at)}</p>
+                  <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
               </a>
             ))}

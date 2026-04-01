@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --navy: #0A1628;
-  --navy-card: #0F2040;
-  --navy-input: #0D1B35;
-  --blue: #2563EB;
-  --blue-light: #3B82F6;
-  --white: #FFFFFF;
-  --gray: #64748B;
-  --gray-light: #94A3B8;
+  --bg: #080808;
+  --card: #0F0F0F;
+  --input: #080808;
+  --border: #1A1A1A;
+  --ember: #C23B0A;
+  --ember-dark: #8C2A06;
+  --ember-light: #D44A18;
+  --text-primary: #E8E0D8;
+  --text-secondary: #6B5E55;
 }
 
 body {
-  background-color: #0A1628;
-  color: white;
+  background-color: #080808;
+  color: #E8E0D8;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
