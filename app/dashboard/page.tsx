@@ -274,24 +274,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>This Week</p>
-            <p className="font-bold" style={{fontSize: '32px', color: '#E8E0D8', letterSpacing: '-1.5px', lineHeight: 1}}>
-              {totalThisWeek}<sup className="text-sm font-medium" style={{color: '#6B5E55'}}> /7</sup>
-            </p>
-            <p className="text-xs mt-1" style={{color: '#C23B0A'}}>{totalSessions} sessions</p>
-          </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Lifetime</p>
-            <p className="font-bold" style={{fontSize: '32px', color: '#E8E0D8', letterSpacing: '-1.5px', lineHeight: 1}}>
-              {totalWeightLifted > 0 ? `${Math.round(totalWeightLifted/1000)}k` : '—'}<sup className="text-sm font-medium" style={{color: '#6B5E55'}}>lbs</sup>
-            </p>
-            <p className="text-xs mt-1" style={{color: '#C23B0A'}}>🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants</p>
-          </div>
-        </div>
-
         {/* Weekly activity */}
         <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
           <div className="flex justify-between items-center mb-4">
@@ -357,7 +339,7 @@ export default function Dashboard() {
 
         {/* Frequently Used */}
         <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
-        
+
         {machineWorkouts.length === 0 ? (
           <p className="text-center py-8" style={{color: '#6B5E55'}}>No workouts yet. Scan a machine to get started.</p>
         ) : (
