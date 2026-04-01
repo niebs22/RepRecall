@@ -214,7 +214,7 @@ export default function Dashboard() {
   const barHeights = [40, 28, 48, 20, 36, 8, 8]
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#080808'}}>
+    <main className="min-h-screen p-6" style={{background: '#080808', backgroundImage: 'radial-gradient(circle at 75% 0%, rgba(194,59,10,0.10) 0%, rgba(194,59,10,0.03) 35%, transparent 60%)'}}>
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
