@@ -95,8 +95,9 @@ export default function History() {
                   {formatDayLabel(group.date)}
                 </p>
                 <div className="flex flex-col gap-2">
-                  {group.items.map((w, wi) => (
-                    <a key={wi} href={'/machine/' + w.machine_id + '?from=history'}
+                  {group.items.map((w, wi) => {
+                    console.log('workout:', w.exercise_name, w.machines?.name)
+                    return (<a key={wi} href={'/machine/' + w.machine_id + '?from=history' + (w.exercise_name ? '&exercise=' + encodeURIComponent(w.exercise_name) : '')}
                       className="rounded-xl p-4 flex justify-between items-center"
                       style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
                       <div>
@@ -109,7 +110,7 @@ export default function History() {
                         <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{formatTime(w.created_at)}</p>
                       </div>
                     </a>
-                  ))}
+                  )})}
                 </div>
               </div>
             ))}
