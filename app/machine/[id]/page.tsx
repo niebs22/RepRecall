@@ -662,7 +662,7 @@ if (validSets.length === 0) {
 )}
 
         {/* History */}
-        {getHistoryGrouped().length > 0 && (
+        {allWorkouts.filter(w => (w.exercise_name || machine?.name) === selectedExercise).length > 1 && (
           <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F0F0F'}}>
             <button
               onClick={() => setHistoryOpen(prev => !prev)}
