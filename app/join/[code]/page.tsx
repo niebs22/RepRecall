@@ -83,74 +83,74 @@ export default function JoinGym() {
   }
 
   if (status === 'loading') return (
-    <main className="min-h-screen flex items-center justify-center" style={{background: '#0A1628'}}>
-      <p style={{color: '#64748B'}}>Loading...</p>
+    <main className="min-h-screen flex items-center justify-center" style={{background: '#080808'}}>
+      <p style={{color: '#6B5E55'}}>Loading...</p>
     </main>
   )
 
   if (status === 'error') return (
-    <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
         <h1 className="text-2xl font-bold text-white mb-2">Invalid QR Code</h1>
-        <p style={{color: '#64748B'}}>This gym code doesn't exist or has expired.</p>
+        <p style={{color: '#6B5E55'}}>This gym code doesn't exist or has expired.</p>
       </div>
     </main>
   )
 
   if (status === 'done') return (
-    <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#2563EB'}}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#C23B0A'}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">You're in!</h2>
-        <p style={{color: '#64748B'}}>Welcome to {gym?.name}. Taking you to the app...</p>
+        <p style={{color: '#6B5E55'}}>Welcome to {gym?.name}. Taking you to the app...</p>
       </div>
     </main>
   )
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#0A1628'}}>
+    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="w-full max-w-sm text-center">
         <h1 className="text-4xl font-bold text-white mb-1">
-          <span style={{fontWeight: 300}}>scan</span><span style={{color: '#2563EB', fontWeight: 900}}>set</span>
+          <span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span>
         </h1>
-        <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#2563EB'}}>Scan. Log. Repeat.</p>
+        <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#C23B0A'}}>Scan. Log. Repeat.</p>
 
         {/* Gym card */}
-        <div className="rounded-2xl p-6 mb-6" style={{background: '#0F2040'}}>
-          <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#64748B'}}>You've been invited to join</p>
+        <div className="rounded-2xl p-6 mb-6" style={{background: '#0F0F0F'}}>
+          <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#6B5E55'}}>You've been invited to join</p>
           <p className="text-2xl font-bold text-white mb-1">{gym?.name}</p>
-          <p className="text-sm" style={{color: '#64748B'}}>Create an account or log in to get started</p>
+          <p className="text-sm" style={{color: '#6B5E55'}}>Create an account or log in to get started</p>
         </div>
 
         {/* Install prompt */}
         {!installed && (
-          <div className="rounded-2xl p-5 mb-6" style={{background: '#0F2040', border: '1px solid #2563EB'}}>
+          <div className="rounded-2xl p-5 mb-6" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
             <p className="text-white font-semibold mb-1">Step 1 — Install the app</p>
-            <p className="text-xs mb-4" style={{color: '#64748B'}}>Get the best experience by adding ScanSet to your home screen</p>
+            <p className="text-xs mb-4" style={{color: '#6B5E55'}}>Get the best experience by adding ScanSet to your home screen</p>
 
             {!showIOSInstructions ? (
               <button
                 onClick={handleInstall}
                 className="w-full py-3 rounded-full font-semibold text-white"
-                style={{background: '#2563EB'}}
+                style={{background: '#C23B0A'}}
               >
                 Add ScanSet to Home Screen
               </button>
             ) : (
               <div className="text-left">
                 <div className="flex items-start gap-3 mb-3">
-                  <span style={{color: '#2563EB', fontWeight: 700, minWidth: '20px'}}>1</span>
-                  <p className="text-sm text-white">Tap the <span style={{color: '#2563EB'}}>Share</span> button at the bottom of your screen</p>
+                  <span style={{color: '#C23B0A', fontWeight: 700, minWidth: '20px'}}>1</span>
+                  <p className="text-sm text-white">Tap the <span style={{color: '#C23B0A'}}>Share</span> button at the bottom of your screen</p>
                 </div>
                 <div className="flex items-start gap-3 mb-3">
-                  <span style={{color: '#2563EB', fontWeight: 700, minWidth: '20px'}}>2</span>
-                  <p className="text-sm text-white">Scroll down and tap <span style={{color: '#2563EB'}}>"Add to Home Screen"</span></p>
+                  <span style={{color: '#C23B0A', fontWeight: 700, minWidth: '20px'}}>2</span>
+                  <p className="text-sm text-white">Scroll down and tap <span style={{color: '#C23B0A'}}>"Add to Home Screen"</span></p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span style={{color: '#2563EB', fontWeight: 700, minWidth: '20px'}}>3</span>
-                  <p className="text-sm text-white">Tap <span style={{color: '#2563EB'}}>"Add"</span> in the top right corner</p>
+                  <span style={{color: '#C23B0A', fontWeight: 700, minWidth: '20px'}}>3</span>
+                  <p className="text-sm text-white">Tap <span style={{color: '#C23B0A'}}>"Add"</span> in the top right corner</p>
                 </div>
               </div>
             )}
@@ -159,19 +159,19 @@ export default function JoinGym() {
 
         {installed && (
           <div className="rounded-2xl p-4 mb-6 flex items-center gap-3" style={{background: 'rgba(184,134,11,0.1)', border: '1px solid rgba(184,134,11,0.3)'}}>
-            <span style={{color: '#B8860B', fontSize: '20px'}}>✓</span>
-            <p className="text-sm font-semibold" style={{color: '#B8860B'}}>ScanSet installed</p>
+            <span style={{color: '#C23B0A', fontSize: '20px'}}>✓</span>
+            <p className="text-sm font-semibold" style={{color: '#C23B0A'}}>ScanSet installed</p>
           </div>
         )}
 
         {/* Step 2 — Account */}
-        <p className="text-xs mb-4" style={{color: '#64748B'}}>Step 2 — Create your account</p>
+        <p className="text-xs mb-4" style={{color: '#6B5E55'}}>Step 2 — Create your account</p>
         <div className="flex flex-col gap-3">
           
             <a
             href={`/signup?gym=${code}`}
             className="py-3 rounded-full font-semibold text-white text-center"
-            style={{background: '#2563EB'}}
+            style={{background: '#C23B0A'}}
           >
             Create Account
           </a>
@@ -179,7 +179,7 @@ export default function JoinGym() {
             <a
             href={`/login?gym=${code}`}
             className="py-3 rounded-full font-semibold text-center"
-            style={{border: '1px solid #2563EB', color: '#3B82F6'}}
+            style={{border: '1px solid #C23B0A', color: '#C23B0A'}}
           >
             Log In
           </a>

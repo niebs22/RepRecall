@@ -109,8 +109,12 @@ export default function MyStats() {
   }
 
   function daysSince(date: string) {
-    const diffMs = new Date().getTime() - new Date(date).getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const now = new Date()
+    const past = new Date(date)
+    const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const pastDate = new Date(past.getFullYear(), past.getMonth(), past.getDate())
+    const diffMs = nowDate.getTime() - pastDate.getTime()
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
     if (diffDays === 0) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     return `${diffDays}d ago`
