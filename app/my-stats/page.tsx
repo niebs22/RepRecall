@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
+import BottomNav from '../components/BottomNav'
 
 export default function MyStats() {
   const [user, setUser] = useState<any>(null)
@@ -127,8 +128,9 @@ export default function MyStats() {
   const longestStreak = getLongestStreak()
   const maxDays = Math.max(...fourWeekTrend.map(w => w.days), 1)
 
-  return (
-    <main className="min-h-screen p-6" style={{background: '#080808'}}>
+    return (
+    <>
+    <main className="min-h-screen p-6 pb-28" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
@@ -231,7 +233,9 @@ export default function MyStats() {
           )}
         </div>
 
-      </div>
+   </div>
     </main>
+    <BottomNav />
+    </>
   )
 }

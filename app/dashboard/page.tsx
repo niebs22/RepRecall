@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
+import BottomNav from '../components/BottomNav'
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
@@ -244,7 +245,8 @@ export default function Dashboard() {
   const barHeights = [40, 28, 48, 20, 36, 8, 8]
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#080808'}}>
+    <>
+    <main className="min-h-screen p-6 pb-28" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
@@ -390,5 +392,7 @@ export default function Dashboard() {
 
       </div>
     </main>
+    <BottomNav />
+    </>
   )
 }
