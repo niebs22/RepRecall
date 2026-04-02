@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
+import jsPDF from 'jspdf'
 
 export default function Admin() {
   const [machines, setMachines] = useState<any[]>([])
@@ -185,6 +186,93 @@ export default function Admin() {
   }
   }
 
+  async function exportAllCards() {
+    const QRCode = await import('qrcode')
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'in',
+      format: 'letter'
+    })
+
+    const cardW = 3
+    const cardH = 1.5
+    const cols = 4
+    const rows = 6
+    const marginX = (8.5 - cols * cardW) / 2
+    const marginY = (11 - rows * cardH) / 2
+    const cropSize = 0.08
+
+    for (let i = 0; i < machines.length; i++) {
+      const machine = machines[i]
+      const col = i % cols
+      const row = Math.floor(i / cols) % rows
+      const pageIndex = Math.floor(i / (cols * rows))
+
+      if (i > 0 && col === 0 && row === 0) doc.addPage()
+
+      const x = marginX + col * cardW
+      const y = marginY + row * cardH
+
+      // Card background
+      doc.setFillColor(8, 8, 8)
+      doc.rect(x, y, cardW, cardH, 'F')
+
+      // Card border
+      doc.setDrawColor(26, 26, 26)
+      doc.setLineWidth(0.005)
+      doc.rect(x, y, cardW, cardH, 'S')
+
+      // Crop marks
+      doc.setDrawColor(180, 180, 180)
+      doc.setLineWidth(0.01)
+      // top-left
+      doc.line(x - cropSize, y, x - 0.01, y)
+      doc.line(x, y - cropSize, x, y - 0.01)
+      // top-right
+      doc.line(x + cardW + 0.01, y, x + cardW + cropSize, y)
+      doc.line(x + cardW, y - cropSize, x + cardW, y - 0.01)
+      // bottom-left
+      doc.line(x - cropSize, y + cardH, x - 0.01, y + cardH)
+      doc.line(x, y + cardH + 0.01, x, y + cardH + cropSize)
+      // bottom-right
+      doc.line(x + cardW + 0.01, y + cardH, x + cardW + cropSize, y + cardH)
+      doc.line(x + cardW, y + cardH + 0.01, x + cardW, y + cardH + cropSize)
+
+      // Wordmark
+      doc.setFontSize(9)
+      doc.setTextColor(232, 224, 216)
+      doc.setFont('helvetica', 'normal')
+      doc.text('scan', x + 0.12, y + 0.22)
+      const scanW = doc.getTextWidth('scan')
+      doc.setTextColor(194, 59, 10)
+      doc.setFont('helvetica', 'bold')
+      doc.text('set', x + 0.12 + scanW, y + 0.22)
+
+      // Machine name
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(232, 224, 216)
+      doc.text(machine.name, x + cardW / 2, y + 0.42, { align: 'center', maxWidth: cardW - 0.2 })
+
+      // QR code
+      const qrDataUrl = await QRCode.toDataURL(
+        'https://scanset.app/machine/' + machine.id,
+        { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
+      )
+      const qrSize = 0.85
+      const qrX = x + (cardW - qrSize) / 2
+      doc.addImage(qrDataUrl, 'PNG', qrX, y + 0.5, qrSize, qrSize)
+
+      // Tagline
+      doc.setFontSize(6)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(194, 59, 10)
+      doc.text('SCAN. LOG. REPEAT.', x + cardW / 2, y + cardH - 0.1, { align: 'center' })
+    }
+
+    doc.save(gymName + '-ScanSet-QR-Cards.pdf')
+  }
+
   function toggleExpand(id: string) {
     setExpanded(expanded === id ? null : id)
   }
@@ -261,9 +349,19 @@ export default function Admin() {
           </form>
         </div>
 
-        <h2 className="font-semibold text-lg mb-4 text-white">
-          Your Machines <span className="text-sm font-normal" style={{color: '#6B5E55'}}>({machines.length})</span>
-        </h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="font-semibold text-lg text-white">
+            Your Machines <span className="text-sm font-normal" style={{color: '#6B5E55'}}>({machines.length})</span>
+          </h2>
+          {machines.length > 0 && (
+            <button
+              onClick={exportAllCards}
+              className="text-sm px-4 py-2 rounded-full font-semibold text-white"
+              style={{background: '#C23B0A'}}>
+              Export All Cards
+            </button>
+          )}
+        </div>
 
         {machines.length === 0 ? (
           <p className="text-center py-8" style={{color: '#6B5E55'}}>No machines yet. Add one above.</p>
