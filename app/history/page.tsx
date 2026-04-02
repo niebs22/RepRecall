@@ -49,6 +49,23 @@ export default function History() {
     return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
   }
 
+  function groupSets(items: any[]) {
+    const groups: Record<string, any[]> = {}
+    items.forEach(w => {
+      const key = (w.exercise_name || w.machines?.name) + '|' + new Date(w.created_at).toISOString().slice(0, 16)
+      if (!groups[key]) groups[key] = []
+      groups[key].push(w)
+    })
+    return Object.values(groups).map(sets => {
+      const first = sets[0]
+      const weights = sets.map(s => s.weight).filter(Boolean)
+      const minW = Math.min(...weights)
+      const maxW = Math.max(...weights)
+      const totalSets = sets.reduce((sum, s) => sum + (s.sets || 1), 0)
+      return { ...first, _groupedSets: totalSets, _minWeight: minW, _maxWeight: maxW, _allSets: sets }
+    }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  }
+
   function formatSummary(w: any) {
     if (w.machines?.type === 'cardio') {
       const parts = []
@@ -57,8 +74,17 @@ export default function History() {
       return parts.join(' · ')
     }
     const parts = []
-    if (w.sets) parts.push(w.sets + (w.sets === 1 ? ' set' : ' sets'))
-    if (w.weight) parts.push(w.weight + ' lbs')
+    const sets = w._groupedSets || w.sets
+    if (sets) parts.push(sets + (sets === 1 ? ' set' : ' sets'))
+    if (w._minWeight && w._maxWeight) {
+      if (w._minWeight === w._maxWeight) {
+        parts.push(w._minWeight + ' lbs')
+      } else {
+        parts.push(w._minWeight + '-' + w._maxWeight + ' lbs')
+      }
+    } else if (w.weight) {
+      parts.push(w.weight + ' lbs')
+    }
     if (w.superset) parts.push('SS')
     return parts.join(' · ')
   }
@@ -95,7 +121,7 @@ export default function History() {
                   {formatDayLabel(group.date)}
                 </p>
                 <div className="flex flex-col gap-2">
-                  {group.items.map((w, wi) => (
+                  {groupSets(group.items).map((w, wi) => (
                     <a key={wi} href={'/machine/' + w.machine_id + '?from=history' + (w.exercise_name ? '&exercise=' + encodeURIComponent(w.exercise_name) : '')}
                       className="rounded-xl p-4 flex justify-between items-center"
                       style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
