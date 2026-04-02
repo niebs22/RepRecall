@@ -13,11 +13,11 @@ export default function BottomNav() {
         <a href="/dashboard" className="flex flex-col items-center gap-1 flex-1">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <path d="M3 12L12 3L21 12V21H15V15H9V21H3V12Z"
-              stroke={pathname === '/dashboard' ? '#C23B0A' : '#6B5E55'}
+              stroke={pathname === '/dashboard' ? '#E8E0D8' : '#6B5E55'}
               strokeWidth="2" strokeLinejoin="round"/>
           </svg>
           <span className="text-xs font-semibold"
-            style={{color: pathname === '/dashboard' ? '#C23B0A' : '#6B5E55'}}>
+            style={{color: pathname === '/dashboard' ? '#E8E0D8' : '#6B5E55'}}>
             Home
           </span>
         </a>
@@ -28,9 +28,9 @@ export default function BottomNav() {
           <div className="flex items-center justify-center rounded-full"
             style={{
               width: '58px', height: '58px',
-              background: '#D44010',
-              boxShadow: '0 4px 20px rgba(212,64,16,0.4)',
-              border: '3px solid #080808'
+              background: '#080808',
+              border: '2px solid #C23B0A',
+              boxShadow: '0 0 12px rgba(194,59,10,0.2)'
             }}>
             <img src="/icon-192.png" width="32" height="32" style={{borderRadius: '6px'}} />
           </div>
@@ -44,20 +44,20 @@ export default function BottomNav() {
         <a href="/history" className="flex flex-col items-center gap-1 flex-1">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <rect x="5" y="3" width="14" height="18" rx="2"
-              stroke={pathname === '/history' ? '#C23B0A' : '#6B5E55'}
+              stroke={pathname === '/history' ? '#E8E0D8' : '#6B5E55'}
               strokeWidth="2"/>
             <line x1="8" y1="8" x2="16" y2="8"
-              stroke={pathname === '/history' ? '#C23B0A' : '#6B5E55'}
+              stroke={pathname === '/history' ? '#E8E0D8' : '#6B5E55'}
               strokeWidth="1.5" strokeLinecap="round"/>
             <line x1="8" y1="12" x2="16" y2="12"
-              stroke={pathname === '/history' ? '#C23B0A' : '#6B5E55'}
+              stroke={pathname === '/history' ? '#E8E0D8' : '#6B5E55'}
               strokeWidth="1.5" strokeLinecap="round"/>
             <line x1="8" y1="16" x2="12" y2="16"
-              stroke={pathname === '/history' ? '#C23B0A' : '#6B5E55'}
+              stroke={pathname === '/history' ? '#E8E0D8' : '#6B5E55'}
               strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
           <span className="text-xs font-semibold"
-            style={{color: pathname === '/history' ? '#C23B0A' : '#6B5E55'}}>
+            style={{color: pathname === '/history' ? '#E8E0D8' : '#6B5E55'}}>
             History
           </span>
         </a>
