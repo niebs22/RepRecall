@@ -9,6 +9,7 @@ function MachinePageInner() {
   const searchParams = useSearchParams()
   const from = searchParams?.get('from')
   const exerciseParam = searchParams?.get('exercise')
+  console.log('exerciseParam:', exerciseParam)
   const [machine, setMachine] = useState<any>(null)
   const [allWorkouts, setAllWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
