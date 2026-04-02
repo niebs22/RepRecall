@@ -309,15 +309,8 @@ if (validSets.length === 0) {
     const exerciseWorkouts = allWorkouts.filter(w =>
       (w.exercise_name || machine?.name) === selectedExercise
     )
-    const lastSessionDate = exerciseWorkouts.length > 0
-      ? new Date(exerciseWorkouts[0].created_at).toDateString()
-      : null
-    const olderWorkouts = exerciseWorkouts.filter(w =>
-      new Date(w.created_at).toDateString() !== lastSessionDate
-    )
-    if (olderWorkouts.length === 0) return []
     const grouped: Record<string, any[]> = {}
-    olderWorkouts.forEach(w => {
+    exerciseWorkouts.forEach(w => {
       const dateStr = new Date(w.created_at).toDateString()
       if (!grouped[dateStr]) grouped[dateStr] = []
       grouped[dateStr].push(w)
@@ -665,7 +658,7 @@ if (validSets.length === 0) {
 )}
 
         {/* History */}
-        {getHistoryGrouped().length > 0 && (
+        {getHistoryGrouped().length > 0 && allWorkouts.filter(w => (w.exercise_name || machine?.name) === selectedExercise).length > 1 && (
           <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F0F0F'}}>
             <button
               onClick={() => setHistoryOpen(prev => !prev)}
