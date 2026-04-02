@@ -341,10 +341,24 @@ export default function Dashboard() {
                 }).join(' ')
                 return (
                   <svg viewBox={`0 0 ${w} ${h}`} style={{width: '100%', height: '32px', overflow: 'visible'}}>
+                    <defs>
+                      <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.3"/>
+                        <stop offset="100%" stopColor="#9B6DFF" stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={`M ${fourWeekData.map((v, i) => {
+                        const x = (i / (fourWeekData.length - 1)) * w
+                        const y = h - (v / max) * (h - 4)
+                        return `${x},${y}`
+                      }).join(' L ')} L ${w},${h} L 0,${h} Z`}
+                      fill="url(#sparkGrad)"
+                    />
                     <polyline
                       points={points}
                       fill="none"
-                      stroke="#C23B0A"
+                      stroke="#9B6DFF"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -352,7 +366,7 @@ export default function Dashboard() {
                     {fourWeekData.map((v, i) => {
                       const x = (i / (fourWeekData.length - 1)) * w
                       const y = h - (v / max) * (h - 4)
-                      return <circle key={i} cx={x} cy={y} r="2.5" fill="#C23B0A" />
+                      return <circle key={i} cx={x} cy={y} r="2.5" fill="#9B6DFF" />
                     })}
                   </svg>
                 )
