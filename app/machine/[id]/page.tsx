@@ -1,11 +1,13 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '../../../lib/supabase'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
-export default function MachinePage() {
+function MachinePageInner() {
   const pathname = usePathname()
   const id = pathname?.split('/').pop()
+  const searchParams = useSearchParams()
+  const from = searchParams?.get('from')
   const [machine, setMachine] = useState<any>(null)
   const [allWorkouts, setAllWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
@@ -371,8 +373,8 @@ if (validSets.length === 0) {
   return (
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
-        <a href="/dashboard" className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
-          Back to Dashboard
+        <a href={from === 'history' ? '/history' : '/dashboard'} className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
+          {from === 'history' ? '← Back to History' : '← Back to Dashboard'}
         </a>
 
         <div className="flex items-center gap-3 mb-1">
@@ -1031,5 +1033,12 @@ if (validSets.length === 0) {
 )}
       </div>
     </main>
+  )
+}
+export default function MachinePage() {
+  return (
+    <Suspense>
+      <MachinePageInner />
+    </Suspense>
   )
 }

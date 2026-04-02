@@ -96,7 +96,7 @@ export default function History() {
                 </p>
                 <div className="flex flex-col gap-2">
                   {group.items.map((w, wi) => (
-                    <a key={wi} href={'/machine/' + w.machine_id}
+                    <a key={wi} href={'/machine/' + w.machine_id + '?from=history'}
                       className="rounded-xl p-4 flex justify-between items-center"
                       style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
                       <div>
