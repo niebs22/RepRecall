@@ -8,6 +8,7 @@ function MachinePageInner() {
   const id = pathname?.split('/').pop()
   const searchParams = useSearchParams()
   const from = searchParams?.get('from')
+  const exerciseParam = searchParams?.get('exercise')
   const [machine, setMachine] = useState<any>(null)
   const [allWorkouts, setAllWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
@@ -95,11 +96,13 @@ function MachinePageInner() {
           .eq('user_id', user.id).eq('machine_id', id)
           .order('created_at', { ascending: true })
         if (variationData) {
-    setVariations(variationData)
-    if (variationData.length === 1) {
-      setSelectedExercise(variationData[0].name)
-    }
-  }
+          setVariations(variationData)
+          if (exerciseParam) {
+            setSelectedExercise(decodeURIComponent(exerciseParam))
+          } else if (variationData.length === 1) {
+            setSelectedExercise(variationData[0].name)
+          }
+        }
 
         const { data: workoutData } = await supabase
           .from('workouts').select('*')
