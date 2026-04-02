@@ -19,6 +19,9 @@ export default function Analytics() {
   const [equipmentOpen, setEquipmentOpen] = useState(true)
   const [members, setMembers] = useState<any[]>([])
   const [membersOpen, setMembersOpen] = useState(false)
+  const [atRiskMembers, setAtRiskMembers] = useState<any[]>([])
+  const [returnRate, setReturnRate] = useState<number | null>(null)
+  const [atRiskOpen, setAtRiskOpen] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -153,6 +156,46 @@ export default function Analytics() {
       else if (hour >= 17 && hour < 22) times.evening++
     })
     setTimeStats(times)
+    // At-risk members — no workout in 14+ days
+    if (gymMembersData && allWorkouts) {
+      const fourteenDaysAgo = new Date()
+      fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
+      const lastWorkoutByUser: Record<string, string> = {}
+      allWorkouts.forEach(w => {
+        if (!lastWorkoutByUser[w.user_id] || w.created_at > lastWorkoutByUser[w.user_id]) {
+          lastWorkoutByUser[w.user_id] = w.created_at
+        }
+      })
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', gymMembersData.map(m => m.user_id))
+      const atRisk = gymMembersData.filter(m => {
+        const last = lastWorkoutByUser[m.user_id]
+        if (!last) return true
+        return new Date(last) < fourteenDaysAgo
+      }).map(m => ({
+        ...m,
+        full_name: profilesData?.find(p => p.id === m.user_id)?.full_name || 'Unknown',
+        email: profilesData?.find(p => p.id === m.user_id)?.email || '',
+        lastWorkout: lastWorkoutByUser[m.user_id] || null
+      })).sort((a, b) => {
+        if (!a.lastWorkout) return -1
+        if (!b.lastWorkout) return 1
+        return new Date(a.lastWorkout).getTime() - new Date(b.lastWorkout).getTime()
+      })
+      setAtRiskMembers(atRisk)
+
+      // New member return rate — members who logged at least 2 sessions
+      const sessionCountByUser: Record<string, number> = {}
+      allWorkouts.forEach(w => {
+        sessionCountByUser[w.user_id] = (sessionCountByUser[w.user_id] || 0) + 1
+      })
+      const totalMembers = gymMembersData.length
+      const returned = gymMembersData.filter(m => (sessionCountByUser[m.user_id] || 0) >= 2).length
+      setReturnRate(totalMembers > 0 ? Math.round((returned / totalMembers) * 100) : null)
+    }
+
     setLoading(false)
   }
 
@@ -313,9 +356,84 @@ export default function Analytics() {
           </div>
         </div>
 
+        {/* New Member Return Rate */}
+        {returnRate !== null && (
+          <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Member Return Rate</p>
+            <div className="flex justify-between items-end mb-3">
+              <div>
+                <p style={{fontSize: '36px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
+                  {returnRate}<span style={{fontSize: '20px', color: '#6B5E55'}}>%</span>
+                </p>
+                <p className="text-xs mt-1" style={{color: '#6B5E55'}}>of members logged 2+ sessions</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-semibold" style={{color: returnRate >= 70 ? '#22C55E' : returnRate >= 40 ? '#F59E0B' : '#EF4444'}}>
+                  {returnRate >= 70 ? '↑ Strong' : returnRate >= 40 ? '→ Average' : '↓ At risk'}
+                </p>
+              </div>
+            </div>
+            <div className="w-full rounded-full h-2" style={{background: '#1A1A1A'}}>
+              <div className="h-2 rounded-full" style={{
+                width: returnRate + '%',
+                background: returnRate >= 70 ? '#22C55E' : returnRate >= 40 ? '#F59E0B' : '#EF4444'
+              }}/>
+            </div>
+          </div>
+        )}
+
+        {/* At-Risk Members */}
+        <div className="rounded-2xl overflow-hidden mb-4" style={{background: '#0F0F0F'}}>
+          <button
+            onClick={() => setAtRiskOpen(prev => !prev)}
+            className="w-full flex justify-between items-center p-5"
+            style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-lg text-white">At-Risk Members</h2>
+              <span className="text-xs px-2 py-0.5 rounded-full"
+                style={{background: atRiskMembers.length > 0 ? 'rgba(239,68,68,0.15)' : '#1A1A1A',
+                  color: atRiskMembers.length > 0 ? '#EF4444' : '#6B5E55'}}>
+                {atRiskMembers.length}
+              </span>
+            </div>
+            <span style={{
+              color: '#6B5E55', fontSize: '18px',
+              transform: atRiskOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1
+            }}>▾</span>
+          </button>
+
+          {atRiskOpen && (
+            <div className="flex flex-col gap-2 px-5 pb-5">
+              {atRiskMembers.length === 0 ? (
+                <p className="text-sm py-2" style={{color: '#6B5E55'}}>All members active in the last 14 days. 🎉</p>
+              ) : (
+                <>
+                  <p className="text-xs mb-2" style={{color: '#6B5E55'}}>No workout logged in 14+ days</p>
+                  {atRiskMembers.map((m, i) => (
+                    <div key={i} className="flex justify-between items-center px-4 py-3 rounded-xl"
+                      style={{background: '#080808', borderLeft: '2px solid #EF4444'}}>
+                      <div>
+                        <p className="text-white text-sm font-semibold">{m.full_name}</p>
+                        <p className="text-xs" style={{color: '#6B5E55'}}>{m.email}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-semibold" style={{color: '#EF4444'}}>
+                          {m.lastWorkout ? daysSince(m.lastWorkout) : 'Never logged'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
           <button
-            onClick={() => setEquipmentOpen(prev => !prev)}
+            onClick={() => setMembersOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
             style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
           >
