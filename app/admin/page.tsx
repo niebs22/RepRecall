@@ -194,21 +194,22 @@ export default function Admin() {
       format: 'letter'
     })
 
-    const cardW = 3
-    const cardH = 1.5
-    const cols = 4
-    const rows = 6
+    const cardW = 2.5
+    const cardH = 2.0
+    const cols = 3
+    const rows = 5
+    const cardsPerPage = cols * rows
     const marginX = (8.5 - cols * cardW) / 2
     const marginY = (11 - rows * cardH) / 2
     const cropSize = 0.08
 
     for (let i = 0; i < machines.length; i++) {
       const machine = machines[i]
-      const col = i % cols
-      const row = Math.floor(i / cols) % rows
-      const pageIndex = Math.floor(i / (cols * rows))
+      const posOnPage = i % cardsPerPage
+      const col = posOnPage % cols
+      const row = Math.floor(posOnPage / cols)
 
-      if (i > 0 && col === 0 && row === 0) doc.addPage()
+      if (i > 0 && posOnPage === 0) doc.addPage()
 
       const x = marginX + col * cardW
       const y = marginY + row * cardH
@@ -218,52 +219,48 @@ export default function Admin() {
       doc.rect(x, y, cardW, cardH, 'F')
 
       // Card border
-      doc.setDrawColor(26, 26, 26)
+      doc.setDrawColor(40, 40, 40)
       doc.setLineWidth(0.005)
       doc.rect(x, y, cardW, cardH, 'S')
 
       // Crop marks
-      doc.setDrawColor(180, 180, 180)
-      doc.setLineWidth(0.01)
-      // top-left
-      doc.line(x - cropSize, y, x - 0.01, y)
-      doc.line(x, y - cropSize, x, y - 0.01)
-      // top-right
-      doc.line(x + cardW + 0.01, y, x + cardW + cropSize, y)
-      doc.line(x + cardW, y - cropSize, x + cardW, y - 0.01)
-      // bottom-left
-      doc.line(x - cropSize, y + cardH, x - 0.01, y + cardH)
-      doc.line(x, y + cardH + 0.01, x, y + cardH + cropSize)
-      // bottom-right
-      doc.line(x + cardW + 0.01, y + cardH, x + cardW + cropSize, y + cardH)
-      doc.line(x + cardW, y + cardH + 0.01, x + cardW, y + cardH + cropSize)
+      doc.setDrawColor(160, 160, 160)
+      doc.setLineWidth(0.008)
+      doc.line(x - cropSize, y, x - 0.015, y)
+      doc.line(x, y - cropSize, x, y - 0.015)
+      doc.line(x + cardW + 0.015, y, x + cardW + cropSize, y)
+      doc.line(x + cardW, y - cropSize, x + cardW, y - 0.015)
+      doc.line(x - cropSize, y + cardH, x - 0.015, y + cardH)
+      doc.line(x, y + cardH + 0.015, x, y + cardH + cropSize)
+      doc.line(x + cardW + 0.015, y + cardH, x + cardW + cropSize, y + cardH)
+      doc.line(x + cardW, y + cardH + 0.015, x + cardW, y + cardH + cropSize)
 
-      // Wordmark
+      // Wordmark — top left
       doc.setFontSize(9)
-      doc.setTextColor(232, 224, 216)
       doc.setFont('helvetica', 'normal')
-      doc.text('scan', x + 0.12, y + 0.22)
-      const scanW = doc.getTextWidth('scan')
-      doc.setTextColor(194, 59, 10)
-      doc.setFont('helvetica', 'bold')
-      doc.text('set', x + 0.12 + scanW, y + 0.22)
-
-      // Machine name
-      doc.setFontSize(10)
-      doc.setFont('helvetica', 'bold')
       doc.setTextColor(232, 224, 216)
-      doc.text(machine.name, x + cardW / 2, y + 0.42, { align: 'center', maxWidth: cardW - 0.2 })
+      doc.text('scan', x + 0.14, y + 0.26)
+      const scanW = doc.getTextWidth('scan')
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(194, 59, 10)
+      doc.text('set', x + 0.14 + scanW, y + 0.26)
 
-      // QR code
+      // QR code — centered
       const qrDataUrl = await QRCode.toDataURL(
         'https://scanset.app/machine/' + machine.id,
-        { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
+        { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
       )
-      const qrSize = 0.85
+      const qrSize = 1.1
       const qrX = x + (cardW - qrSize) / 2
-      doc.addImage(qrDataUrl, 'PNG', qrX, y + 0.5, qrSize, qrSize)
+      doc.addImage(qrDataUrl, 'PNG', qrX, y + 0.35, qrSize, qrSize)
 
-      // Tagline
+      // Machine name — below QR
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(232, 224, 216)
+      doc.text(machine.name, x + cardW / 2, y + 1.58, { align: 'center', maxWidth: cardW - 0.2 })
+
+      // Tagline — bottom
       doc.setFontSize(6)
       doc.setFont('helvetica', 'bold')
       doc.setTextColor(194, 59, 10)
