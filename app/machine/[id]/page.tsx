@@ -306,11 +306,14 @@ if (validSets.length === 0) {
   }
 
   function getHistoryGrouped() {
-    const skipDate = allWorkouts.length > 0
-      ? new Date(allWorkouts[0].created_at).toDateString()
+    const exerciseWorkouts = allWorkouts.filter(w =>
+      (w.exercise_name || machine?.name) === selectedExercise
+    )
+    const skipDate = exerciseWorkouts.length > 0
+      ? new Date(exerciseWorkouts[0].created_at).toDateString()
       : null
     const grouped: Record<string, any[]> = {}
-    allWorkouts.forEach(w => {
+    exerciseWorkouts.forEach(w => {
       const dateStr = new Date(w.created_at).toDateString()
       if (dateStr === skipDate) return
       if (!grouped[dateStr]) grouped[dateStr] = []
@@ -404,7 +407,7 @@ if (validSets.length === 0) {
               onChange={e => {
                 if (e.target.value === '__add__') { setShowAddVariation(true) }
                 else if (e.target.value === '__manage__') { setShowManageVariations(true) }
-                else { setSelectedExercise(e.target.value); setShowAddVariation(false) }
+                else { setSelectedExercise(e.target.value); setShowAddVariation(false); setHistoryOpen(false) }
               }}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
               style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
@@ -659,7 +662,7 @@ if (validSets.length === 0) {
 )}
 
         {/* History */}
-        {allWorkouts.length > 1 && (
+        {getHistoryGrouped().length > 0 && (
           <div className="rounded-2xl overflow-hidden mb-8" style={{background: '#0F0F0F'}}>
             <button
               onClick={() => setHistoryOpen(prev => !prev)}
