@@ -135,11 +135,10 @@ export default function Analytics() {
         }
       }
     })
-    const stats = Object.values(usageMap).map(stat => {
-      const machine = machines?.find(m => m.name === stat.name)
+    const stats = Object.entries(usageMap).map(([machineId, stat]) => {
+      const machine = machines?.find(m => m.id === machineId)
       return { ...stat, purchase_price: machine?.purchase_price || null }
     }).sort((a, b) => b.count - a.count)
-    setMachineStats(stats)
     setMachineStats(stats)
     setMostUsed(stats[0] || null)
     setLeastUsed(stats[stats.length - 1] || null)
