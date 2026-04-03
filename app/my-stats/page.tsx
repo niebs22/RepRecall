@@ -8,6 +8,7 @@ export default function MyStats() {
   const [user, setUser] = useState<any>(null)
   const [allWorkouts, setAllWorkouts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [prsOpen, setPrsOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function MyStats() {
     load()
   }, [])
 
-  // PRs — heaviest weight per exercise name
+  // PRs — heaviest weight per exercise, sorted alphabetically
   function getPRs() {
     const prMap: Record<string, { weight: number; machineName: string; date: string }> = {}
     allWorkouts.forEach(w => {
@@ -39,7 +40,7 @@ export default function MyStats() {
     })
     return Object.entries(prMap)
       .map(([exercise, data]) => ({ exercise, ...data }))
-      .sort((a, b) => b.weight - a.weight)
+      .sort((a, b) => a.exercise.localeCompare(b.exercise))
   }
 
   // Top 4 most used equipment
@@ -56,57 +57,75 @@ export default function MyStats() {
       .slice(0, 4)
   }
 
-  // Rolling 4-week activity — sessions per week
+  // Rolling 4-week activity
   function getFourWeekTrend() {
-    const weeks: { label: string; days: Set<string> }[] = []
     const now = new Date()
-    for (let w = 3; w >= 0; w--) {
-      const weekStart = new Date(now)
-      const dayOfWeek = now.getDay()
-      const monday = new Date(now)
-      monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-      monday.setHours(0, 0, 0, 0)
-      monday.setDate(monday.getDate() - w * 7)
-      const weekEnd = new Date(monday)
-      weekEnd.setDate(monday.getDate() + 6)
-      weekEnd.setHours(23, 59, 59, 999)
+    const dayOfWeek = now.getDay()
+    const thisMonday = new Date(now)
+    thisMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    thisMonday.setHours(0, 0, 0, 0)
+
+    return [3, 2, 1, 0].map(w => {
+      const start = new Date(thisMonday)
+      start.setDate(thisMonday.getDate() - w * 7)
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      end.setHours(23, 59, 59, 999)
       const label = w === 0 ? 'This week' : w === 1 ? 'Last week' : `${w + 1} wks ago`
-      weeks.push({ label, days: new Set() })
-      allWorkouts.forEach(wo => {
-        const d = new Date(wo.created_at)
-        if (d >= monday && d <= weekEnd) {
-          weeks[3 - w].days.add(d.toDateString())
-        }
-      })
-    }
-    return weeks.map(w => ({ label: w.label, days: w.days.size }))
+      const days = new Set(
+        allWorkouts
+          .filter(wo => { const d = new Date(wo.created_at); return d >= start && d <= end })
+          .map(wo => new Date(wo.created_at).toDateString())
+      )
+      return { label, days: days.size }
+    })
   }
 
-  // Total sessions
-  const totalSessions = allWorkouts.length
+  // Active weeks out of last 8
+  function getActiveWeeks() {
+    const now = new Date()
+    const dayOfWeek = now.getDay()
+    const thisMonday = new Date(now)
+    thisMonday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+    thisMonday.setHours(0, 0, 0, 0)
+    let active = 0
+    for (let w = 0; w < 8; w++) {
+      const start = new Date(thisMonday)
+      start.setDate(thisMonday.getDate() - w * 7)
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      end.setHours(23, 59, 59, 999)
+      const hasWorkout = allWorkouts.some(wo => {
+        const d = new Date(wo.created_at)
+        return d >= start && d <= end
+      })
+      if (hasWorkout) active++
+    }
+    return active
+  }
 
-  // Total weight
+  // Equipment not used in 21+ days (recommendations)
+  function getRecommendations() {
+    const lastUsed: Record<string, { name: string; date: string }> = {}
+    allWorkouts.forEach(w => {
+      const key = w.machine_id
+      const name = w.machines?.name || 'Unknown'
+      if (!lastUsed[key]) lastUsed[key] = { name, date: w.created_at }
+    })
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - 21)
+    return Object.values(lastUsed)
+      .filter(m => new Date(m.date) < cutoff)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 4)
+  }
+
+  const totalSessions = allWorkouts.length
   const totalWeight = allWorkouts.reduce((sum, w) => {
     if (w.weight && w.reps) return sum + w.weight * w.reps
     if (w.weight) return sum + w.weight
     return sum
   }, 0)
-
-  // Longest streak
-  function getLongestStreak() {
-    const days = new Set(allWorkouts.map(w => new Date(w.created_at).toDateString()))
-    const sorted = Array.from(days).map(d => new Date(d)).sort((a, b) => a.getTime() - b.getTime())
-    let longest = 0, current = 0, prev: Date | null = null
-    sorted.forEach(d => {
-      if (prev) {
-        const diff = (d.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24)
-        if (diff === 1) { current++; longest = Math.max(longest, current) }
-        else current = 1
-      } else { current = 1; longest = 1 }
-      prev = d
-    })
-    return longest
-  }
 
   function daysSince(date: string) {
     const now = new Date()
@@ -129,10 +148,11 @@ export default function MyStats() {
   const prs = getPRs()
   const topEquipment = getTopEquipment()
   const fourWeekTrend = getFourWeekTrend()
-  const longestStreak = getLongestStreak()
+  const activeWeeks = getActiveWeeks()
+  const recommendations = getRecommendations()
   const maxDays = Math.max(...fourWeekTrend.map(w => w.days), 1)
 
-    return (
+  return (
     <>
     <main className="min-h-screen p-6 pb-28" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
@@ -160,9 +180,9 @@ export default function MyStats() {
             </p>
           </div>
           <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Streak</p>
+            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Active</p>
             <p className="font-bold" style={{fontSize: '28px', color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-              {longestStreak}<sup style={{fontSize: '11px', color: '#6B5E55'}}>days</sup>
+              {activeWeeks}<sup style={{fontSize: '11px', color: '#6B5E55'}}>/8 wks</sup>
             </p>
           </div>
         </div>
@@ -182,7 +202,7 @@ export default function MyStats() {
                       ? i === 3 ? 'linear-gradient(180deg, #D44A18 0%, #8C2A06 100%)' : 'linear-gradient(180deg, #8C2A06 0%, #5A1A04 100%)'
                       : '#1A1A1A'
                   }}/>
-                  <p className="text-xs text-center" style={{color: '#6B5E55', fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
+                  <p className="text-center" style={{color: '#6B5E55', fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
                 </div>
               )
             })}
@@ -211,33 +231,71 @@ export default function MyStats() {
           </div>
         </div>
 
-        {/* PRs */}
-        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-          <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Personal Records</p>
-          {prs.length === 0 ? (
-            <p className="text-sm" style={{color: '#6B5E55'}}>No strength workouts logged yet.</p>
-          ) : (
+        {/* Recommendations */}
+        {recommendations.length > 0 && (
+          <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>Worth Revisiting</p>
+            <p className="text-xs mb-4" style={{color: '#6B5E55'}}>Equipment you haven't hit in 3+ weeks</p>
             <div className="flex flex-col gap-3">
-              {prs.map((pr, i) => (
-                <div key={i} className="flex justify-between items-center py-3"
-                  style={{borderBottom: i < prs.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
-                  <div>
-                    <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{pr.exercise}</p>
-                    <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{daysSince(pr.date)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold" style={{fontSize: '22px', color: '#E8E0D8', letterSpacing: '-0.5px', lineHeight: 1}}>
-                      {pr.weight}
-                    </p>
-                    <p className="text-xs" style={{color: '#6B5E55'}}>lbs</p>
-                  </div>
+              {recommendations.map((r, i) => (
+                <div key={i} className="flex justify-between items-center py-2"
+                  style={{borderBottom: i < recommendations.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
+                  <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{r.name}</p>
+                  <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{daysSince(r.date)}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* PRs — collapsible */}
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <button
+            onClick={() => setPrsOpen(prev => !prev)}
+            className="w-full flex justify-between items-center p-5"
+            style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+          >
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Personal Records</p>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
+                {prs.length}
+              </span>
+            </div>
+            <span style={{
+              color: '#6B5E55', fontSize: '18px',
+              transform: prsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1
+            }}>▾</span>
+          </button>
+
+          {prsOpen && (
+            <div className="px-5 pb-5">
+              {prs.length === 0 ? (
+                <p className="text-sm" style={{color: '#6B5E55'}}>No strength workouts logged yet.</p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {prs.map((pr, i) => (
+                    <div key={i} className="flex justify-between items-center py-3"
+                      style={{borderBottom: i < prs.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
+                      <div>
+                        <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{pr.exercise}</p>
+                        <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{daysSince(pr.date)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold" style={{fontSize: '22px', color: '#E8E0D8', letterSpacing: '-0.5px', lineHeight: 1}}>
+                          {pr.weight}
+                        </p>
+                        <p className="text-xs" style={{color: '#6B5E55'}}>lbs</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
 
-   </div>
+      </div>
     </main>
     <BottomNav />
     </>
