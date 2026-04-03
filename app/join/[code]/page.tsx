@@ -8,31 +8,7 @@ export default function JoinGym() {
   const code = pathname?.split('/').pop()
   const [gym, setGym] = useState<any>(null)
   const [status, setStatus] = useState<'loading' | 'join' | 'done' | 'error'>('loading')
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
-  const [installed, setInstalled] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-  const [showIOSInstructions, setShowIOSInstructions] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    // Detect iOS
-    const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())
-    setIsIOS(ios)
-
-    // Capture Android install prompt
-    const handler = (e: any) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-    }
-    window.addEventListener('beforeinstallprompt', handler)
-
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setInstalled(true)
-    }
-
-    return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
 
   useEffect(() => {
     async function load() {
@@ -66,19 +42,6 @@ export default function JoinGym() {
       setTimeout(() => router.push('/dashboard'), 2000)
     } else {
       setStatus('error')
-    }
-  }
-
-  async function handleInstall() {
-    if (isIOS) {
-      setShowIOSInstructions(true)
-      return
-    }
-    if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      if (outcome === 'accepted') setInstalled(true)
-      setDeferredPrompt(null)
     }
   }
 
@@ -117,70 +80,25 @@ export default function JoinGym() {
         </h1>
         <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#C23B0A'}}>Scan. Log. Repeat.</p>
 
-        {/* Gym card */}
         <div className="rounded-2xl p-6 mb-6" style={{background: '#0F0F0F'}}>
           <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#6B5E55'}}>You've been invited to join</p>
           <p className="text-2xl font-bold text-white mb-1">{gym?.name}</p>
           <p className="text-sm" style={{color: '#6B5E55'}}>Create an account or log in to get started</p>
         </div>
 
-        {/* Install prompt */}
-        {!installed && (
-          <div className="rounded-2xl p-5 mb-6" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
-            <p className="text-white font-semibold mb-1">Step 1 — Install the app</p>
-            <p className="text-xs mb-4" style={{color: '#6B5E55'}}>Get the best experience by adding ScanSet to your home screen</p>
-
-            {!showIOSInstructions ? (
-              <button
-                onClick={handleInstall}
-                className="w-full py-3 rounded-full font-semibold text-white"
-                style={{background: '#C23B0A'}}
-              >
-                Add ScanSet to Home Screen
-              </button>
-            ) : (
-              <div className="text-left">
-                <div className="flex items-start gap-3 mb-3">
-                  <span style={{color: '#C23B0A', fontWeight: 700, minWidth: '20px'}}>1</span>
-                  <p className="text-sm text-white">Tap the <span style={{color: '#C23B0A'}}>Share</span> button at the bottom of your screen</p>
-                </div>
-                <div className="flex items-start gap-3 mb-3">
-                  <span style={{color: '#C23B0A', fontWeight: 700, minWidth: '20px'}}>2</span>
-                  <p className="text-sm text-white">Scroll down and tap <span style={{color: '#C23B0A'}}>"Add to Home Screen"</span></p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span style={{color: '#C23B0A', fontWeight: 700, minWidth: '20px'}}>3</span>
-                  <p className="text-sm text-white">Tap <span style={{color: '#C23B0A'}}>"Add"</span> in the top right corner</p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {installed && (
-          <div className="rounded-2xl p-4 mb-6 flex items-center gap-3" style={{background: 'rgba(194,59,10,0.1)', border: '1px solid rgba(194,59,10,0.3)'}}>
-            <span style={{color: '#C23B0A', fontSize: '20px'}}>✓</span>
-            <p className="text-sm font-semibold" style={{color: '#C23B0A'}}>ScanSet installed</p>
-          </div>
-        )}
-
-        {/* Step 2 — Account */}
-        <p className="text-xs mb-4" style={{color: '#6B5E55'}}>Step 2 — Create your account</p>
         <div className="flex flex-col gap-3">
           
             <a
             href={`/signup?gym=${code}`}
             className="py-3 rounded-full font-semibold text-white text-center"
-            style={{background: '#C23B0A'}}
-          >
+            style={{background: '#C23B0A'}}>
             Create Account
           </a>
           
             <a
             href={`/login?gym=${code}`}
             className="py-3 rounded-full font-semibold text-center"
-            style={{border: '1px solid #C23B0A', color: '#C23B0A'}}
-          >
+            style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
             Log In
           </a>
         </div>

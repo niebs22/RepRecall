@@ -17,6 +17,10 @@ export default function Dashboard() {
   const [totalWeightLifted, setTotalWeightLifted] = useState(0)
   const [loyalMachine, setLoyalMachine] = useState<string | null>(null)
   const [fourWeekData, setFourWeekData] = useState<number[]>([0, 0, 0, 0])
+  const [showInstallBanner, setShowInstallBanner] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [showIOSSteps, setShowIOSSteps] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
 
   useEffect(() => {
     async function getUser() {
@@ -36,6 +40,18 @@ export default function Dashboard() {
       }
     }
     getUser()
+
+    // Install banner
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    const dismissed = localStorage.getItem('install_banner_dismissed')
+    if (!isStandalone && !dismissed) {
+      setShowInstallBanner(true)
+    }
+    const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())
+    setIsIOS(ios)
+    const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e) }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
   async function checkPendingGym(userId: string) {
@@ -189,6 +205,21 @@ export default function Dashboard() {
     }
   }
 
+  async function handleInstall() {
+    if (isIOS) { setShowIOSSteps(true); return }
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') setShowInstallBanner(false)
+      setDeferredPrompt(null)
+    }
+  }
+
+  function dismissBanner() {
+    localStorage.setItem('install_banner_dismissed', 'true')
+    setShowInstallBanner(false)
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut()
     router.push('/')
@@ -305,6 +336,43 @@ export default function Dashboard() {
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#6B5E55'}}>▾</div>
           </div>
         </div>
+
+        {/* Install banner */}
+        {showInstallBanner && (
+          <div className="rounded-2xl p-4 mb-4" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
+            <div className="flex justify-between items-start mb-2">
+              <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Add ScanSet to your home screen</p>
+              <button onClick={dismissBanner} style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
+            </div>
+            <p className="text-xs mb-3" style={{color: '#6B5E55'}}>Get the full app experience — faster access, works offline</p>
+            {!showIOSSteps ? (
+              <button
+                onClick={handleInstall}
+                className="w-full py-2.5 rounded-full font-semibold text-white text-sm"
+                style={{background: '#C23B0A'}}>
+                Add to Home Screen
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-bold" style={{color: '#C23B0A', minWidth: '16px'}}>1</span>
+                  <p className="text-xs text-white">Tap the <span style={{color: '#C23B0A'}}>Share</span> button at the bottom of Safari</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-bold" style={{color: '#C23B0A', minWidth: '16px'}}>2</span>
+                  <p className="text-xs text-white">Tap <span style={{color: '#C23B0A'}}>"Add to Home Screen"</span></p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-xs font-bold" style={{color: '#C23B0A', minWidth: '16px'}}>3</span>
+                  <p className="text-xs text-white">Tap <span style={{color: '#C23B0A'}}>"Add"</span></p>
+                </div>
+                <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
+                  Already installed — dismiss
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Two box row */}
         <div className="grid grid-cols-2 gap-3 mb-4">
