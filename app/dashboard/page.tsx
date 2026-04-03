@@ -324,7 +324,7 @@ export default function Dashboard() {
               <button
                 onClick={handleInstall}
                 className="w-full py-2.5 rounded-full font-semibold text-white text-sm"
-                style={{background: '#C23B0A'}}>
+                style={{background: '#D4A017'}}>
                 Add to Home Screen
               </button>
             ) : (
