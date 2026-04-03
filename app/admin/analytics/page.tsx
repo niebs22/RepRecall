@@ -463,6 +463,7 @@ export default function Analytics() {
                     ? Math.floor((new Date().getTime() - new Date(machine.lastUsed).getTime()) / (1000 * 60 * 60 * 24))
                     : 999
                   const isUnused = daysSinceUse >= 30
+                  console.log(machine.name, 'purchase_price:', machine.purchase_price, 'count:', machine.count)
                   const costPerUse = machine.purchase_price && machine.count > 0
                     ? (machine.purchase_price / machine.count).toFixed(2)
                     : null
