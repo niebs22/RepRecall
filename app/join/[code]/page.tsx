@@ -158,7 +158,7 @@ export default function JoinGym() {
         )}
 
         {installed && (
-          <div className="rounded-2xl p-4 mb-6 flex items-center gap-3" style={{background: 'rgba(184,134,11,0.1)', border: '1px solid rgba(184,134,11,0.3)'}}>
+          <div className="rounded-2xl p-4 mb-6 flex items-center gap-3" style={{background: 'rgba(194,59,10,0.1)', border: '1px solid rgba(194,59,10,0.3)'}}>
             <span style={{color: '#C23B0A', fontSize: '20px'}}>✓</span>
             <p className="text-sm font-semibold" style={{color: '#C23B0A'}}>ScanSet installed</p>
           </div>
