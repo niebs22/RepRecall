@@ -83,6 +83,7 @@ export default function Analytics() {
 
     const { data: machines } = await supabase
       .from('machines').select('*').eq('gym_id', gymId)
+    console.log('machines fetch:', machines?.map(m => ({ name: m.name, price: m.purchase_price })))
 
     const machineIds = machines?.map(m => m.id) || []
 
