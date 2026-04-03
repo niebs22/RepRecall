@@ -455,30 +455,55 @@ export default function Analytics() {
 
           {equipmentOpen && (
             <div className="flex flex-col gap-3 px-5 pb-5">
-              {machineStats.map((machine, i) => (
-                <div key={i} className="rounded-xl p-4" style={{background: '#080808'}}>
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-white text-sm font-medium">{machine.name}</p>
-                    <div className="text-right">
-                      <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{machine.count} sessions</p>
-                      <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(machine.lastUsed)}</p>
+              {machineStats.map((machine, i) => {
+                  const daysSinceUse = machine.lastUsed
+                    ? Math.floor((new Date().getTime() - new Date(machine.lastUsed).getTime()) / (1000 * 60 * 60 * 24))
+                    : 999
+                  const isUnused = daysSinceUse >= 30
+                  const costPerUse = machine.purchase_price && machine.count > 0
+                    ? (machine.purchase_price / machine.count).toFixed(2)
+                    : null
+                  return (
+                    <div key={i} className="rounded-xl p-4" style={{
+                      background: '#080808',
+                      border: isUnused ? '1px solid rgba(239,68,68,0.3)' : 'none'
+                    }}>
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="flex items-center gap-2">
+                          <p className="text-white text-sm font-medium">{machine.name}</p>
+                          {isUnused && (
+                            <span className="text-xs px-2 py-0.5 rounded-full font-bold"
+                              style={{background: 'rgba(239,68,68,0.15)', color: '#EF4444'}}>
+                              Unused 30d+
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-semibold" style={{color: isUnused ? '#EF4444' : '#C23B0A'}}>{machine.count} sessions</p>
+                          <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(machine.lastUsed)}</p>
+                        </div>
+                      </div>
+                      <div className="w-full rounded-full h-1.5 mb-2" style={{background: '#1A1A1A'}}>
+                        <div
+                          className="h-1.5 rounded-full"
+                          style={{
+                            width: machine.count === 0 ? '2%' : (machine.count / maxCount * 100) + '%',
+                            background: isUnused ? '#EF4444' : 'linear-gradient(90deg, #C23B0A, #C23B0A)'
+                          }}
+                        />
+                      </div>
+                      {costPerUse && (
+                        <p className="text-xs" style={{color: '#6B5E55'}}>
+                          Cost per session: <span style={{color: '#E8E0D8', fontWeight: 600}}>${costPerUse}</span>
+                          <span style={{color: '#6B5E55'}}> (${machine.purchase_price?.toLocaleString()} purchase)</span>
+                        </p>
+                      )}
                     </div>
-                  </div>
-                  <div className="w-full rounded-full h-1.5" style={{background: '#1A1A1A'}}>
-                    <div
-                      className="h-1.5 rounded-full"
-                      style={{
-                        width: machine.count === 0 ? '2%' : (machine.count / maxCount * 100) + '%',
-                        background: machine.count === 0 ? '#1A1A1A' : 'linear-gradient(90deg, #C23B0A, #C23B0A)'
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                  )
+                })}
             </div>
           )}
         </div>
-
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
           <button
             onClick={() => setMembersOpen(prev => !prev)}

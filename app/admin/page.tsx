@@ -15,6 +15,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [role, setRole] = useState<string>('')
+  const [editingPrice, setEditingPrice] = useState<string | null>(null)
+  const [priceInput, setPriceInput] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -270,6 +272,15 @@ export default function Admin() {
     doc.save(gymName + '-ScanSet-QR-Cards.pdf')
   }
 
+  async function savePurchasePrice(machineId: string) {
+    const price = parseFloat(priceInput)
+    if (isNaN(price) || price < 0) return
+    await supabase.from('machines').update({ purchase_price: price }).eq('id', machineId)
+    setEditingPrice(null)
+    setPriceInput('')
+    fetchMachines(gymId)
+  }
+
   function toggleExpand(id: string) {
     setExpanded(expanded === id ? null : id)
   }
@@ -399,7 +410,7 @@ export default function Admin() {
                           level="H"
                         />
                       </div>
-                      <div className="flex flex-col gap-2 flex-1">
+                     <div className="flex flex-col gap-2 flex-1">
                         <button
                           onClick={() => downloadQR(machine.id, machine.name)}
                           className="py-2 rounded-full text-sm font-semibold text-white text-center"
@@ -415,6 +426,48 @@ export default function Admin() {
                           Delete
                         </button>
                       </div>
+                    </div>
+
+                    {/* Purchase price */}
+                    <div className="mt-4 pt-4" style={{borderTop: '1px solid #1A1A1A'}}>
+                      <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Purchase Price</p>
+                      {editingPrice === machine.id ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            value={priceInput}
+                            onChange={e => setPriceInput(e.target.value)}
+                            placeholder="e.g. 1200"
+                            className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
+                            style={{background: '#080808', border: '1px solid #C23B0A'}}
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => savePurchasePrice(machine.id)}
+                            className="px-4 py-2 rounded-lg text-white text-sm font-semibold"
+                            style={{background: '#C23B0A'}}>
+                            Save
+                          </button>
+                          <button
+                            onClick={() => { setEditingPrice(null); setPriceInput('') }}
+                            className="px-3 py-2 rounded-lg text-sm"
+                            style={{background: 'transparent', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-semibold" style={{color: machine.purchase_price ? '#E8E0D8' : '#6B5E55'}}>
+                            {machine.purchase_price ? '$' + machine.purchase_price.toLocaleString() : 'Not set'}
+                          </p>
+                          <button
+                            onClick={() => { setEditingPrice(machine.id); setPriceInput(machine.purchase_price || '') }}
+                            className="text-xs px-3 py-1 rounded-lg font-semibold"
+                            style={{color: '#C23B0A', background: 'rgba(194,59,10,0.1)'}}>
+                            {machine.purchase_price ? 'Edit' : 'Add Price'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
