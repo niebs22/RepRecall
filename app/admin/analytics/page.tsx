@@ -437,7 +437,7 @@ export default function Analytics() {
 
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
           <button
-            onClick={() => setMembersOpen(prev => !prev)}
+            onClick={() => setEquipmentOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
             style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
           >
@@ -464,7 +464,6 @@ export default function Analytics() {
                     ? Math.floor((new Date().getTime() - new Date(machine.lastUsed).getTime()) / (1000 * 60 * 60 * 24))
                     : 999
                   const isUnused = daysSinceUse >= 30
-                  console.log(machine.name, 'purchase_price:', machine.purchase_price, 'count:', machine.count)
                   const costPerUse = machine.purchase_price && machine.count > 0
                     ? (machine.purchase_price / machine.count).toFixed(2)
                     : null
