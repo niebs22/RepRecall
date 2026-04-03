@@ -312,34 +312,9 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Scan card */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-          <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Ready to train?</p>
-          
-            <a
-            href="/scan"
-            className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
-            style={{background: '#D44010', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
-            <span style={{fontSize: '20px'}}></span> Scan Equipment
-          </a>
-          <div className="relative">
-            <select
-              onChange={handleMachineSelect}
-              defaultValue=""
-              className="w-full px-4 py-3 rounded-lg appearance-none focus:outline-none"
-              style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
-              <option value="" disabled>Select equipment manually</option>
-              {allMachines.map(machine => (
-                <option key={machine.id} value={machine.id}>{machine.name}</option>
-              ))}
-            </select>
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#6B5E55'}}>▾</div>
-          </div>
-        </div>
-
         {/* Install banner */}
         {showInstallBanner && (
-          <div className="rounded-2xl p-4 mb-4" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
+          <div className="rounded-2xl p-4 mb-4" style={{background: '#0F0F0F', border: '1px solid #D4A017'}}>
             <div className="flex justify-between items-start mb-2">
               <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Add ScanSet to your home screen</p>
               <button onClick={dismissBanner} style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
@@ -373,6 +348,31 @@ export default function Dashboard() {
             )}
           </div>
         )}
+
+        {/* Scan card */}
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Ready to train?</p>
+          
+            <a
+            href="/scan"
+            className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
+            style={{background: '#D44010', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
+            <span style={{fontSize: '20px'}}></span> Scan Equipment
+          </a>
+          <div className="relative">
+            <select
+              onChange={handleMachineSelect}
+              defaultValue=""
+              className="w-full px-4 py-3 rounded-lg appearance-none focus:outline-none"
+              style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
+              <option value="" disabled>Select equipment manually</option>
+              {allMachines.map(machine => (
+                <option key={machine.id} value={machine.id}>{machine.name}</option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#6B5E55'}}>▾</div>
+          </div>
+        </div>
 
         {/* Two box row */}
         <div className="grid grid-cols-2 gap-3 mb-4">
