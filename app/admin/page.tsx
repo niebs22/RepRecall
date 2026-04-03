@@ -15,6 +15,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [role, setRole] = useState<string>('')
+  const [newPrice, setNewPrice] = useState('')
   const [editingPrice, setEditingPrice] = useState<string | null>(null)
   const [priceInput, setPriceInput] = useState('')
   const router = useRouter()
@@ -76,11 +77,13 @@ export default function Admin() {
       gym_id: gymId,
       name: newMachine,
       description: newDescription,
-      type: newType
+      type: newType,
+      purchase_price: newPrice ? parseFloat(newPrice) : null
     })
     setNewMachine('')
     setNewDescription('')
     setNewType('strength')
+    setNewPrice('')
     fetchMachines(gymId)
     setLoading(false)
   }
@@ -319,6 +322,14 @@ export default function Admin() {
               placeholder="Description (optional)"
               value={newDescription}
               onChange={e => setNewDescription(e.target.value)}
+              className="px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
+            />
+            <input
+              type="number"
+              placeholder="Purchase price (optional, e.g. 1200)"
+              value={newPrice}
+              onChange={e => setNewPrice(e.target.value)}
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
               style={{background: '#080808', border: '1px solid #1A1A1A'}}
             />
