@@ -384,7 +384,7 @@ export default function Dashboard() {
           <p className="text-center py-8" style={{color: '#6B5E55'}}>No workouts yet. Scan a machine to get started.</p>
         ) : (
           <div className="flex flex-col gap-2 mb-6">
-            {machineWorkouts.map(workout => (
+            {machineWorkouts.slice(0, 8).map(workout => (
               
                 <a
                 key={workout.machine_id}
