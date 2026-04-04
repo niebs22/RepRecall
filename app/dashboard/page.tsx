@@ -17,6 +17,8 @@ export default function Dashboard() {
   const [totalWeightLifted, setTotalWeightLifted] = useState(0)
   const [loyalMachine, setLoyalMachine] = useState<string | null>(null)
   const [fourWeekData, setFourWeekData] = useState<number[]>([0, 0, 0, 0])
+  const [challengeOpen, setChallengeOpen] = useState(false)
+  const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [showIOSSteps, setShowIOSSteps] = useState(false)
@@ -37,6 +39,7 @@ export default function Dashboard() {
         fetchWeekActivity(user.id)
         fetchLiftStats(user.id)
         fetchFourWeekData(user.id)
+        fetchChallengeExercises(user.id)
       }
     }
     getUser()
@@ -181,6 +184,37 @@ export default function Dashboard() {
       return days.size
     }).reverse()
     setFourWeekData(weeks)
+  }
+
+  async function fetchChallengeExercises(userId: string) {
+    const { data } = await supabase
+      .from('workouts')
+      .select('exercise_name, machine_id, created_at, weight, reps, sets, machines!workouts_machine_id_fkey(name)')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    if (!data) return
+    const cutoff = new Date()
+    cutoff.setDate(cutoff.getDate() - 10)
+    const exerciseMap: Record<string, any> = {}
+    data.forEach((w: any) => {
+      const key = w.exercise_name || w.machines?.name
+      if (!key || !w.machine_id) return
+      if (!exerciseMap[key]) {
+        exerciseMap[key] = {
+          name: key,
+          machineId: w.machine_id,
+          lastDate: w.created_at,
+          lastWeight: w.weight,
+          lastReps: w.reps,
+          lastSets: w.sets
+        }
+      }
+    })
+    const challenges = Object.values(exerciseMap)
+      .filter(e => new Date(e.lastDate) < cutoff)
+      .sort((a, b) => new Date(a.lastDate).getTime() - new Date(b.lastDate).getTime())
+      .slice(0, 4)
+    setChallengeExercises(challenges)
   }
 
   async function fetchLiftStats(userId: string) {
@@ -444,6 +478,59 @@ export default function Dashboard() {
           </a>
 
         </div>
+
+        {/* Challenge box */}
+        {challengeExercises.length > 0 && (
+          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <button
+              onClick={() => setChallengeOpen(prev => !prev)}
+              className="w-full p-5 text-left"
+              style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                  <p className="text-sm" style={{color: '#6B5E55'}}>
+                    {challengeOpen ? 'Try to beat your last session on these.' : "Not sure what to work today? We picked exercises you haven't hit in a while — try to beat your last session."}
+                  </p>
+                </div>
+                <span style={{
+                  color: '#6B5E55', fontSize: '18px', marginLeft: '12px',
+                  transform: challengeOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1, flexShrink: 0
+                }}>▾</span>
+              </div>
+            </button>
+
+            {challengeOpen && (
+              <div className="flex flex-col gap-2 px-5 pb-5">
+                {challengeExercises.map((ex, i) => (
+                  <a key={i}
+                    href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
+                    className="flex justify-between items-center p-4 rounded-xl"
+                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
+                    <div>
+                      <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
+                      <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
+                        {ex.lastSets && ex.lastReps ? `Last: ${ex.lastSets}x${ex.lastReps}` : ''}
+                        {ex.lastWeight ? ` · ${ex.lastWeight} lbs` : ''}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>
+                        {(() => {
+                          const days = Math.round((new Date().getTime() - new Date(ex.lastDate).getTime()) / (1000 * 60 * 60 * 24))
+                          return days === 1 ? 'Yesterday' : `${days}d ago`
+                        })()}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Beat it →</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Frequently Used */}
         <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
