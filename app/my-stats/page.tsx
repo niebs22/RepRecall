@@ -104,22 +104,6 @@ export default function MyStats() {
     return active
   }
 
-  // Equipment not used in 21+ days (recommendations)
-  function getRecommendations() {
-    const lastUsed: Record<string, { name: string; date: string }> = {}
-    allWorkouts.forEach(w => {
-      const key = w.machine_id
-      const name = w.machines?.name || 'Unknown'
-      if (!lastUsed[key]) lastUsed[key] = { name, date: w.created_at }
-    })
-    const cutoff = new Date()
-    cutoff.setDate(cutoff.getDate() - 21)
-    return Object.values(lastUsed)
-      .filter(m => new Date(m.date) < cutoff)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 4)
-  }
-
   const totalSessions = allWorkouts.length
   const totalWeight = allWorkouts.reduce((sum, w) => {
     if (w.weight && w.reps) return sum + w.weight * w.reps
@@ -149,7 +133,6 @@ export default function MyStats() {
   const topEquipment = getTopEquipment()
   const fourWeekTrend = getFourWeekTrend()
   const activeWeeks = getActiveWeeks()
-  const recommendations = getRecommendations()
   const maxDays = Math.max(...fourWeekTrend.map(w => w.days), 1)
 
   return (
@@ -230,23 +213,6 @@ export default function MyStats() {
             )}
           </div>
         </div>
-
-        {/* Recommendations */}
-        {recommendations.length > 0 && (
-          <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>Worth Revisiting</p>
-            <p className="text-xs mb-4" style={{color: '#6B5E55'}}>Equipment you haven't hit in 3+ weeks</p>
-            <div className="flex flex-col gap-3">
-              {recommendations.map((r, i) => (
-                <div key={i} className="flex justify-between items-center py-2"
-                  style={{borderBottom: i < recommendations.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
-                  <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{r.name}</p>
-                  <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{daysSince(r.date)}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* PRs — collapsible */}
         <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
