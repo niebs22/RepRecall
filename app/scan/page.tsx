@@ -77,7 +77,7 @@ export default function ScanPage() {
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-white">Rep<span style={{color: '#C23B0A'}}>Recall</span></h1>
+          <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#C23B0A'}}>set</span></h1>
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>
             Back
           </a>
