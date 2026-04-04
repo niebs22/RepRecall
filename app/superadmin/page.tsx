@@ -9,6 +9,8 @@ export default function SuperAdmin() {
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [ownerEmail, setOwnerEmail] = useState<Record<string, string>>({})
+  const [setupLinks, setSetupLinks] = useState<Record<string, string>>({})
+  const [copied, setCopied] = useState<Record<string, boolean>>({})
   const router = useRouter()
 
   useEffect(() => {
@@ -44,9 +46,7 @@ export default function SuperAdmin() {
     e.preventDefault()
     if (!newGymName.trim()) return
     setLoading(true)
-    await supabase.from('gyms').insert({
-      name: newGymName.trim()
-    })
+    await supabase.from('gyms').insert({ name: newGymName.trim() })
     setNewGymName('')
     fetchGyms()
     setLoading(false)
@@ -58,41 +58,45 @@ export default function SuperAdmin() {
     fetchGyms()
   }
 
-  async function assignOwner(gymId: string) {
+  async function generateSetupLink(gymId: string) {
     const email = ownerEmail[gymId]
     if (!email) return
 
-    // Find user by email in profiles
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', email)
+    // Delete any existing unused invite for this gym
+    await supabase
+      .from('gym_owner_invites')
+      .delete()
+      .eq('gym_id', gymId)
+      .eq('used', false)
+
+    // Create new invite
+    const { data, error } = await supabase
+      .from('gym_owner_invites')
+      .insert({ gym_id: gymId, email })
+      .select()
       .single()
 
-    if (!profile) {
-      alert('User not found. Make sure they have signed up first.')
+    if (error || !data) {
+      alert('Error generating link. Check Supabase.')
       return
     }
 
-    // Set as gym owner
-    await supabase.from('profiles').update({ role: 'gym_owner' }).eq('id', profile.id)
-    await supabase.from('gyms').update({ owner_id: profile.id }).eq('id', gymId)
-    await supabase.from('gym_members').upsert({ user_id: profile.id, gym_id: gymId }, { onConflict: 'user_id,gym_id' })
+    const link = `https://scanset.app/owner-setup?token=${data.token}`
+    setSetupLinks(prev => ({ ...prev, [gymId]: link }))
+  }
 
-    alert('Owner assigned successfully.')
-    fetchGyms()
+  async function copyLink(gymId: string) {
+    await navigator.clipboard.writeText(setupLinks[gymId])
+    setCopied(prev => ({ ...prev, [gymId]: true }))
+    setTimeout(() => setCopied(prev => ({ ...prev, [gymId]: false })), 2000)
   }
 
   function toggleExpand(id: string) {
     setExpanded(expanded === id ? null : id)
   }
 
-  function getJoinUrl(code: string) {
-    return `https://scanset.app/join/${code}`
-}
-
   function copyJoinUrl(code: string) {
-    navigator.clipboard.writeText(getJoinUrl(code))
+    navigator.clipboard.writeText(`https://scanset.app/join/${code}`)
     alert('Join URL copied to clipboard')
   }
 
@@ -149,7 +153,7 @@ export default function SuperAdmin() {
                     <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#C23B0A' : '#6B5E55'}}></div>
                     <p className="text-white font-medium text-sm">{gym.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                      background: gym.owner_id ? 'rgba(184,134,11,0.1)' : 'rgba(100,116,139,0.1)',
+                      background: gym.owner_id ? 'rgba(194,59,10,0.1)' : 'rgba(100,116,139,0.1)',
                       color: gym.owner_id ? '#C23B0A' : '#6B5E55'
                     }}>
                       {gym.owner_id ? 'Owner set' : 'No owner'}
@@ -161,9 +165,9 @@ export default function SuperAdmin() {
                 </button>
 
                 {expanded === gym.id && (
-                  <div className="px-4 pb-4 pt-2 flex flex-col gap-3" style={{borderTop: '1px solid #1A1A1A'}}>
+                  <div className="px-4 pb-4 pt-2 flex flex-col gap-4" style={{borderTop: '1px solid #1A1A1A'}}>
 
-                    {/* Join URL */}
+                    {/* Member join URL */}
                     <div>
                       <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Member Join URL</p>
                       <div className="flex gap-2">
@@ -180,10 +184,10 @@ export default function SuperAdmin() {
                       </div>
                     </div>
 
-                    {/* Assign owner */}
+                    {/* Generate owner setup link */}
                     <div>
-                      <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Assign Gym Owner</p>
-                      <div className="flex gap-2">
+                      <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Owner Setup Link</p>
+                      <div className="flex gap-2 mb-2">
                         <input
                           type="email"
                           placeholder="Owner email"
@@ -193,13 +197,27 @@ export default function SuperAdmin() {
                           style={{background: '#080808', border: '1px solid #1A1A1A'}}
                         />
                         <button
-                          onClick={() => assignOwner(gym.id)}
-                          className="text-xs px-3 py-2 rounded-lg font-semibold text-white"
+                          onClick={() => generateSetupLink(gym.id)}
+                          className="text-xs px-3 py-2 rounded-lg font-semibold text-white whitespace-nowrap"
                           style={{background: '#C23B0A'}}
                         >
-                          Assign
+                          Generate
                         </button>
                       </div>
+                      {setupLinks[gym.id] && (
+                        <div className="flex gap-2">
+                          <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#080808', color: '#6B5E55'}}>
+                            {setupLinks[gym.id]}
+                          </p>
+                          <button
+                            onClick={() => copyLink(gym.id)}
+                            className="text-xs px-3 py-2 rounded-lg font-semibold text-white whitespace-nowrap"
+                            style={{background: copied[gym.id] ? '#1A1A1A' : '#C23B0A', color: copied[gym.id] ? '#C23B0A' : '#fff'}}
+                          >
+                            {copied[gym.id] ? 'Copied!' : 'Copy'}
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Delete */}

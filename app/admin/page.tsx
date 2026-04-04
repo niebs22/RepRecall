@@ -19,6 +19,9 @@ export default function Admin() {
   const [editingPrice, setEditingPrice] = useState<string | null>(null)
   const [priceInput, setPriceInput] = useState('')
   const router = useRouter()
+  const [bulkNames, setBulkNames] = useState('')
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const [bulkType, setBulkType] = useState('strength')
 
   useEffect(() => {
     async function load() {
@@ -104,6 +107,18 @@ export default function Admin() {
   await supabase.from('machines').delete().eq('id', id)
   if (expanded === id) setExpanded(null)
   fetchMachines(gymId)
+}
+async function bulkAddMachines(e: any) {
+  e.preventDefault()
+  const names = bulkNames.split('\n').map(n => n.trim()).filter(Boolean)
+  if (!names.length) return
+  setBulkLoading(true)
+  await supabase.from('machines').insert(
+    names.map(name => ({ gym_id: gymId, name, type: bulkType }))
+  )
+  setBulkNames('')
+  fetchMachines(gymId)
+  setBulkLoading(false)
 }
 
   async function downloadQR(machineId: string, machineName: string) {
@@ -367,7 +382,53 @@ export default function Admin() {
             </button>
           </form>
         </div>
-
+{/* Bulk add machines */}
+<div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
+  <h2 className="text-white font-semibold text-lg mb-1">Bulk Add Machines</h2>
+  <p className="text-xs mb-4" style={{color: '#6B5E55'}}>One machine name per line</p>
+  <form onSubmit={bulkAddMachines} className="flex flex-col gap-3">
+    <textarea
+      placeholder={"Bench Press\nSquat Rack\nLeg Press\nCable Row"}
+      value={bulkNames}
+      onChange={e => setBulkNames(e.target.value)}
+      rows={6}
+      className="px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
+      style={{background: '#080808', border: '1px solid #1A1A1A'}}
+    />
+    <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1A1A1A'}}>
+      <button
+        type="button"
+        onClick={() => setBulkType('strength')}
+        className="flex-1 py-3 text-sm font-semibold transition-colors"
+        style={{
+          background: bulkType === 'strength' ? '#C23B0A' : '#080808',
+          color: bulkType === 'strength' ? '#fff' : '#6B5E55'
+        }}
+      >
+        💪 Strength
+      </button>
+      <button
+        type="button"
+        onClick={() => setBulkType('cardio')}
+        className="flex-1 py-3 text-sm font-semibold transition-colors"
+        style={{
+          background: bulkType === 'cardio' ? '#C23B0A' : '#080808',
+          color: bulkType === 'cardio' ? '#fff' : '#6B5E55'
+        }}
+      >
+        🏃 Cardio
+      </button>
+    </div>
+    <button
+      type="submit"
+      disabled={bulkLoading}
+      className="py-3 rounded-full font-semibold text-white"
+      style={{background: '#C23B0A'}}
+    >
+      {bulkLoading ? 'Adding...' : `Add ${bulkNames.split('\n').filter(n => n.trim()).length || ''} Machines`}
+    </button>
+  </form>
+</div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-semibold text-lg text-white">
             Your Machines <span className="text-sm font-normal" style={{color: '#6B5E55'}}>({machines.length})</span>
