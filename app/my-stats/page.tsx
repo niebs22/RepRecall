@@ -11,6 +11,7 @@ export default function MyStats() {
   const [prsOpen, setPrsOpen] = useState(false)
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
+  const [challengePool, setChallengePool] = useState<any[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -131,11 +132,16 @@ export default function MyStats() {
         }
       }
     })
-    const challenges = Object.values(exerciseMap)
+    const pool = Object.values(exerciseMap)
       .filter(e => new Date(e.lastDate) < cutoff)
       .sort((a, b) => new Date(a.lastDate).getTime() - new Date(b.lastDate).getTime())
-      .slice(0, 4)
-    setChallengeExercises(challenges)
+    setChallengePool(pool)
+    setChallengeExercises(pool.slice(0, 4))
+  }
+
+  function shuffleChallenges() {
+    const shuffled = [...challengePool].sort(() => Math.random() - 0.5)
+    setChallengeExercises(shuffled.slice(0, 4))
   }
 
   const totalSessions = allWorkouts.length
@@ -258,7 +264,19 @@ export default function MyStats() {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                    {challengePool.length > 4 && (
+                      <button
+                        onClick={e => { e.stopPropagation(); shuffleChallenges() }}
+                        className="text-xs px-1.5 py-0.5 rounded"
+                        style={{color: '#6B5E55', background: '#1A1A1A', lineHeight: 1}}
+                        title="Shuffle"
+                      >
+                        ↻
+                      </button>
+                    )}
+                  </div>
                   <p className="text-sm" style={{color: '#6B5E55'}}>
                     {challengeOpen ? 'Try to beat your last session on these.' : "Not sure what to work today? We picked exercises you haven't hit in a while — try to beat your last session."}
                   </p>
