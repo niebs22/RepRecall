@@ -311,7 +311,7 @@ export default function Dashboard() {
 
   return (
     <>
-    <main className="min-h-screen p-6 pb-28" style={{background: '#080808'}}>
+    <main className="min-h-screen p-6 pb-32" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
 
         {/* Header */}
@@ -391,7 +391,7 @@ export default function Dashboard() {
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
             style={{background: '#D44010', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
-            <span style={{fontSize: '20px'}}></span> Scan Equipment
+            <span style={{fontSize: '20px'}}></span> Scan QR Code
           </a>
           <div className="relative">
             <select
