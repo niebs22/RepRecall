@@ -255,7 +255,12 @@ export default function MyStats() {
         </div>
 
         {/* Looking for a Challenge */}
-        {challengeExercises.length > 0 && (
+        {challengeExercises.length === 0 ? (
+          <div className="rounded-2xl mb-4 p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+            <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
+          </div>
+        ) : (
           <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
             <button
               onClick={() => setChallengeOpen(prev => !prev)}
