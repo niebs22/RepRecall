@@ -191,22 +191,33 @@ export default function MyStats() {
         <h2 className="text-3xl font-bold mb-6" style={{color: '#E8E0D8', letterSpacing: '-0.5px'}}>My Stats</h2>
 
         {/* Summary row */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Sessions</p>
-            <p className="font-bold" style={{fontSize: '28px', color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>{totalSessions}</p>
+        {/* Summary row */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="rounded-2xl p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Sessions</p>
+            <p className="font-bold" style={{fontSize: '42px', color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>{totalSessions}</p>
+            <p className="text-xs mt-2" style={{color: '#6B5E55'}}>total logged</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Lifted</p>
-            <p className="font-bold" style={{fontSize: '28px', color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-              {Math.round(totalWeight / 1000)}k<sup style={{fontSize: '11px', color: '#6B5E55'}}>lbs</sup>
+          <div className="rounded-2xl p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifted</p>
+            <p className="font-bold" style={{fontSize: '42px', color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
+              {Math.round(totalWeight / 1000)}k
             </p>
+            <p className="text-xs mt-2" style={{color: '#6B5E55'}}>lbs all time</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Active</p>
-            <p className="font-bold" style={{fontSize: '28px', color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-              {activeWeeks}<sup style={{fontSize: '11px', color: '#6B5E55'}}>/8 wks</sup>
-            </p>
+        </div>
+        <div className="rounded-2xl px-5 py-4 mb-4 flex justify-between items-center" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>Consistency</p>
+            <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Active {activeWeeks} of the last 8 weeks</p>
+          </div>
+          <div className="flex gap-1.5">
+            {Array.from({length: 8}, (_, i) => (
+              <div key={i} style={{
+                width: '8px', height: '8px', borderRadius: '2px',
+                background: i < activeWeeks ? '#C23B0A' : '#1A1A1A'
+              }}/>
+            ))}
           </div>
         </div>
 
