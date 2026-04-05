@@ -32,7 +32,13 @@ export default function BottomNav() {
               border: '2px solid #C23B0A',
               boxShadow: '0 0 12px rgba(194,59,10,0.2)'
             }}>
-            <img src="/icon-192.png" width="32" height="32" style={{borderRadius: '6px'}} />
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M4 8V5a1 1 0 0 1 1-1h3" stroke="#C23B0A" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M16 4h3a1 1 0 0 1 1 1v3" stroke="#C23B0A" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M20 16v3a1 1 0 0 1-1 1h-3" stroke="#C23B0A" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M8 20H5a1 1 0 0 1-1-1v-3" stroke="#C23B0A" strokeWidth="2" strokeLinecap="round"/>
+              <line x1="4" y1="12" x2="20" y2="12" stroke="#C23B0A" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
           </div>
           <span className="text-xs font-bold uppercase tracking-wide"
             style={{color: '#C23B0A', letterSpacing: '0.5px'}}>
