@@ -445,8 +445,8 @@ if (validSets.length === 0) {
             {!showInlineAdd && (
               <button
                 onClick={() => setShowInlineAdd(true)}
-                className="text-sm font-semibold mt-1 mb-2 inline-block"
-                style={{color: '#C23B0A', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                className="text-sm font-semibold mt-1 mb-2 inline-block px-3 py-1.5 rounded-full"
+                style={{color: '#9B6DFF', background: 'rgba(155,109,255,0.1)', border: '1px solid rgba(155,109,255,0.3)', cursor: 'pointer'}}>
                 + Add {machine.name} variation
               </button>
             )}
