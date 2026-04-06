@@ -201,7 +201,11 @@ function MachinePageInner() {
   }
 
   async function saveEditedSession() {
-    for (const s of editableSets) {
+    const toUpdate = editableSets.filter(s => s.id && !s._deleted && !s._new)
+    const toInsert = editableSets.filter(s => s._new && !s._deleted)
+    const toDelete = editableSets.filter(s => s._deleted && s.id)
+
+    for (const s of toUpdate) {
       await supabase.from('workouts').update({
         reps: parseInt(s.reps),
         weight: parseFloat(s.weight),
@@ -210,6 +214,28 @@ function MachinePageInner() {
         notes: s.notes || null,
       }).eq('id', s.id)
     }
+
+    if (toInsert.length > 0) {
+      const ref = editableSets.find(s => s.id && !s._new)
+      await supabase.from('workouts').insert(toInsert.map(s => ({
+        user_id: user.id,
+        machine_id: id,
+        exercise_name: ref?.exercise_name || selectedExercise,
+        sets: editableSets.filter(s => !s._deleted).length,
+        reps: parseInt(s.reps),
+        weight: parseFloat(s.weight),
+        notes: null,
+        duration: null,
+        distance: null,
+        superset: false,
+        created_at: ref?.created_at || new Date().toISOString()
+      })))
+    }
+
+    for (const s of toDelete) {
+      await supabase.from('workouts').delete().eq('id', s.id)
+    }
+
     const { data: workoutData } = await supabase
       .from('workouts').select('*')
       .eq('user_id', user.id).eq('machine_id', id)
@@ -569,19 +595,39 @@ if (validSets.length === 0) {
                       <p className="col-span-4 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Weight</p>
                       <p className="col-span-3"></p>
                     </div>
-                    {editableSets.map((s, i) => (
-                      <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
+                    {editableSets.filter(s => !s._deleted).map((s, i) => (
+                      <div key={s.id || i} className="grid grid-cols-12 gap-2 items-center">
                         <p className="col-span-1 text-xs font-bold" style={{color: '#C23B0A'}}>{i + 1}</p>
                         <input type="number" value={s.reps}
-                          onChange={e => updateEditableSet(i, 'reps', e.target.value)}
-                          className="col-span-5 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
+                          onChange={e => updateEditableSet(editableSets.indexOf(s), 'reps', e.target.value)}
+                          className="col-span-4 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
                           style={{background: '#080808', border: '1px solid #C23B0A'}}/>
                         <input type="number" value={s.weight}
-                          onChange={e => updateEditableSet(i, 'weight', e.target.value)}
-                          className="col-span-6 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
+                          onChange={e => updateEditableSet(editableSets.indexOf(s), 'weight', e.target.value)}
+                          className="col-span-5 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
                           style={{background: '#080808', border: '1px solid #C23B0A'}}/>
+                        <button type="button"
+                          onClick={() => {
+                            const actualIndex = editableSets.indexOf(s)
+                            if (s._new) {
+                              setEditableSets(prev => prev.filter((_, idx) => idx !== actualIndex))
+                            } else {
+                              setEditableSets(prev => prev.map((es, idx) => idx === actualIndex ? {...es, _deleted: true} : es))
+                            }
+                          }}
+                          className="col-span-2 text-center text-lg"
+                          style={{color: editableSets.filter(s => !s._deleted).length === 1 ? '#1A1A1A' : '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                          ×
+                        </button>
                       </div>
                     ))}
+                    <button
+                      type="button"
+                      onClick={() => setEditableSets(prev => [...prev, {reps: '', weight: '', _new: true}])}
+                      className="w-full py-2 rounded-xl text-sm font-semibold mt-1"
+                      style={{background: 'transparent', border: '1px dashed #C23B0A', color: '#C23B0A'}}>
+                      + Add Set
+                    </button>
                   </div>
                 )}
                 <div className="mb-3">
