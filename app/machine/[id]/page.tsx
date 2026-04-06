@@ -424,25 +424,43 @@ if (validSets.length === 0) {
              {machine.type === 'strength' && (
           <div className="mb-6">
             <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Exercise</label>
-            <select
-              value={selectedExercise}
-              onChange={e => {
-                if (e.target.value === '__add__') { setShowAddVariation(true) }
-                else if (e.target.value === '__manage__') { setShowManageVariations(true) }
-                else { setSelectedExercise(e.target.value); setShowAddVariation(false); setHistoryOpen(false) }
-              }}
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
-              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-            >
-              <option value={machine.name}>{machine.name}</option>
-              {variations.map(v => (
-                <option key={v.id} value={v.name}>{v.name}</option>
-              ))}
-              <option value="__add__">+ Add variation...</option>
-              {variations.length > 0 && <option value="__manage__">✎ Manage variations...</option>}
-            </select>
 
-            {!showInlineAdd && (
+            {variations.length === 0 ? (
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="rounded-xl py-4 px-3 text-center"
+                  style={{background: '#C23B0A'}}>
+                  <p className="text-sm font-bold text-white">{machine.name}</p>
+                  <p className="text-xs mt-1" style={{color: 'rgba(255,255,255,0.6)'}}>default</p>
+                </div>
+                <button
+                  onClick={() => setShowInlineAdd(true)}
+                  className="rounded-xl py-4 px-3 text-center"
+                  style={{background: 'transparent', border: '1px solid #C23B0A', cursor: 'pointer'}}>
+                  <p className="text-sm font-bold" style={{color: '#C23B0A'}}>+ Add variation</p>
+                  <p className="text-xs mt-1" style={{color: '#6B5E55'}}>e.g. Incline Press</p>
+                </button>
+              </div>
+            ) : (
+              <select
+                value={selectedExercise}
+                onChange={e => {
+                  if (e.target.value === '__add__') { setShowAddVariation(true) }
+                  else if (e.target.value === '__manage__') { setShowManageVariations(true) }
+                  else { setSelectedExercise(e.target.value); setShowAddVariation(false); setHistoryOpen(false) }
+                }}
+                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
+                style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+              >
+                <option value={machine.name}>{machine.name}</option>
+                {variations.map(v => (
+                  <option key={v.id} value={v.name}>{v.name}</option>
+                ))}
+                <option value="__add__">+ Add variation...</option>
+                <option value="__manage__">✎ Manage variations...</option>
+              </select>
+            )}
+
+            {!showInlineAdd && variations.length > 0 && (
               <button
                 onClick={() => setShowInlineAdd(true)}
                 className="text-sm font-semibold mt-1 mb-2 inline-block px-3 py-1.5 rounded-full"
