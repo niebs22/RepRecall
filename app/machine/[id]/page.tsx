@@ -48,18 +48,15 @@ function MachinePageInner() {
   const router = useRouter()
 
   function FunctionalLogger({ machineId, userId, machineName, allWorkouts, onSaved, daysSince }: any) {
-    const ACTIVITIES = ['Box Jumps', 'Battle Rope', 'Foam Rolling', 'Bands', 'Stretching', 'Other']
-    const [selectedActivity, setSelectedActivity] = useState('')
-    const [customActivity, setCustomActivity] = useState('')
-    const [duration, setDuration] = useState('')
-    const [sets, setSets] = useState('')
-    const [reps, setReps] = useState('')
+    const ACTIVITIES = ['Box Jumps', 'Battle Rope', 'Foam Rolling', 'Bands', 'Stretching']
+    const [durations, setDurations] = useState<Record<string, string>>({})
+    const [sets, setSets] = useState<Record<string, string>>({})
+    const [reps, setReps] = useState<Record<string, string>>({})
+    const [otherName, setOtherName] = useState('')
+    const [otherDuration, setOtherDuration] = useState('')
     const [notes, setNotes] = useState('')
-    const [sessionItems, setSessionItems] = useState<any[]>([])
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
-
-    const showReps = selectedActivity === 'Box Jumps' || selectedActivity === 'Bands'
 
     const lastSession = allWorkouts.length > 0 ? allWorkouts[0] : null
     const lastSessionDate = lastSession?.created_at
@@ -67,48 +64,44 @@ function MachinePageInner() {
     const lastDuration = lastSession?.duration
     const lastNotes = lastSession?.notes
 
-    function handleActivitySelect(activity: string) {
-      setSelectedActivity(activity)
-      setDuration('')
-      setSets('')
-      setReps('')
-      setNotes('')
-      setCustomActivity('')
-      setError('')
-    }
-
-    function handleAddToSession() {
-      if (!selectedActivity) { setError('Please select an activity.'); return }
-      if (!duration && !notes) { setError('Please add a duration or notes.'); return }
-      const activityName = selectedActivity === 'Other' ? customActivity || 'Other' : selectedActivity
-      setSessionItems(prev => [...prev, {
-        activityName,
-        duration: duration || null,
-        sets: sets || null,
-        reps: reps || null,
-        notes: notes || null
-      }])
-      setSelectedActivity('')
-      setDuration('')
-      setSets('')
-      setReps('')
-      setNotes('')
-      setCustomActivity('')
-      setError('')
-    }
-
     async function handleFinish() {
-      if (sessionItems.length === 0) { setError('Add at least one activity first.'); return }
+      const items: any[] = []
+
+      ACTIVITIES.forEach(activity => {
+        const d = durations[activity]
+        const s = sets[activity]
+        const r = reps[activity]
+        if (d || s || r) {
+          items.push({
+            exercise_name: activity,
+            duration: d ? parseFloat(d) : null,
+            sets: s ? parseInt(s) : null,
+            reps: r ? parseInt(r) : null,
+          })
+        }
+      })
+
+      if (otherName && (otherDuration)) {
+        items.push({
+          exercise_name: otherName,
+          duration: otherDuration ? parseFloat(otherDuration) : null,
+          sets: null,
+          reps: null,
+        })
+      }
+
+      if (items.length === 0) { setError('Fill in at least one activity.'); return }
+
       setSaving(true)
       await supabase.from('workouts').insert(
-        sessionItems.map(item => ({
+        items.map(item => ({
           user_id: userId,
           machine_id: machineId,
-          exercise_name: item.activityName,
-          duration: item.duration ? parseFloat(item.duration) : null,
-          sets: item.sets ? parseInt(item.sets) : null,
-          reps: item.reps ? parseInt(item.reps) : null,
-          notes: item.notes || null,
+          exercise_name: item.exercise_name,
+          duration: item.duration,
+          sets: item.sets,
+          reps: item.reps,
+          notes: notes || null,
           weight: null,
           superset: false
         }))
@@ -134,127 +127,89 @@ function MachinePageInner() {
 
         <h2 className="font-semibold text-lg text-white mb-4">Log Today's Workout</h2>
 
-        {/* Session items so far */}
-        {sessionItems.length > 0 && (
-          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Added to session</p>
-            <div className="flex flex-col gap-2">
-              {sessionItems.map((item, i) => (
-                <div key={i} className="flex justify-between items-center py-2"
-                  style={{borderBottom: i < sessionItems.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
-                  <div className="flex items-center gap-2">
-                    <span style={{color: '#C23B0A', fontSize: '12px'}}>✓</span>
-                    <p className="text-sm font-semibold text-white">{item.activityName}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {item.duration && <p className="text-xs" style={{color: '#6B5E55'}}>{item.duration} min</p>}
-                    {item.sets && item.reps && <p className="text-xs" style={{color: '#6B5E55'}}>{item.sets}x{item.reps}</p>}
-                    <button
-                      onClick={() => setSessionItems(prev => prev.filter((_, idx) => idx !== i))}
-                      style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '14px'}}>
-                      ×
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="rounded-2xl overflow-hidden mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          {/* Header */}
+          <div className="grid grid-cols-12 gap-2 px-4 py-3" style={{borderBottom: '1px solid #1A1A1A'}}>
+            <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Activity</p>
+            <p className="col-span-3 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Min</p>
+            <p className="col-span-2 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Sets</p>
+            <p className="col-span-2 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Reps</p>
           </div>
-        )}
 
-        {/* Activity picker */}
-        <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Activity</p>
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {ACTIVITIES.map(activity => (
-            <button
-              key={activity}
-              type="button"
-              onClick={() => handleActivitySelect(activity)}
-              className="py-3 px-4 rounded-xl text-sm font-semibold text-left"
-              style={{
-                background: selectedActivity === activity ? '#C23B0A' : '#0F0F0F',
-                color: selectedActivity === activity ? '#fff' : '#6B5E55',
-                border: selectedActivity === activity ? 'none' : '1px solid #1A1A1A'
-              }}
-            >
-              {activity}
-            </button>
-          ))}
+          {ACTIVITIES.map((activity, i) => {
+            const showSetsReps = activity === 'Box Jumps' || activity === 'Bands'
+            return (
+              <div key={activity} className="grid grid-cols-12 gap-2 px-4 py-3 items-center"
+                style={{borderBottom: i < ACTIVITIES.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
+                <p className="col-span-5 text-sm font-semibold" style={{color: durations[activity] || sets[activity] || reps[activity] ? '#E8E0D8' : '#6B5E55'}}>{activity}</p>
+                <input
+                  type="number"
+                  placeholder="—"
+                  value={durations[activity] || ''}
+                  onChange={e => setDurations(prev => ({...prev, [activity]: e.target.value}))}
+                  className="col-span-3 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
+                  style={{background: '#080808', border: '1px solid #1A1A1A'}}
+                />
+                {showSetsReps ? (
+                  <>
+                    <input
+                      type="number"
+                      placeholder="—"
+                      value={sets[activity] || ''}
+                      onChange={e => setSets(prev => ({...prev, [activity]: e.target.value}))}
+                      className="col-span-2 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
+                      style={{background: '#080808', border: '1px solid #1A1A1A'}}
+                    />
+                    <input
+                      type="number"
+                      placeholder="—"
+                      value={reps[activity] || ''}
+                      onChange={e => setReps(prev => ({...prev, [activity]: e.target.value}))}
+                      className="col-span-2 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
+                      style={{background: '#080808', border: '1px solid #1A1A1A'}}
+                    />
+                  </>
+                ) : (
+                  <div className="col-span-4"/>
+                )}
+              </div>
+            )
+          })}
+
+          {/* Other row */}
+          <div className="grid grid-cols-12 gap-2 px-4 py-3 items-center" style={{borderTop: '1px solid #1A1A1A'}}>
+            <input
+              type="text"
+              placeholder="Other..."
+              value={otherName}
+              onChange={e => setOtherName(e.target.value)}
+              className="col-span-5 px-2 py-2 rounded-lg text-white focus:outline-none text-sm"
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
+            />
+            <input
+              type="number"
+              placeholder="—"
+              value={otherDuration}
+              onChange={e => setOtherDuration(e.target.value)}
+              className="col-span-3 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
+            />
+            <div className="col-span-4"/>
+          </div>
         </div>
 
-        {selectedActivity && (
-          <div className="flex flex-col gap-4 mb-4">
-            {selectedActivity === 'Other' && (
-              <input
-                type="text"
-                placeholder="What did you do?"
-                value={customActivity}
-                onChange={e => setCustomActivity(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
-              />
-            )}
-
-            <div>
-              <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
-              <input
-                type="number"
-                value={duration}
-                onChange={e => setDuration(e.target.value)}
-                placeholder="0"
-                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-              />
-            </div>
-
-            {showReps && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Sets</label>
-                  <input
-                    type="number"
-                    value={sets}
-                    onChange={e => setSets(e.target.value)}
-                    placeholder="0"
-                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Reps</label>
-                  <input
-                    type="number"
-                    value={reps}
-                    onChange={e => setReps(e.target.value)}
-                    placeholder="0"
-                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
-              <textarea
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                placeholder="e.g. felt strong today"
-                rows={2}
-                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
-                style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleAddToSession}
-              className="w-full py-3 rounded-full font-semibold text-white"
-              style={{background: '#0F0F0F', border: '1px solid #C23B0A', color: '#C23B0A'}}
-            >
-              + Add to Session
-            </button>
-          </div>
-        )}
+        {/* Shared notes */}
+        <div className="mb-6">
+          <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
+          <textarea
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="e.g. felt strong today"
+            rows={2}
+            className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
+            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+          />
+        </div>
 
         {error && (
           <div className="flex justify-between items-center px-4 py-3 rounded-lg mb-4"
@@ -264,16 +219,14 @@ function MachinePageInner() {
           </div>
         )}
 
-        {sessionItems.length > 0 && (
-          <button
-            onClick={handleFinish}
-            disabled={saving}
-            className="w-full py-3 rounded-full font-semibold text-white"
-            style={{background: '#C23B0A'}}
-          >
-            {saving ? 'Saving...' : `Finish Workout (${sessionItems.length} ${sessionItems.length === 1 ? 'activity' : 'activities'})`}
-          </button>
-        )}
+        <button
+          onClick={handleFinish}
+          disabled={saving}
+          className="w-full py-3 rounded-full font-semibold text-white"
+          style={{background: '#C23B0A'}}
+        >
+          {saving ? 'Saving...' : 'Finish Workout'}
+        </button>
       </div>
     )
   }
