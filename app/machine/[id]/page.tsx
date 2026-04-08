@@ -562,6 +562,32 @@ if (validSets.length === 0) {
   const lastSessionDate = lastSessionSets.length > 0 ? lastSessionSets[0].created_at : null
   const lastSessionNotes = lastSessionSets.find(s => s.notes)?.notes
 
+  if (machine.type === 'functional') {
+    return (
+      <>
+        <main className="min-h-screen p-6" style={{background: '#080808'}}>
+          <div className="max-w-lg mx-auto">
+            <a href="/dashboard" className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
+              ← Back to Dashboard
+            </a>
+            <div className="flex items-center gap-3 mb-6">
+              <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: 'rgba(194,59,10,0.1)', color: '#C23B0A'}}>Functional</span>
+            </div>
+            <FunctionalLogger
+              machineId={id!}
+              userId={user.id}
+              machineName={machine.name}
+              allWorkouts={allWorkouts}
+              onSaved={() => setSaved(true)}
+              daysSince={daysSince}
+            />
+          </div>
+        </main>
+      </>
+    )
+  }
+
   return (
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
@@ -572,10 +598,10 @@ if (validSets.length === 0) {
         <div className="flex items-center gap-3 mb-1">
   <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
   <span className="text-xs px-2 py-0.5 rounded-full" style={{
-    background: machine.type === 'cardio' ? 'rgba(194,59,10,0.1)' : 'rgba(37,99,235,0.1)',
-    color: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'
+    background: 'rgba(194,59,10,0.1)',
+    color: '#C23B0A'
   }}>
-    {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
+    {machine.type === 'cardio' ? 'Cardio' : machine.type === 'functional' ? 'Functional' : 'Strength'}
   </span>
 </div>
         {machine.description && (
@@ -742,7 +768,7 @@ if (validSets.length === 0) {
           />
         )}
 
-        {machine.type !== 'functional' && lastSessionSets.length > 0 ? (
+        {lastSessionSets.length > 0 ? (
           <div className="rounded-2xl p-5 mb-8" style={{background: '#0F0F0F', borderLeft: '3px solid #C23B0A'}}>
             <div className="flex justify-between items-center mb-4">
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
