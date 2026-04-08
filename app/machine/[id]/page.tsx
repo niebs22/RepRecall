@@ -87,9 +87,18 @@ function MachinePageInner() {
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
               <p className="text-xs" style={{color: '#C23B0A'}}>{daysSince(lastSessionDate)}</p>
             </div>
-            <p className="font-bold text-white text-lg">{lastActivity}</p>
-            {lastDuration && <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{lastDuration} min</p>}
-            {lastNotes && <p className="text-xs italic mt-2 pt-2" style={{color: '#6B5E55', borderTop: '1px solid #1A1A1A'}}>"{lastNotes}"</p>}
+            {lastActivity !== 'Functional Training' && (
+              <p className="font-bold text-white text-lg mb-1">{lastActivity}</p>
+            )}
+            {lastDuration && <p className="text-sm" style={{color: '#6B5E55'}}>{lastDuration} min</p>}
+            {lastNotes && (
+              <p className="text-sm mt-1" style={{
+                color: lastActivity === 'Functional Training' ? '#E8E0D8' : '#6B5E55',
+                fontStyle: lastActivity === 'Functional Training' ? 'normal' : 'italic',
+                borderTop: lastActivity !== 'Functional Training' ? '1px solid #1A1A1A' : 'none',
+                paddingTop: lastActivity !== 'Functional Training' ? '8px' : '0'
+              }}>{lastNotes}</p>
+            )}
           </div>
         )}
 
