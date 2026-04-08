@@ -48,12 +48,8 @@ function MachinePageInner() {
   const router = useRouter()
 
   function FunctionalLogger({ machineId, userId, machineName, allWorkouts, onSaved, daysSince }: any) {
-    const ACTIVITIES = ['Box Jumps', 'Battle Rope', 'Foam Rolling', 'Bands', 'Stretching']
-    const [durations, setDurations] = useState<Record<string, string>>({})
-    const [sets, setSets] = useState<Record<string, string>>({})
-    const [reps, setReps] = useState<Record<string, string>>({})
-    const [otherName, setOtherName] = useState('')
-    const [otherDuration, setOtherDuration] = useState('')
+    const [activity, setActivity] = useState('')
+    const [duration, setDuration] = useState('')
     const [notes, setNotes] = useState('')
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
@@ -65,47 +61,19 @@ function MachinePageInner() {
     const lastNotes = lastSession?.notes
 
     async function handleFinish() {
-      const items: any[] = []
-
-      ACTIVITIES.forEach(activity => {
-        const d = durations[activity]
-        const s = sets[activity]
-        const r = reps[activity]
-        if (d || s || r) {
-          items.push({
-            exercise_name: activity,
-            duration: d ? parseFloat(d) : null,
-            sets: s ? parseInt(s) : null,
-            reps: r ? parseInt(r) : null,
-          })
-        }
-      })
-
-      if (otherName && (otherDuration)) {
-        items.push({
-          exercise_name: otherName,
-          duration: otherDuration ? parseFloat(otherDuration) : null,
-          sets: null,
-          reps: null,
-        })
-      }
-
-      if (items.length === 0) { setError('Fill in at least one activity.'); return }
-
+      if (!activity && !notes) { setError('Add what you did or some notes.'); return }
       setSaving(true)
-      await supabase.from('workouts').insert(
-        items.map(item => ({
-          user_id: userId,
-          machine_id: machineId,
-          exercise_name: item.exercise_name,
-          duration: item.duration,
-          sets: item.sets,
-          reps: item.reps,
-          notes: notes || null,
-          weight: null,
-          superset: false
-        }))
-      )
+      await supabase.from('workouts').insert({
+        user_id: userId,
+        machine_id: machineId,
+        exercise_name: activity || 'Functional Training',
+        duration: duration ? parseFloat(duration) : null,
+        notes: notes || null,
+        sets: null,
+        reps: null,
+        weight: null,
+        superset: false
+      })
       setSaving(false)
       onSaved()
     }
@@ -125,90 +93,44 @@ function MachinePageInner() {
           </div>
         )}
 
-        <h2 className="font-semibold text-lg text-white mb-4">Log Today's Workout</h2>
+        <h2 className="font-semibold text-lg text-white mb-6">Log Today's Workout</h2>
 
-        <div className="rounded-2xl overflow-hidden mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-          {/* Header */}
-          <div className="grid grid-cols-12 gap-2 px-4 py-3" style={{borderBottom: '1px solid #1A1A1A'}}>
-            <p className="col-span-5 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Activity</p>
-            <p className="col-span-3 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Min</p>
-            <p className="col-span-2 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Sets</p>
-            <p className="col-span-2 text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Reps</p>
-          </div>
-
-          {ACTIVITIES.map((activity, i) => {
-            const showSetsReps = activity === 'Box Jumps' || activity === 'Bands'
-            return (
-              <div key={activity} className="grid grid-cols-12 gap-2 px-4 py-3 items-center"
-                style={{borderBottom: i < ACTIVITIES.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
-                <p className="col-span-5 text-sm font-semibold" style={{color: durations[activity] || sets[activity] || reps[activity] ? '#E8E0D8' : '#6B5E55'}}>{activity}</p>
-                <input
-                  type="number"
-                  placeholder="—"
-                  value={durations[activity] || ''}
-                  onChange={e => setDurations(prev => ({...prev, [activity]: e.target.value}))}
-                  className="col-span-3 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
-                  style={{background: '#080808', border: '1px solid #1A1A1A'}}
-                />
-                {showSetsReps ? (
-                  <>
-                    <input
-                      type="number"
-                      placeholder="—"
-                      value={sets[activity] || ''}
-                      onChange={e => setSets(prev => ({...prev, [activity]: e.target.value}))}
-                      className="col-span-2 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
-                      style={{background: '#080808', border: '1px solid #1A1A1A'}}
-                    />
-                    <input
-                      type="number"
-                      placeholder="—"
-                      value={reps[activity] || ''}
-                      onChange={e => setReps(prev => ({...prev, [activity]: e.target.value}))}
-                      className="col-span-2 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
-                      style={{background: '#080808', border: '1px solid #1A1A1A'}}
-                    />
-                  </>
-                ) : (
-                  <div className="col-span-4"/>
-                )}
-              </div>
-            )
-          })}
-
-          {/* Other row */}
-          <div className="grid grid-cols-12 gap-2 px-4 py-3 items-center" style={{borderTop: '1px solid #1A1A1A'}}>
+        <div className="flex flex-col gap-4 mb-6">
+          <div>
+            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>What did you do?</label>
             <input
               type="text"
-              placeholder="Other..."
-              value={otherName}
-              onChange={e => setOtherName(e.target.value)}
-              className="col-span-5 px-2 py-2 rounded-lg text-white focus:outline-none text-sm"
-              style={{background: '#080808', border: '1px solid #1A1A1A'}}
+              placeholder="e.g. Battle rope, box jumps, stretching"
+              value={activity}
+              onChange={e => setActivity(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
             />
+          </div>
+
+          <div>
+            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
             <input
               type="number"
-              placeholder="—"
-              value={otherDuration}
-              onChange={e => setOtherDuration(e.target.value)}
-              className="col-span-3 px-2 py-2 rounded-lg text-white focus:outline-none text-center text-sm"
-              style={{background: '#080808', border: '1px solid #1A1A1A'}}
+              placeholder="0"
+              value={duration}
+              onChange={e => setDuration(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
             />
-            <div className="col-span-4"/>
           </div>
-        </div>
 
-        {/* Shared notes */}
-        <div className="mb-6">
-          <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
-          <textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            placeholder="e.g. felt strong today"
-            rows={2}
-            className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
-            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-          />
+          <div>
+            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="e.g. 3 rounds, felt great"
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            />
+          </div>
         </div>
 
         {error && (
