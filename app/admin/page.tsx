@@ -371,6 +371,17 @@ async function bulkAddMachines(e: any) {
               >
                 🏃 Cardio
               </button>
+              <button
+                type="button"
+                onClick={() => setNewType('functional')}
+                className="flex-1 py-3 text-sm font-semibold transition-colors"
+                style={{
+                  background: newType === 'functional' ? '#C23B0A' : '#080808',
+                  color: newType === 'functional' ? '#fff' : '#6B5E55'
+                }}
+              >
+                🏋️ Functional
+              </button>
             </div>
             <button
               type="submit"
@@ -396,29 +407,40 @@ async function bulkAddMachines(e: any) {
       style={{background: '#080808', border: '1px solid #1A1A1A'}}
     />
     <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1A1A1A'}}>
-      <button
-        type="button"
-        onClick={() => setBulkType('strength')}
-        className="flex-1 py-3 text-sm font-semibold transition-colors"
-        style={{
-          background: bulkType === 'strength' ? '#C23B0A' : '#080808',
-          color: bulkType === 'strength' ? '#fff' : '#6B5E55'
-        }}
-      >
-        💪 Strength
-      </button>
-      <button
-        type="button"
-        onClick={() => setBulkType('cardio')}
-        className="flex-1 py-3 text-sm font-semibold transition-colors"
-        style={{
-          background: bulkType === 'cardio' ? '#C23B0A' : '#080808',
-          color: bulkType === 'cardio' ? '#fff' : '#6B5E55'
-        }}
-      >
-        🏃 Cardio
-      </button>
-    </div>
+              <button
+                type="button"
+                onClick={() => setBulkType('strength')}
+                className="flex-1 py-3 text-sm font-semibold transition-colors"
+                style={{
+                  background: bulkType === 'strength' ? '#C23B0A' : '#080808',
+                  color: bulkType === 'strength' ? '#fff' : '#6B5E55'
+                }}
+              >
+                💪 Strength
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkType('cardio')}
+                className="flex-1 py-3 text-sm font-semibold transition-colors"
+                style={{
+                  background: bulkType === 'cardio' ? '#C23B0A' : '#080808',
+                  color: bulkType === 'cardio' ? '#fff' : '#6B5E55'
+                }}
+              >
+                🏃 Cardio
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkType('functional')}
+                className="flex-1 py-3 text-sm font-semibold transition-colors"
+                style={{
+                  background: bulkType === 'functional' ? '#C23B0A' : '#080808',
+                  color: bulkType === 'functional' ? '#fff' : '#6B5E55'
+                }}
+              >
+                🏋️ Functional
+              </button>
+            </div>
     <button
       type="submit"
       disabled={bulkLoading}
