@@ -112,7 +112,7 @@ function MachinePageInner() {
             <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
             <input
               type="number"
-              placeholder="0"
+              placeholder="—"
               value={duration}
               onChange={e => setDuration(e.target.value)}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
@@ -518,7 +518,7 @@ if (validSets.length === 0) {
               <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
               <span className="text-xs px-2 py-0.5 rounded-full" style={{background: 'rgba(194,59,10,0.1)', color: '#C23B0A'}}>Functional</span>
             </div>
-            <FunctionalLogger
+           <FunctionalLogger
               machineId={id!}
               userId={user.id}
               machineName={machine.name}
@@ -526,6 +526,43 @@ if (validSets.length === 0) {
               onSaved={() => setSaved(true)}
               daysSince={daysSince}
             />
+
+            {/* History */}
+            {allWorkouts.length > 1 && (
+              <div className="rounded-2xl overflow-hidden mt-6" style={{background: '#0F0F0F'}}>
+                <button
+                  onClick={() => setHistoryOpen(prev => !prev)}
+                  className="w-full flex justify-between items-center p-5"
+                  style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+                >
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold text-white">History</h2>
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
+                      {allWorkouts.length} sessions
+                    </span>
+                  </div>
+                  <span style={{
+                    color: '#6B5E55', fontSize: '18px',
+                    transform: historyOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1
+                  }}>▾</span>
+                </button>
+                {historyOpen && (
+                  <div className="flex flex-col gap-4 px-5 pb-5">
+                    {allWorkouts.map((w, i) => (
+                      <div key={i} style={{borderBottom: i < allWorkouts.length - 1 ? '1px solid #1A1A1A' : 'none', paddingBottom: i < allWorkouts.length - 1 ? '12px' : '0'}}>
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-sm font-semibold text-white">{w.exercise_name}</p>
+                          <p className="text-xs" style={{color: '#C23B0A'}}>{daysSince(w.created_at)}</p>
+                        </div>
+                        {w.duration && <p className="text-xs" style={{color: '#6B5E55'}}>{w.duration} min</p>}
+                        {w.notes && <p className="text-xs italic mt-1" style={{color: '#6B5E55'}}>"{w.notes}"</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </main>
       </>
