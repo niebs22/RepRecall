@@ -55,6 +55,7 @@ function MachinePageInner() {
     const [sets, setSets] = useState('')
     const [reps, setReps] = useState('')
     const [notes, setNotes] = useState('')
+    const [sessionItems, setSessionItems] = useState<any[]>([])
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
 
@@ -66,22 +67,52 @@ function MachinePageInner() {
     const lastDuration = lastSession?.duration
     const lastNotes = lastSession?.notes
 
-    async function handleSave() {
+    function handleActivitySelect(activity: string) {
+      setSelectedActivity(activity)
+      setDuration('')
+      setSets('')
+      setReps('')
+      setNotes('')
+      setCustomActivity('')
+      setError('')
+    }
+
+    function handleAddToSession() {
       if (!selectedActivity) { setError('Please select an activity.'); return }
       if (!duration && !notes) { setError('Please add a duration or notes.'); return }
-      setSaving(true)
       const activityName = selectedActivity === 'Other' ? customActivity || 'Other' : selectedActivity
-      await supabase.from('workouts').insert({
-        user_id: userId,
-        machine_id: machineId,
-        exercise_name: activityName,
-        duration: duration ? parseFloat(duration) : null,
-        sets: sets ? parseInt(sets) : null,
-        reps: reps ? parseInt(reps) : null,
-        notes: notes || null,
-        weight: null,
-        superset: false
-      })
+      setSessionItems(prev => [...prev, {
+        activityName,
+        duration: duration || null,
+        sets: sets || null,
+        reps: reps || null,
+        notes: notes || null
+      }])
+      setSelectedActivity('')
+      setDuration('')
+      setSets('')
+      setReps('')
+      setNotes('')
+      setCustomActivity('')
+      setError('')
+    }
+
+    async function handleFinish() {
+      if (sessionItems.length === 0) { setError('Add at least one activity first.'); return }
+      setSaving(true)
+      await supabase.from('workouts').insert(
+        sessionItems.map(item => ({
+          user_id: userId,
+          machine_id: machineId,
+          exercise_name: item.activityName,
+          duration: item.duration ? parseFloat(item.duration) : null,
+          sets: item.sets ? parseInt(item.sets) : null,
+          reps: item.reps ? parseInt(item.reps) : null,
+          notes: item.notes || null,
+          weight: null,
+          superset: false
+        }))
+      )
       setSaving(false)
       onSaved()
     }
@@ -101,110 +132,148 @@ function MachinePageInner() {
           </div>
         )}
 
+        <h2 className="font-semibold text-lg text-white mb-4">Log Today's Workout</h2>
+
+        {/* Session items so far */}
+        {sessionItems.length > 0 && (
+          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Added to session</p>
+            <div className="flex flex-col gap-2">
+              {sessionItems.map((item, i) => (
+                <div key={i} className="flex justify-between items-center py-2"
+                  style={{borderBottom: i < sessionItems.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
+                  <div className="flex items-center gap-2">
+                    <span style={{color: '#C23B0A', fontSize: '12px'}}>✓</span>
+                    <p className="text-sm font-semibold text-white">{item.activityName}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {item.duration && <p className="text-xs" style={{color: '#6B5E55'}}>{item.duration} min</p>}
+                    {item.sets && item.reps && <p className="text-xs" style={{color: '#6B5E55'}}>{item.sets}x{item.reps}</p>}
+                    <button
+                      onClick={() => setSessionItems(prev => prev.filter((_, idx) => idx !== i))}
+                      style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '14px'}}>
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Activity picker */}
-        <div className="mb-6">
-          <h2 className="font-semibold text-lg text-white mb-4">Log Today's Workout</h2>
-          <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Activity</p>
-          <div className="grid grid-cols-2 gap-2 mb-4">
-            {ACTIVITIES.map(activity => (
-              <button
-                key={activity}
-                type="button"
-                onClick={() => setSelectedActivity(activity)}
-                className="py-3 px-4 rounded-xl text-sm font-semibold text-left"
-                style={{
-                  background: selectedActivity === activity ? '#C23B0A' : '#0F0F0F',
-                  color: selectedActivity === activity ? '#fff' : '#6B5E55',
-                  border: selectedActivity === activity ? 'none' : '1px solid #1A1A1A'
-                }}
-              >
-                {activity}
-              </button>
-            ))}
-          </div>
+        <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Activity</p>
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {ACTIVITIES.map(activity => (
+            <button
+              key={activity}
+              type="button"
+              onClick={() => handleActivitySelect(activity)}
+              className="py-3 px-4 rounded-xl text-sm font-semibold text-left"
+              style={{
+                background: selectedActivity === activity ? '#C23B0A' : '#0F0F0F',
+                color: selectedActivity === activity ? '#fff' : '#6B5E55',
+                border: selectedActivity === activity ? 'none' : '1px solid #1A1A1A'
+              }}
+            >
+              {activity}
+            </button>
+          ))}
+        </div>
 
-          {selectedActivity === 'Other' && (
-            <input
-              type="text"
-              placeholder="What did you do?"
-              value={customActivity}
-              onChange={e => setCustomActivity(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-4"
-              style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
-            />
-          )}
+        {selectedActivity && (
+          <div className="flex flex-col gap-4 mb-4">
+            {selectedActivity === 'Other' && (
+              <input
+                type="text"
+                placeholder="What did you do?"
+                value={customActivity}
+                onChange={e => setCustomActivity(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
+                style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
+              />
+            )}
 
-          {/* Duration */}
-          <div className="mb-4">
-            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
-            <input
-              type="number"
-              value={duration}
-              onChange={e => setDuration(e.target.value)}
-              placeholder="0"
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-            />
-          </div>
-
-          {/* Sets/reps for rep-based activities */}
-          {showReps && (
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div>
-                <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Sets</label>
-                <input
-                  type="number"
-                  value={sets}
-                  onChange={e => setSets(e.target.value)}
-                  placeholder="0"
-                  className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                  style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-                />
-              </div>
-              <div>
-                <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Reps</label>
-                <input
-                  type="number"
-                  value={reps}
-                  onChange={e => setReps(e.target.value)}
-                  placeholder="0"
-                  className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                  style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-                />
-              </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
+              <input
+                type="number"
+                value={duration}
+                onChange={e => setDuration(e.target.value)}
+                placeholder="0"
+                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+              />
             </div>
-          )}
 
-          {/* Notes */}
-          <div className="mb-4">
-            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="e.g. 3 rounds of battle rope + sled push, felt great"
-              rows={3}
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
-              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-            />
-          </div>
+            {showReps && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Sets</label>
+                  <input
+                    type="number"
+                    value={sets}
+                    onChange={e => setSets(e.target.value)}
+                    placeholder="0"
+                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Reps</label>
+                  <input
+                    type="number"
+                    value={reps}
+                    onChange={e => setReps(e.target.value)}
+                    placeholder="0"
+                    className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                    style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+                  />
+                </div>
+              </div>
+            )}
 
-          {error && (
-            <div className="flex justify-between items-center px-4 py-3 rounded-lg mb-4"
-              style={{background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)'}}>
-              <p className="text-sm" style={{color: '#EF4444'}}>{error}</p>
-              <button onClick={() => setError('')} style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
+            <div>
+              <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
+              <textarea
+                value={notes}
+                onChange={e => setNotes(e.target.value)}
+                placeholder="e.g. felt strong today"
+                rows={2}
+                className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
+                style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+              />
             </div>
-          )}
 
+            <button
+              type="button"
+              onClick={handleAddToSession}
+              className="w-full py-3 rounded-full font-semibold text-white"
+              style={{background: '#0F0F0F', border: '1px solid #C23B0A', color: '#C23B0A'}}
+            >
+              + Add to Session
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className="flex justify-between items-center px-4 py-3 rounded-lg mb-4"
+            style={{background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)'}}>
+            <p className="text-sm" style={{color: '#EF4444'}}>{error}</p>
+            <button onClick={() => setError('')} style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
+          </div>
+        )}
+
+        {sessionItems.length > 0 && (
           <button
-            onClick={handleSave}
+            onClick={handleFinish}
             disabled={saving}
             className="w-full py-3 rounded-full font-semibold text-white"
             style={{background: '#C23B0A'}}
           >
-            {saving ? 'Saving...' : 'Finish Workout'}
+            {saving ? 'Saving...' : `Finish Workout (${sessionItems.length} ${sessionItems.length === 1 ? 'activity' : 'activities'})`}
           </button>
-        </div>
+        )}
       </div>
     )
   }
