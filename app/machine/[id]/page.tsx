@@ -47,6 +47,168 @@ function MachinePageInner() {
 
   const router = useRouter()
 
+  function FunctionalLogger({ machineId, userId, machineName, allWorkouts, onSaved, daysSince }: any) {
+    const ACTIVITIES = ['Box Jumps', 'Battle Rope', 'Foam Rolling', 'Bands', 'Stretching', 'Other']
+    const [selectedActivity, setSelectedActivity] = useState('')
+    const [customActivity, setCustomActivity] = useState('')
+    const [duration, setDuration] = useState('')
+    const [sets, setSets] = useState('')
+    const [reps, setReps] = useState('')
+    const [notes, setNotes] = useState('')
+    const [saving, setSaving] = useState(false)
+    const [error, setError] = useState('')
+
+    const showReps = selectedActivity === 'Box Jumps' || selectedActivity === 'Bands'
+
+    const lastSession = allWorkouts.length > 0 ? allWorkouts[0] : null
+    const lastSessionDate = lastSession?.created_at
+    const lastActivity = lastSession?.exercise_name
+    const lastDuration = lastSession?.duration
+    const lastNotes = lastSession?.notes
+
+    async function handleSave() {
+      if (!selectedActivity) { setError('Please select an activity.'); return }
+      if (!duration && !notes) { setError('Please add a duration or notes.'); return }
+      setSaving(true)
+      const activityName = selectedActivity === 'Other' ? customActivity || 'Other' : selectedActivity
+      await supabase.from('workouts').insert({
+        user_id: userId,
+        machine_id: machineId,
+        exercise_name: activityName,
+        duration: duration ? parseFloat(duration) : null,
+        sets: sets ? parseInt(sets) : null,
+        reps: reps ? parseInt(reps) : null,
+        notes: notes || null,
+        weight: null,
+        superset: false
+      })
+      setSaving(false)
+      onSaved()
+    }
+
+    return (
+      <div>
+        {/* Last session */}
+        {lastSession && (
+          <div className="rounded-2xl p-5 mb-8" style={{background: '#0F0F0F', borderLeft: '3px solid #C23B0A'}}>
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
+              <p className="text-xs" style={{color: '#C23B0A'}}>{daysSince(lastSessionDate)}</p>
+            </div>
+            <p className="font-bold text-white text-lg">{lastActivity}</p>
+            {lastDuration && <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{lastDuration} min</p>}
+            {lastNotes && <p className="text-xs italic mt-2 pt-2" style={{color: '#6B5E55', borderTop: '1px solid #1A1A1A'}}>"{lastNotes}"</p>}
+          </div>
+        )}
+
+        {/* Activity picker */}
+        <div className="mb-6">
+          <h2 className="font-semibold text-lg text-white mb-4">Log Today's Workout</h2>
+          <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Activity</p>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {ACTIVITIES.map(activity => (
+              <button
+                key={activity}
+                type="button"
+                onClick={() => setSelectedActivity(activity)}
+                className="py-3 px-4 rounded-xl text-sm font-semibold text-left"
+                style={{
+                  background: selectedActivity === activity ? '#C23B0A' : '#0F0F0F',
+                  color: selectedActivity === activity ? '#fff' : '#6B5E55',
+                  border: selectedActivity === activity ? 'none' : '1px solid #1A1A1A'
+                }}
+              >
+                {activity}
+              </button>
+            ))}
+          </div>
+
+          {selectedActivity === 'Other' && (
+            <input
+              type="text"
+              placeholder="What did you do?"
+              value={customActivity}
+              onChange={e => setCustomActivity(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-4"
+              style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}
+            />
+          )}
+
+          {/* Duration */}
+          <div className="mb-4">
+            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
+            <input
+              type="number"
+              value={duration}
+              onChange={e => setDuration(e.target.value)}
+              placeholder="0"
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            />
+          </div>
+
+          {/* Sets/reps for rep-based activities */}
+          {showReps && (
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Sets</label>
+                <input
+                  type="number"
+                  value={sets}
+                  onChange={e => setSets(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                  style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+                />
+              </div>
+              <div>
+                <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Reps</label>
+                <input
+                  type="number"
+                  value={reps}
+                  onChange={e => setReps(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
+                  style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          <div className="mb-4">
+            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Notes (optional)</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="e.g. 3 rounds of battle rope + sled push, felt great"
+              rows={3}
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none resize-none"
+              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            />
+          </div>
+
+          {error && (
+            <div className="flex justify-between items-center px-4 py-3 rounded-lg mb-4"
+              style={{background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)'}}>
+              <p className="text-sm" style={{color: '#EF4444'}}>{error}</p>
+              <button onClick={() => setError('')} style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
+            </div>
+          )}
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full py-3 rounded-full font-semibold text-white"
+            style={{background: '#C23B0A'}}
+          >
+            {saving ? 'Saving...' : 'Finish Workout'}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   useEffect(() => {
     async function load() {
       try {
@@ -568,8 +730,19 @@ if (validSets.length === 0) {
           </div>
         )}
 
-        {/* Last session */}
-        {lastSessionSets.length > 0 ? (
+{/* Functional training logger */}
+        {machine.type === 'functional' && (
+          <FunctionalLogger
+            machineId={id!}
+            userId={user.id}
+            machineName={machine.name}
+            allWorkouts={allWorkouts}
+            onSaved={() => setSaved(true)}
+            daysSince={daysSince}
+          />
+        )}
+
+        {machine.type !== 'functional' && lastSessionSets.length > 0 ? (
           <div className="rounded-2xl p-5 mb-8" style={{background: '#0F0F0F', borderLeft: '3px solid #C23B0A'}}>
             <div className="flex justify-between items-center mb-4">
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
