@@ -45,7 +45,58 @@ function MachinePageInner() {
   const [supersetSets, setSupersetSets] = useState<any[]>([{reps: '', weight: ''}])
   const [supersetNotes, setSupersetNotes] = useState('')
 
+  // Rotation state
+  const [showSwitchPicker, setShowSwitchPicker] = useState(false)
+  const [switchSearch, setSwitchSearch] = useState('')
+  const [rotationMachines, setRotationMachines] = useState<any[]>([])
+
   const router = useRouter()
+
+  // Load rotation and draft from localStorage on mount
+  useEffect(() => {
+    if (!id) return
+    const savedRotation = localStorage.getItem('rotation_machines')
+    if (savedRotation) setRotationMachines(JSON.parse(savedRotation))
+    const draft = localStorage.getItem(`draft_${id}`)
+    if (draft) {
+      const parsed = JSON.parse(draft)
+      if (parsed.sets) setSets(parsed.sets)
+      if (parsed.notes) setNotes(parsed.notes)
+      if (parsed.duration) setDuration(parsed.duration)
+      if (parsed.distance) setDistance(parsed.distance)
+    }
+  }, [id])
+
+  function saveDraft() {
+    if (!id) return
+    localStorage.setItem(`draft_${id}`, JSON.stringify({ sets, notes, duration, distance }))
+  }
+
+  function clearDraft() {
+    if (!id) return
+    localStorage.removeItem(`draft_${id}`)
+  }
+
+  function addToRotation(m: any) {
+    if (!machine) return
+    const current = { id, name: machine.name }
+    const updated = [current, m].reduce((acc: any[], item: any) => {
+      if (!acc.find((x: any) => x.id === item.id)) acc.push(item)
+      return acc
+    }, rotationMachines)
+    setRotationMachines(updated)
+    localStorage.setItem('rotation_machines', JSON.stringify(updated))
+  }
+
+  function clearRotation() {
+    setRotationMachines([])
+    localStorage.removeItem('rotation_machines')
+  }
+
+  function switchToMachine(targetId: string) {
+    saveDraft()
+    router.push(`/machine/${targetId}`)
+  }
 
   function FunctionalLogger({ machineId, userId, machineName, allWorkouts, onSaved, daysSince }: any) {
     const [activity, setActivity] = useState('')
@@ -394,7 +445,7 @@ function MachinePageInner() {
   async function handleSave(e: any) {
     e.preventDefault()
     if (machine.type === 'cardio') {
-      if (!duration) return
+      if (!duration && !distance) return
       const { error } = await supabase.from('workouts').insert({
         user_id: user.id, machine_id: id, exercise_name: selectedExercise,
         duration: parseFloat(duration),
@@ -403,7 +454,7 @@ function MachinePageInner() {
         notes: notes || null, sets: null, weight: null,
         superset: false
       })
-      if (!error) setSaved(true)
+      if (!error) { clearDraft(); setSaved(true) }
     } else {
       const validSets = sets.filter(s => s.reps && s.weight)
 if (validSets.length === 0) {
@@ -417,7 +468,7 @@ if (validSets.length === 0) {
         superset: false
       }))
       const { error } = await supabase.from('workouts').insert(inserts)
-      if (!error) setSaved(true)
+      if (!error) { clearDraft(); setSaved(true) }
     }
   }
 
@@ -993,13 +1044,63 @@ if (validSets.length === 0) {
 <div className="flex justify-between items-center mb-4">
   <h2 className="font-semibold text-lg text-white">Log Today's Workout</h2>
           {!supersetMachine && machine.type === 'strength' && (
-            <button onClick={() => setShowSupersetPicker(true)}
-              className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-              style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
-              + Superset
-            </button>
+            <div className="flex gap-2">
+              <button onClick={() => setShowSwitchPicker(true)}
+                className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                style={{border: '1px solid #6B5E55', color: '#6B5E55'}}>
+                ⇄ Switch
+              </button>
+              <button onClick={() => setShowSupersetPicker(true)}
+                className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
+                + Superset
+              </button>
+            </div>
           )}
         </div>
+
+
+{/* Switch machine picker */}
+        {showSwitchPicker && (
+          
+          <div className="rounded-2xl p-4 mb-6" style={{background: '#0F0F0F', border: '1px solid #6B5E55'}}>
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-white text-sm font-semibold">Switch to machine</p>
+              <button onClick={() => { setShowSwitchPicker(false); setSwitchSearch('') }}
+                className="text-xs" style={{color: '#6B5E55'}}>Cancel</button>
+            </div>
+            
+              <a
+              href="/scan"
+              onClick={saveDraft}
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-white mb-3"
+              style={{background: '#C23B0A'}}>
+              Scan Next Machine
+            </a>
+            <input type="text" value={switchSearch} onChange={e => setSwitchSearch(e.target.value)}
+              placeholder="Or search machines..."
+              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}/>
+            <div className="flex flex-col gap-2" style={{maxHeight: '200px', overflowY: 'auto'}}>
+              {allMachines
+                .filter(m => m.name.toLowerCase().includes(switchSearch.toLowerCase()) && m.id !== id)
+                .map(m => (
+                  <button key={m.id}
+                    onClick={() => {
+                      addToRotation(m)
+                      setShowSwitchPicker(false)
+                      setSwitchSearch('')
+                      switchToMachine(m.id)
+                    }}
+                    className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
+                    style={{background: '#080808'}}>
+                    <p className="text-white text-sm">{m.name}</p>
+                    <p className="text-xs" style={{color: '#6B5E55'}}>Switch →</p>
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
 
         {/* Superset picker */}
         {showSupersetPicker && (
@@ -1288,6 +1389,35 @@ if (validSets.length === 0) {
         )}
 </div>
 )}
+
+        {/* Rotation bar */}
+        {rotationMachines.length > 1 && (
+          <div className="fixed bottom-24 left-0 right-0 z-40 px-4">
+            <div className="max-w-lg mx-auto">
+              <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+                <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: '#6B5E55'}}>Rotating</p>
+                <div className="flex gap-2 flex-1 overflow-x-auto">
+                  {rotationMachines.map((m: any) => (
+                    <button
+                      key={m.id}
+                      onClick={() => m.id !== id && switchToMachine(m.id)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap"
+                      style={{
+                        background: m.id === id ? '#C23B0A' : '#1A1A1A',
+                        color: m.id === id ? '#fff' : '#6B5E55',
+                        cursor: m.id === id ? 'default' : 'pointer'
+                      }}
+                    >
+                      {m.name}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={clearRotation} style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', flexShrink: 0}}>×</button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </main>
   )
