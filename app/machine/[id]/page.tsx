@@ -93,6 +93,20 @@ function MachinePageInner() {
     localStorage.removeItem('rotation_machines')
   }
 
+  function removeFromRotation() {
+    const updated = rotationMachines.map((m: any) =>
+      m.id === id ? { ...m, done: true } : m
+    )
+    const allDone = updated.every((m: any) => m.done)
+    if (allDone) {
+      setRotationMachines([])
+      localStorage.removeItem('rotation_machines')
+    } else {
+      setRotationMachines(updated)
+      localStorage.setItem('rotation_machines', JSON.stringify(updated))
+    }
+  }
+
   function switchToMachine(targetId: string) {
     saveDraft()
     router.push(`/machine/${targetId}`)
@@ -439,6 +453,7 @@ function MachinePageInner() {
       await supabase.from('workouts').insert(insertsB)
     }
 
+    removeFromRotation()
     setSaved(true)
   }
 
@@ -454,7 +469,7 @@ function MachinePageInner() {
         notes: notes || null, sets: null, weight: null,
         superset: false
       })
-      if (!error) { clearDraft(); setSaved(true) }
+      if (!error) { clearDraft(); removeFromRotation(); setSaved(true) }
     } else {
       const validSets = sets.filter(s => s.reps && s.weight)
 if (validSets.length === 0) {
@@ -468,7 +483,7 @@ if (validSets.length === 0) {
         superset: false
       }))
       const { error } = await supabase.from('workouts').insert(inserts)
-      if (!error) { clearDraft(); setSaved(true) }
+      if (!error) { clearDraft(); removeFromRotation(); setSaved(true) }
     }
   }
 
@@ -1422,20 +1437,27 @@ if (validSets.length === 0) {
               <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
                 <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: '#6B5E55'}}>Rotating</p>
                 <div className="flex gap-2 flex-1 overflow-x-auto">
-                  {rotationMachines.map((m: any) => (
-                    <button
-                      key={m.id}
-                      onClick={() => m.id !== id && switchToMachine(m.id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap"
-                      style={{
-                        background: m.id === id ? '#C23B0A' : '#1A1A1A',
-                        color: m.id === id ? '#fff' : '#6B5E55',
-                        cursor: m.id === id ? 'default' : 'pointer'
-                      }}
-                    >
-                      {m.name}
-                    </button>
-                  ))}
+                  {rotationMachines.map((m: any) => {
+                    const isDone = m.done
+                    const isCurrent = m.id === id
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => !isCurrent && !isDone && switchToMachine(m.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1"
+                        style={{
+                          background: isCurrent ? '#C23B0A' : isDone ? 'transparent' : '#1A1A1A',
+                          color: isCurrent ? '#fff' : isDone ? '#3A3A3A' : '#6B5E55',
+                          cursor: isCurrent || isDone ? 'default' : 'pointer',
+                          border: isDone ? '1px solid #2A2A2A' : 'none',
+                          textDecoration: isDone ? 'line-through' : 'none'
+                        }}
+                      >
+                        {isDone && <span style={{color: '#3A3A3A'}}>✓</span>}
+                        {m.name}
+                      </button>
+                    )
+                  })}
                 </div>
                 <button onClick={clearRotation} style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', flexShrink: 0}}>×</button>
               </div>
