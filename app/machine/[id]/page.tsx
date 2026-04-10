@@ -534,7 +534,32 @@ if (validSets.length === 0) {
   )
 
   if (saved) return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
+    <main className="min-h-screen flex flex-col items-center justify-center p-6 pb-36" style={{background: '#080808'}}>
+
+      {/* Rotation bar on saved screen */}
+      {rotationMachines.length > 1 && (
+        <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
+          <div className="max-w-lg mx-auto">
+            <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
+              <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: '#C23B0A'}}>Up next</p>
+              <div className="flex gap-2 flex-1 overflow-x-auto">
+                {rotationMachines.filter((m: any) => m.id !== id).map((m: any) => (
+                  <button
+                    key={m.id}
+                    onClick={() => router.push(`/machine/${m.id}`)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap"
+                    style={{background: '#C23B0A', color: '#fff'}}
+                  >
+                    {m.name} →
+                  </button>
+                ))}
+              </div>
+              <button onClick={clearRotation} style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', flexShrink: 0}}>×</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#C23B0A'}}>
           <span className="text-2xl text-white">✓</span>
