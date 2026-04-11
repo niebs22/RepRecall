@@ -1451,21 +1451,51 @@ if (validSets.length === 0) {
                     const isDone = m.done
                     const isCurrent = m.id === id
                     return (
-                      <button
-                        key={m.id}
-                        onClick={() => !isCurrent && !isDone && switchToMachine(m.id)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap flex items-center gap-1"
+                      <div key={m.id} className="flex items-center gap-1 rounded-lg"
                         style={{
                           background: isCurrent ? '#C23B0A' : isDone ? 'transparent' : '#1A1A1A',
-                          color: isCurrent ? '#fff' : isDone ? '#3A3A3A' : '#6B5E55',
-                          cursor: isCurrent || isDone ? 'default' : 'pointer',
                           border: isDone ? '1px solid #2A2A2A' : 'none',
-                          textDecoration: isDone ? 'line-through' : 'none'
-                        }}
-                      >
-                        {isDone && <span style={{color: '#3A3A3A'}}>✓</span>}
-                        {m.name}
-                      </button>
+                          flexShrink: 0
+                        }}>
+                        <button
+                          onClick={() => !isCurrent && !isDone && switchToMachine(m.id)}
+                          className="px-3 py-1.5 text-xs font-semibold whitespace-nowrap flex items-center gap-1"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: isCurrent ? '#fff' : isDone ? '#3A3A3A' : '#6B5E55',
+                            cursor: isCurrent || isDone ? 'default' : 'pointer',
+                            textDecoration: isDone ? 'line-through' : 'none'
+                          }}
+                        >
+                          {isDone && <span style={{color: '#3A3A3A'}}>✓</span>}
+                          {m.name}
+                        </button>
+                        {!isDone && (
+                          <button
+                            onClick={() => {
+                              const updated = rotationMachines.filter((r: any) => r.id !== m.id)
+                              setRotationMachines(updated)
+                              if (updated.length === 0) {
+                                localStorage.removeItem('rotation_machines')
+                              } else {
+                                localStorage.setItem('rotation_machines', JSON.stringify(updated))
+                              }
+                            }}
+                            style={{
+                              color: isCurrent ? 'rgba(255,255,255,0.6)' : '#3A3A3A',
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: '14px',
+                              paddingRight: '8px',
+                              paddingLeft: '0',
+                              lineHeight: 1
+                            }}>
+                            ×
+                          </button>
+                        )}
+                      </div>
                     )
                   })}
                 </div>
