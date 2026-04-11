@@ -36,6 +36,7 @@ function MachinePageInner() {
   const [validationError, setValidationError] = useState('')
   const [newQuickVariation, setNewQuickVariation] = useState('')
   const [showInlineAdd, setShowInlineAdd] = useState(false)
+  const [showProgress, setShowProgress] = useState(false)
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -535,6 +536,43 @@ if (validSets.length === 0) {
       workouts,
       ...formatHistoryDate(workouts[0].created_at)
     }))
+  }
+
+  function getProgressData() {
+    const exerciseWorkouts = allWorkouts.filter(w =>
+      (w.exercise_name || machine?.name) === selectedExercise
+    )
+    if (exerciseWorkouts.length < 2) return null
+
+    const isCardio = machine?.type === 'cardio'
+
+    const sessions = exerciseWorkouts
+      .slice()
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .map(w => ({
+        date: new Date(w.created_at),
+        value: isCardio
+          ? (w.duration || w.distance || 0)
+          : (w.weight || 0)
+      }))
+      .filter(s => s.value > 0)
+
+    if (sessions.length < 2) return null
+
+    const first = sessions[0].value
+    const last = sessions[sessions.length - 1].value
+    const delta = last - first
+
+    const firstThree = sessions.slice(0, 3).map(s => s.value)
+    const lastThree = sessions.slice(-3).map(s => s.value)
+    const avgFirst = firstThree.reduce((a, b) => a + b, 0) / firstThree.length
+    const avgLast = lastThree.reduce((a, b) => a + b, 0) / lastThree.length
+    const diff = avgLast - avgFirst
+    const trend = diff > 2 ? '↑' : diff < -2 ? '↓' : '→'
+
+    const unit = isCardio ? (sessions[0].value === Math.round(sessions[0].value) ? 'min' : 'mi') : 'lbs'
+
+    return { sessions, first, last, delta, trend, unit, isCardio }
   }
 
   const filteredMachines = allMachines.filter(m =>
@@ -1084,6 +1122,105 @@ if (validSets.length === 0) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Progress */}
+        {allWorkouts.filter(w => (w.exercise_name || machine?.name) === selectedExercise && (w.weight || w.duration || w.distance)).length >= 2 && (
+          <div className="mb-8">
+            <button
+              onClick={() => setShowProgress(prev => !prev)}
+              className="px-4 py-2 rounded-full text-sm font-semibold"
+              style={{
+                background: showProgress ? 'rgba(155,109,255,0.15)' : 'transparent',
+                border: '1px solid rgba(155,109,255,0.4)',
+                color: '#9B6DFF',
+                cursor: 'pointer'
+              }}
+            >
+              {showProgress ? 'Hide Progress' : '↑ See Progress'}
+            </button>
+
+            {showProgress && (() => {
+              const pd = getProgressData()
+              if (!pd) return (
+                <p className="text-sm mt-4" style={{color: '#6B5E55'}}>Not enough data yet — keep logging!</p>
+              )
+
+              const { sessions, first, last, delta, trend, unit } = pd
+              const values = sessions.map(s => s.value)
+              const minVal = Math.min(...values)
+              const maxVal = Math.max(...values)
+              const range = maxVal - minVal || 1
+              const chartW = 300
+              const chartH = 80
+              const pts = sessions.map((s, i) => {
+                const x = (i / (sessions.length - 1)) * chartW
+                const y = chartH - ((s.value - minVal) / range) * (chartH - 10) - 5
+                return `${x},${y}`
+              }).join(' ')
+
+              const n = sessions.length
+              let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0
+              sessions.forEach((s, i) => {
+                sumX += i; sumY += s.value; sumXY += i * s.value; sumX2 += i * i
+              })
+              const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
+              const intercept = (sumY - slope * sumX) / n
+              const trendY1 = chartH - ((intercept - minVal) / range) * (chartH - 10) - 5
+              const trendY2 = chartH - ((slope * (n - 1) + intercept - minVal) / range) * (chartH - 10) - 5
+
+              const lastPt = sessions[sessions.length - 1]
+              const lastX = chartW
+              const lastY = chartH - ((lastPt.value - minVal) / range) * (chartH - 10) - 5
+
+              return (
+                <div className="rounded-2xl p-5 mt-3" style={{background: '#0D0D12', border: '1px solid #1E1A2E'}}>
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#9B6DFF'}}>Progress</p>
+                      <p className="text-xs" style={{color: '#6B5E55'}}>{selectedExercise}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold" style={{color: delta >= 0 ? '#9B6DFF' : '#EF4444'}}>
+                        {delta >= 0 ? '+' : ''}{Math.round(delta)} {unit}
+                      </p>
+                      <p className="text-xs" style={{color: '#6B5E55'}}>since you started</p>
+                    </div>
+                  </div>
+
+                  <svg width="100%" height={chartH + 20} viewBox={`0 0 ${chartW} ${chartH + 20}`} preserveAspectRatio="none">
+                    <line x1="0" y1={chartH + 2} x2={chartW} y2={chartH + 2} stroke="#1E1A2E" strokeWidth="1"/>
+                    <line
+                      x1="0" y1={trendY1}
+                      x2={chartW} y2={trendY2}
+                      stroke="rgba(155,109,255,0.2)"
+                      strokeWidth="1.5"
+                      strokeDasharray="4 4"
+                    />
+                    <polyline
+                      points={pts}
+                      fill="none"
+                      stroke="#9B6DFF"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                    {sessions.map((s, i) => {
+                      const x = (i / (sessions.length - 1)) * chartW
+                      const y = chartH - ((s.value - minVal) / range) * (chartH - 10) - 5
+                      return <circle key={i} cx={x} cy={y} r="3" fill={i === sessions.length - 1 ? '#9B6DFF' : '#2A2040'}/>
+                    })}
+                  </svg>
+
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs" style={{color: '#3A3A3A'}}>{first} {unit} · start</p>
+                    <p className="text-xs font-semibold" style={{color: '#6B5E55'}}>{trend} {sessions.length} sessions</p>
+                    <p className="text-xs font-bold" style={{color: '#9B6DFF'}}>{last} {unit} · now</p>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )}
 
