@@ -1471,7 +1471,7 @@ if (validSets.length === 0) {
                           {isDone && <span style={{color: '#3A3A3A'}}>✓</span>}
                           {m.name}
                         </button>
-                        {!isDone && (
+                        {!isDone && !isCurrent && (
                           <button
                             onClick={() => {
                               const updated = rotationMachines.filter((r: any) => r.id !== m.id)
