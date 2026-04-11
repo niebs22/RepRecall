@@ -546,16 +546,19 @@ if (validSets.length === 0) {
 
     const isCardio = machine?.type === 'cardio'
 
-    const sessions = exerciseWorkouts
-      .slice()
-      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-      .map(w => ({
-        date: new Date(w.created_at),
-        value: isCardio
-          ? (w.duration || w.distance || 0)
-          : (w.weight || 0)
-      }))
-      .filter(s => s.value > 0)
+    const sessionMap: Record<string, number> = {}
+    exerciseWorkouts.forEach(w => {
+      const dateStr = new Date(w.created_at).toDateString()
+      const val = isCardio ? (w.duration || w.distance || 0) : (w.weight || 0)
+      if (!sessionMap[dateStr] || val > sessionMap[dateStr]) {
+        sessionMap[dateStr] = val
+      }
+    })
+
+    const sessions = Object.entries(sessionMap)
+      .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+      .map(([date, value]) => ({ date: new Date(date), value }))
+      .filter(s => s.value > 10)
 
     if (sessions.length < 2) return null
 
