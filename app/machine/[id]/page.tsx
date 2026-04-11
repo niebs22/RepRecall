@@ -1096,7 +1096,7 @@ if (validSets.length === 0) {
               <button onClick={() => setShowSwitchPicker(true)}
                 className="text-xs px-3 py-1.5 rounded-lg font-semibold"
                 style={{border: '1px solid #6B5E55', color: '#6B5E55'}}>
-                ⇔ Switch Machine
+                 ⇄ Switch Machine
               </button>
               {machine.type === 'strength' && (
                 <button onClick={() => setShowSupersetPicker(true)}
