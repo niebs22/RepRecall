@@ -64,12 +64,13 @@ function MachinePageInner() {
       if (parsed.notes) setNotes(parsed.notes)
       if (parsed.duration) setDuration(parsed.duration)
       if (parsed.distance) setDistance(parsed.distance)
+      if (parsed.selectedExercise) setSelectedExercise(parsed.selectedExercise)
     }
   }, [id])
 
   function saveDraft() {
     if (!id) return
-    localStorage.setItem(`draft_${id}`, JSON.stringify({ sets, notes, duration, distance }))
+    localStorage.setItem(`draft_${id}`, JSON.stringify({ sets, notes, duration, distance, selectedExercise }))
   }
 
   function clearDraft() {
@@ -1083,18 +1084,20 @@ if (validSets.length === 0) {
 <div>
 <div className="flex justify-between items-center mb-4">
   <h2 className="font-semibold text-lg text-white">Log Today's Workout</h2>
-          {!supersetMachine && machine.type === 'strength' && (
+          {!supersetMachine && (
             <div className="flex gap-2">
               <button onClick={() => setShowSwitchPicker(true)}
                 className="text-xs px-3 py-1.5 rounded-lg font-semibold"
                 style={{border: '1px solid #6B5E55', color: '#6B5E55'}}>
                 ⇄ Switch
               </button>
-              <button onClick={() => setShowSupersetPicker(true)}
-                className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-                style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
-                + Superset
-              </button>
+              {machine.type === 'strength' && (
+                <button onClick={() => setShowSupersetPicker(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+                  style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
+                  + Superset
+                </button>
+              )}
             </div>
           )}
         </div>

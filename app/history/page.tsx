@@ -61,7 +61,7 @@ export default function History() {
       const weights = sets.map(s => s.weight).filter(Boolean)
       const minW = Math.min(...weights)
       const maxW = Math.max(...weights)
-      const totalSets = sets.reduce((sum, s) => sum + (s.sets || 1), 0)
+      const totalSets = sets.length
       return { ...first, _groupedSets: totalSets, _minWeight: minW, _maxWeight: maxW, _allSets: sets }
     }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   }
