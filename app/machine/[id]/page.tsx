@@ -272,7 +272,12 @@ function MachinePageInner() {
           .from('machines').select('*').eq('id', id).single()
         if (machineError) { setError('Machine not found'); return }
         setMachine(machineData)
-        setSelectedExercise(machineData.name)
+        setMachine(machineData)
+
+        const draft = localStorage.getItem(`draft_${id}`)
+        const draftExercise = draft ? JSON.parse(draft).selectedExercise : null
+
+        if (!draftExercise) setSelectedExercise(machineData.name)
 
         const { data: variationData } = await supabase
           .from('variations').select('*')
@@ -280,7 +285,9 @@ function MachinePageInner() {
           .order('created_at', { ascending: true })
         if (variationData) {
           setVariations(variationData)
-          if (exerciseParam) {
+          if (draftExercise) {
+            setSelectedExercise(draftExercise)
+          } else if (exerciseParam) {
             setSelectedExercise(decodeURIComponent(exerciseParam))
           } else if (variationData.length === 1) {
             setSelectedExercise(variationData[0].name)
