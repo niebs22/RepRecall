@@ -89,14 +89,14 @@ export default function JoinGym() {
         <div className="flex flex-col gap-3">
           
             <a
-            href={`/signup?gym=${code}`}
+            href={`/signup?gym=${code}${typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('next') ? '&next=' + encodeURIComponent(new URLSearchParams(window.location.search).get('next')!) : ''}`}
             className="py-3 rounded-full font-semibold text-white text-center"
             style={{background: '#C23B0A'}}>
             Create Account
           </a>
           
             <a
-            href={`/login?gym=${code}`}
+            href={`/login?gym=${code}${typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('next') ? '&next=' + encodeURIComponent(new URLSearchParams(window.location.search).get('next')!) : ''}`}
             className="py-3 rounded-full font-semibold text-center"
             style={{border: '1px solid #C23B0A', color: '#C23B0A'}}>
             Log In

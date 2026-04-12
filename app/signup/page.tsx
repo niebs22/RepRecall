@@ -12,12 +12,16 @@ function SignupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const gymCode = searchParams.get('gym')
+  const nextUrl = searchParams.get('next')
 
   useEffect(() => {
     if (gymCode) {
       localStorage.setItem('pending_gym_code', gymCode)
     }
-  }, [gymCode])
+    if (nextUrl) {
+      localStorage.setItem('pending_next_url', nextUrl)
+    }
+  }, [gymCode, nextUrl])
 
   async function handleSignup(e: any) {
     e.preventDefault()

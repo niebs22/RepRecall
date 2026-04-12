@@ -10,6 +10,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const gymCode = searchParams.get('gym')
+  const nextUrl = searchParams.get('next')
 
   async function handleLogin(e: any) {
     e.preventDefault()
@@ -19,12 +20,17 @@ function LoginForm() {
       return
     }
 
-    // If there's a gym code, store it so dashboard can link them
     if (gymCode) {
       localStorage.setItem('pending_gym_code', gymCode)
     }
 
-    router.push('/dashboard')
+    const pendingNext = nextUrl || localStorage.getItem('pending_next_url')
+    if (pendingNext) {
+      localStorage.removeItem('pending_next_url')
+      router.push(pendingNext)
+    } else {
+      router.push('/dashboard')
+    }
   }
 
   return (
