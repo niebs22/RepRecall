@@ -116,7 +116,6 @@ function MachinePageInner() {
 
   function FunctionalLogger({ machineId, userId, machineName, allWorkouts, onSaved, daysSince }: any) {
     const [activity, setActivity] = useState('')
-    const [duration, setDuration] = useState('')
     const [notes, setNotes] = useState('')
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
@@ -134,7 +133,7 @@ function MachinePageInner() {
         user_id: userId,
         machine_id: machineId,
         exercise_name: activity || 'Functional Training',
-        duration: duration ? parseFloat(duration) : null,
+        duration: null,
         notes: notes || null,
         sets: null,
         reps: null,
@@ -180,18 +179,6 @@ function MachinePageInner() {
               value={activity}
               onChange={e => setActivity(e.target.value)}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-            />
-          </div>
-
-          <div>
-            <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Duration (minutes)</label>
-            <input
-              type="number"
-              placeholder="—"
-              value={duration}
-              onChange={e => setDuration(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg text-white focus:outline-none text-center"
               style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
             />
           </div>
