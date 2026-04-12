@@ -1185,10 +1185,10 @@ if (validSets.length === 0) {
                       <p className="text-xs" style={{color: '#6B5E55'}}>{selectedExercise}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold" style={{color: delta >= 0 ? '#9B6DFF' : '#EF4444'}}>
-                        {delta >= 0 ? '+' : ''}{Math.round(delta)} {unit}
+                      <p className="text-3xl font-black" style={{color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
+                        {delta >= 0 ? '+' : ''}{Math.round(delta)}
                       </p>
-                      <p className="text-xs" style={{color: '#6B5E55'}}>since you started</p>
+                      <p className="text-xs mt-1" style={{color: '#6B5E55'}}>{unit} since you started</p>
                     </div>
                   </div>
 
@@ -1197,22 +1197,25 @@ if (validSets.length === 0) {
                     <line
                       x1="0" y1={trendY1}
                       x2={chartW} y2={trendY2}
-                      stroke="rgba(155,109,255,0.2)"
+                      stroke="rgba(155,109,255,0.5)"
                       strokeWidth="1.5"
-                      strokeDasharray="4 4"
+                      strokeDasharray="5 4"
                     />
                     <polyline
                       points={pts}
                       fill="none"
                       stroke="#9B6DFF"
-                      strokeWidth="2"
+                      strokeWidth="2.5"
                       strokeLinejoin="round"
                       strokeLinecap="round"
                     />
                     {sessions.map((s, i) => {
                       const x = (i / (sessions.length - 1)) * chartW
                       const y = chartH - ((s.value - minVal) / range) * (chartH - 10) - 5
-                      return <circle key={i} cx={x} cy={y} r="3" fill={i === sessions.length - 1 ? '#9B6DFF' : '#2A2040'}/>
+                      const isLast = i === sessions.length - 1
+                      return isLast
+                        ? <circle key={i} cx={x} cy={y} r="5" fill="#9B6DFF"/>
+                        : <circle key={i} cx={x} cy={y} r="4" fill="#0D0D12" stroke="#9B6DFF" strokeWidth="2"/>
                     })}
                   </svg>
 
