@@ -271,10 +271,10 @@ export default function MyStats() {
               return (
                 <div key={i} className="flex flex-col items-center gap-2 flex-1">
                   <p className="text-xs font-bold" style={{color: '#C23B0A'}}>{week.days > 0 ? week.days : ''}</p>
-                  <div className="w-full rounded" style={{
+                   <div className="w-full rounded" style={{
                     height: `${height}px`,
                     background: week.days > 0
-                      ? i === 3 ? 'linear-gradient(180deg, #D44A18 0%, #8C2A06 100%)' : 'linear-gradient(180deg, #8C2A06 0%, #5A1A04 100%)'
+                      ? i === 3 ? '#C23B0A' : '#6B2510'
                       : '#1A1A1A'
                   }}/>
                   <p className="text-center" style={{color: '#6B5E55', fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
@@ -475,7 +475,7 @@ export default function MyStats() {
                         </div>
                       </div>
 
-                      <svg width="100%" height={chartH + 20} viewBox={`0 0 ${chartW} ${chartH + 20}`} preserveAspectRatio="none">
+                      <svg width="100%" height="120" viewBox={`0 0 ${chartW} ${chartH + 20}`} preserveAspectRatio="xMidYMid meet">
                         <line x1="0" y1={chartH + 2} x2={chartW} y2={chartH + 2} stroke="#1E1A2E" strokeWidth="1"/>
                         <line x1="0" y1={trendY1} x2={chartW} y2={trendY2}
                           stroke="rgba(155,109,255,0.5)" strokeWidth="1.5" strokeDasharray="5 4"/>
