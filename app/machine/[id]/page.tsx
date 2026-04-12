@@ -1192,7 +1192,7 @@ if (validSets.length === 0) {
                     </div>
                   </div>
 
-                  <svg width="100%" height={chartH + 20} viewBox={`0 0 ${chartW} ${chartH + 20}`} preserveAspectRatio="none">
+                 <svg width="100%" height="120" viewBox={`0 0 ${chartW} ${chartH + 20}`} preserveAspectRatio="xMidYMid meet">
                     <line x1="0" y1={chartH + 2} x2={chartW} y2={chartH + 2} stroke="#1E1A2E" strokeWidth="1"/>
                     <line
                       x1="0" y1={trendY1}
