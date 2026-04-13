@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [fourWeekData, setFourWeekData] = useState<number[]>([0, 0, 0, 0])
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
+  const [challengePool, setChallengePool] = useState<any[]>([])
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [showIOSSteps, setShowIOSSteps] = useState(false)
@@ -210,11 +211,16 @@ export default function Dashboard() {
         }
       }
     })
-    const challenges = Object.values(exerciseMap)
+    const pool = Object.values(exerciseMap)
       .filter(e => new Date(e.lastDate) < cutoff)
       .sort((a, b) => new Date(a.lastDate).getTime() - new Date(b.lastDate).getTime())
-      .slice(0, 4)
-    setChallengeExercises(challenges)
+    setChallengePool(pool)
+    setChallengeExercises(pool.slice(0, 4))
+  }
+
+  function shuffleChallenges() {
+    const shuffled = [...challengePool].sort(() => Math.random() - 0.5)
+    setChallengeExercises(shuffled.slice(0, 4))
   }
 
   async function fetchLiftStats(userId: string) {
@@ -480,7 +486,12 @@ export default function Dashboard() {
         </div>
 
         {/* Challenge box */}
-        {challengeExercises.length > 0 && (
+        {challengeExercises.length === 0 ? (
+          <div className="rounded-2xl mb-4 p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+            <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
+          </div>
+        ) : (
           <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
             <button
               onClick={() => setChallengeOpen(prev => !prev)}
@@ -489,7 +500,19 @@ export default function Dashboard() {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                    {challengePool.length > 4 && (
+                      <button
+                        onClick={e => { e.stopPropagation(); shuffleChallenges() }}
+                        className="text-xs px-1.5 py-0.5 rounded"
+                        style={{color: '#6B5E55', background: '#1A1A1A', lineHeight: 1}}
+                        title="Shuffle"
+                      >
+                        ↻
+                      </button>
+                    )}
+                  </div>
                   <p className="text-sm" style={{color: '#6B5E55'}}>
                     {challengeOpen ? 'Try to beat your last session on these.' : "Not sure what to work today? We picked exercises you haven't hit in a while — try to beat your last session."}
                   </p>
@@ -530,7 +553,8 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-        )}
+        ) }
+
 
         {/* Frequently Used */}
         <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
