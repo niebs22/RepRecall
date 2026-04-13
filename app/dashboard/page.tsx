@@ -33,6 +33,12 @@ export default function Dashboard() {
       } else {
         setUser(user)
         await checkPendingGym(user.id)
+        const pendingNext = localStorage.getItem('pending_next_url')
+        if (pendingNext) {
+          localStorage.removeItem('pending_next_url')
+          router.push(pendingNext)
+          return
+        }
         fetchProfile(user.id)
         fetchUserGym(user.id)
         fetchMachineWorkouts(user.id)
