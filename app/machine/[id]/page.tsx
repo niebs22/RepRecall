@@ -222,17 +222,23 @@ function MachinePageInner() {
         if (!id) { setError('Invalid machine ID'); return }
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-          const { data: machineGym } = await supabase
+          const { data: machineData } = await supabase
             .from('machines')
-            .select('gym_id, gyms(code)')
+            .select('gym_id')
             .eq('id', id)
             .single()
-          if (machineGym?.gyms) {
-            const code = (machineGym.gyms as any).code
-            router.push(`/join/${code}?next=/machine/${id}`)
-          } else {
-            router.push('/login')
+          if (machineData?.gym_id) {
+            const { data: gymData } = await supabase
+              .from('gyms')
+              .select('code')
+              .eq('id', machineData.gym_id)
+              .single()
+            if (gymData?.code) {
+              router.push(`/join/${gymData.code}?next=/machine/${id}`)
+              return
+            }
           }
+          router.push('/login')
           return
         }
         setUser(user)
