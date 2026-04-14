@@ -312,7 +312,6 @@ async function bulkAddMachines(e: any) {
             <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
           <div className="flex gap-4">
-            <a href="/admin/analytics" className="text-sm" style={{color: '#C23B0A'}}>Analytics</a>
             {role === 'super_admin' && (
               <a href="/superadmin" className="text-sm" style={{color: '#6B5E55'}}>Super Admin</a>
             )}
@@ -320,7 +319,34 @@ async function bulkAddMachines(e: any) {
           </div>
         </div>
 
+        {/* Quick action cards */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          <a href="/admin/analytics" className="rounded-2xl p-5 flex flex-col gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p style={{fontSize: '24px'}}>📊</p>
+            <p className="font-bold text-white text-sm">Analytics</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>Member activity, equipment usage</p>
+          </a>
+          <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            onClick={() => document.getElementById('export-btn')?.click()}>
+            <p style={{fontSize: '24px'}}>🖨️</p>
+            <p className="font-bold text-white text-sm">Export QR Cards</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>Print cards for all machines</p>
+          </div>
+          <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            onClick={() => document.getElementById('add-machine-section')?.scrollIntoView({behavior: 'smooth'})}>
+            <p style={{fontSize: '24px'}}>➕</p>
+            <p className="font-bold text-white text-sm">Add Machine</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>Single or bulk add equipment</p>
+          </div>
+          <div className="rounded-2xl p-5 flex flex-col gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+            <p style={{fontSize: '24px'}}>🏋️</p>
+            <p className="font-bold text-white text-sm">{machines.length} Machines</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>{gymName}</p>
+          </div>
+        </div>
+
         {/* Add machine form */}
+        <div id="add-machine-section">
         <div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
           <h2 className="text-white font-semibold text-lg mb-4">Add Machine</h2>
           <form onSubmit={addMachine} className="flex flex-col gap-3">
@@ -393,6 +419,8 @@ async function bulkAddMachines(e: any) {
             </button>
           </form>
         </div>
+        </div>
+
 {/* Bulk add machines */}
 <div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
   <h2 className="text-white font-semibold text-lg mb-1">Bulk Add Machines</h2>
@@ -457,6 +485,7 @@ async function bulkAddMachines(e: any) {
           </h2>
           {machines.length > 0 && (
             <button
+              id="export-btn"
               onClick={exportAllCards}
               className="text-sm px-4 py-2 rounded-full font-semibold text-white"
               style={{background: '#C23B0A'}}>

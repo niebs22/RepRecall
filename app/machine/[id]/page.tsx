@@ -597,15 +597,15 @@ if (validSets.length === 0) {
       {rotationMachines.length > 1 && (
         <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
           <div className="max-w-lg mx-auto">
-            <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
-              <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: '#C23B0A'}}>Up next</p>
+            <div className="rounded-2xl px-4 py-4 flex items-center gap-2" style={{background: '#C23B0A'}}>
+              <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: 'rgba(255,255,255,0.7)'}}>Up next</p>
               <div className="flex gap-2 flex-1 overflow-x-auto">
                 {rotationMachines.filter((m: any) => m.id !== id).map((m: any) => (
                   <button
                     key={m.id}
                     onClick={() => router.push(`/machine/${m.id}`)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap"
-                    style={{background: '#C23B0A', color: '#fff'}}
+                    style={{background: 'rgba(255,255,255,0.2)', color: '#fff'}}
                   >
                     {m.name} →
                   </button>
@@ -736,7 +736,7 @@ if (validSets.length === 0) {
           <div className="mb-6">
             <label className="text-xs mb-2 block font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Exercise</label>
 
-            {variations.length === 0 ? (
+            {rotationMachines.length <= 1 && variations.length === 0 ? (
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div className="rounded-xl py-4 px-3 text-center"
                   style={{background: '#C23B0A'}}>
@@ -771,7 +771,7 @@ if (validSets.length === 0) {
               </select>
             )}
 
-            {!showInlineAdd && variations.length > 0 && (
+            {!showInlineAdd && variations.length > 0 && rotationMachines.length <= 1 && (
               <button
                 onClick={() => setShowInlineAdd(true)}
                 className="text-sm font-semibold mt-1 mb-2 inline-block px-3 py-1.5 rounded-full"
@@ -1580,7 +1580,7 @@ if (validSets.length === 0) {
         {rotationMachines.length > 1 && (
           <div className="fixed bottom-24 left-0 right-0 z-40 px-4">
             <div className="max-w-lg mx-auto">
-              <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+              <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #C23B0A', boxShadow: '0 0 0 1px rgba(194,59,10,0.2)'}}>
                 <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: '#6B5E55'}}>Rotating</p>
                 <div className="flex gap-2 flex-1 overflow-x-auto">
                   {rotationMachines.map((m: any) => {
