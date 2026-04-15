@@ -329,7 +329,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
-            scan<span style={{fontWeight: 900, color: '#C23B0A'}}>set</span>
+            scan<span style={{fontWeight: 900, color: '#D94412'}}>set</span>
           </h1>
           <div className="flex items-center gap-4">
             {profile?.role && profile.role !== 'member' && (
