@@ -495,7 +495,7 @@ if (validSets.length === 0) {
 
   function daysSince(date: string) {
     const now = new Date()
-    const past = new Date(date)
+    const past = new Date(date.endsWith('Z') ? date : date + 'Z')
     const diffMs = now.getTime() - past.getTime()
     const diffHours = diffMs / (1000 * 60 * 60)
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
@@ -508,7 +508,7 @@ if (validSets.length === 0) {
   }
 
   function formatHistoryDate(date: string) {
-    const d = new Date(date)
+    const d = new Date(date.endsWith('Z') ? date : date + 'Z')
     const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: gymTimezone })
     const now = new Date()
     const todayStr = now.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })

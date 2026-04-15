@@ -204,7 +204,7 @@ export default function MyStats() {
 
   function daysSince(date: string) {
     const now = new Date()
-    const past = new Date(date)
+    const past = new Date(date.endsWith('Z') ? date : date + 'Z')
     const todayStr = now.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
     const pastStr = past.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
     if (todayStr === pastStr) return 'Today'

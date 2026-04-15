@@ -147,7 +147,7 @@ export default function Analytics() {
 
     const days = [0,0,0,0,0,0,0]
     allWorkouts?.forEach(w => {
-      const localDay = new Date(w.created_at).toLocaleDateString('en-US', {
+      const localDay = new Date(w.created_at.endsWith('Z') ? w.created_at : w.created_at + 'Z').toLocaleDateString('en-US', {
         weekday: 'short', timeZone: gymTimezone
       })
       const dayMap: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }
@@ -158,7 +158,7 @@ export default function Analytics() {
 
     const times = { morning: 0, afternoon: 0, evening: 0 }
     allWorkouts?.forEach(w => {
-      const hour = parseInt(new Date(w.created_at).toLocaleTimeString('en-US', {
+      const hour = parseInt(new Date(w.created_at.endsWith('Z') ? w.created_at : w.created_at + 'Z').toLocaleTimeString('en-US', {
         hour: 'numeric', hour12: false, timeZone: gymTimezone
       }))
       if (hour >= 5 && hour < 11) times.morning++
@@ -211,7 +211,7 @@ export default function Analytics() {
 
   function daysSince(date: string | null) {
     if (!date) return 'Never'
-    const diffMs = new Date().getTime() - new Date(date).getTime()
+    const diffMs = new Date().getTime() - new Date(date.endsWith('Z') ? date : date + 'Z').getTime()
     const diffHours = diffMs / (1000 * 60 * 60)
     const diffDays = Math.floor(diffHours / 24)
     if (diffHours < 24) return 'Today'
