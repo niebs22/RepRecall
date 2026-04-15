@@ -1580,7 +1580,7 @@ if (validSets.length === 0) {
         {rotationMachines.length > 1 && (
           <div className="fixed bottom-24 left-0 right-0 z-40 px-4">
             <div className="max-w-lg mx-auto">
-              <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #C23B0A', boxShadow: '0 0 0 1px rgba(194,59,10,0.2)'}}>
+              <div className="rounded-2xl px-4 py-3 flex items-center gap-2" style={{background: '#0F0F0F', border: '1px solid #3A3A3A', boxShadow: '0 0 0 1px rgba(255,255,255,0.05)'}}>
                 <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: '#6B5E55'}}>Rotating</p>
                 <div className="flex gap-2 flex-1 overflow-x-auto">
                   {rotationMachines.map((m: any) => {
