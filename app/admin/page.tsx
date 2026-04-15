@@ -329,19 +329,8 @@ async function bulkAddMachines(e: any) {
           <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
             onClick={() => document.getElementById('export-btn')?.click()}>
             <p style={{fontSize: '24px'}}>🖨️</p>
-            <p className="font-bold text-white text-sm">Export QR Cards</p>
-            <p className="text-xs" style={{color: '#6B5E55'}}>Print cards for all machines</p>
-          </div>
-          <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
-            onClick={() => document.getElementById('add-machine-section')?.scrollIntoView({behavior: 'smooth'})}>
-            <p style={{fontSize: '24px'}}>➕</p>
-            <p className="font-bold text-white text-sm">Add Machine</p>
-            <p className="text-xs" style={{color: '#6B5E55'}}>Single or bulk add equipment</p>
-          </div>
-          <div className="rounded-2xl p-5 flex flex-col gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p style={{fontSize: '24px'}}>🏋️</p>
-            <p className="font-bold text-white text-sm">{machines.length} Machines</p>
-            <p className="text-xs" style={{color: '#6B5E55'}}>{gymName}</p>
+            <p className="font-bold text-white text-sm">Export All QR Cards</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>Exports all {machines.length} machines as a print-ready PDF</p>
           </div>
         </div>
 
