@@ -23,6 +23,7 @@ export default function Admin() {
   const [bulkLoading, setBulkLoading] = useState(false)
   const [bulkType, setBulkType] = useState('strength')
   const [bulkOpen, setBulkOpen] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
