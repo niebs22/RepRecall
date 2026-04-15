@@ -67,6 +67,7 @@ export default function History() {
   }
 
   function formatTime(date: string) {
+    console.log('formatTime timezone:', timezone, 'date:', date)
     return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: timezone })
   }
 
