@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [gymName, setGymName] = useState('')
+  const [gymTimezone, setGymTimezone] = useState('America/New_York')
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
@@ -97,10 +98,13 @@ export default function Dashboard() {
   async function fetchUserGym(userId: string) {
     const { data } = await supabase
       .from('gym_members')
-      .select('gym_id, gyms(name)')
+      .select('gym_id, gyms(name, timezone)')
       .eq('user_id', userId)
       .single()
-    if (data?.gyms) setGymName((data.gyms as any).name)
+    if (data?.gyms) {
+      setGymName((data.gyms as any).name)
+      setGymTimezone((data.gyms as any).timezone || 'America/New_York')
+    }
   }
 
   async function fetchMachineWorkouts(userId: string) {
@@ -283,7 +287,9 @@ export default function Dashboard() {
     const diffHours = diffMs / (1000 * 60 * 60)
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
     if (diffHours < 1) return 'Just now'
-    if (diffHours < 24) return 'Today'
+    const todayStr = now.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    const pastStr = past.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    if (todayStr === pastStr) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     return diffDays + ' days ago'
   }
