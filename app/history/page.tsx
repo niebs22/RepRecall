@@ -66,13 +66,14 @@ export default function History() {
     })
   }
 
-  function formatTime(date: string) {
+  function formatTime(date: string, tz?: string) {
+    const zone = tz || timezone
     try {
       return new Intl.DateTimeFormat('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
-        timeZone: timezone
+        timeZone: zone
       }).format(new Date(date))
     } catch {
       return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
@@ -162,7 +163,7 @@ export default function History() {
                         <p className="text-xs mt-1" style={{color: '#6B5E55'}}>{formatSummary(w)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{formatTime(w.created_at)}</p>
+                        <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{formatTime(w.created_at, timezone)}</p>
                       </div>
                     </a>
                   ))}
