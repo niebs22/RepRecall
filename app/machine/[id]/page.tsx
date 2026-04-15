@@ -16,6 +16,7 @@ function MachinePageInner() {
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [variations, setVariations] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
+  const [gymTimezone, setGymTimezone] = useState('America/New_York')
   const [selectedExercise, setSelectedExercise] = useState('')
   const [showAddVariation, setShowAddVariation] = useState(false)
   const [showManageVariations, setShowManageVariations] = useState(false)
@@ -245,9 +246,12 @@ function MachinePageInner() {
 
         const { data: existingMembership } = await supabase
           .from('gym_members')
-          .select('gym_id')
+          .select('gym_id, gyms(timezone)')
           .eq('user_id', user.id)
           .single()
+        if (existingMembership?.gyms) {
+          setGymTimezone((existingMembership.gyms as any).timezone || 'America/New_York')
+        }
 
         if (!existingMembership) {
           const { data: machineGym } = await supabase
@@ -496,19 +500,23 @@ if (validSets.length === 0) {
     const diffHours = diffMs / (1000 * 60 * 60)
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
     if (diffHours < 1) return 'Just now'
-    if (diffHours < 24) return 'Today'
+    const todayStr = now.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    const pastStr = past.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    if (todayStr === pastStr) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     return diffDays + ' days ago'
   }
 
   function formatHistoryDate(date: string) {
     const d = new Date(date)
-    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    const diffMs = new Date().getTime() - d.getTime()
-    const diffHours = diffMs / (1000 * 60 * 60)
+    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: gymTimezone })
+    const now = new Date()
+    const todayStr = now.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    const pastStr = d.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    const diffMs = now.getTime() - d.getTime()
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
     let ago = ''
-    if (diffHours < 24) ago = 'Today'
+    if (todayStr === pastStr) ago = 'Today'
     else if (diffDays === 1) ago = 'Yesterday'
     else ago = diffDays + ' days ago'
     return { label, ago }
