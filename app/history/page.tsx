@@ -21,7 +21,11 @@ export default function History() {
         .eq('user_id', user.id)
         .single()
       if (memberData?.gyms) {
-        setTimezone((memberData.gyms as any).timezone || 'America/New_York')
+        const tz = (memberData.gyms as any).timezone || 'America/New_York'
+        console.log('Setting timezone to:', tz)
+        setTimezone(tz)
+      } else {
+        console.log('No gym timezone found, memberData:', memberData)
       }
 
       const { data } = await supabase
