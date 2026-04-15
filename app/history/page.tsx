@@ -67,8 +67,16 @@ export default function History() {
   }
 
   function formatTime(date: string) {
-    console.log('formatTime timezone:', timezone, 'date:', date)
-    return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: timezone })
+    try {
+      return new Intl.DateTimeFormat('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: timezone
+      }).format(new Date(date))
+    } catch {
+      return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    }
   }
 
   function groupSets(items: any[]) {
