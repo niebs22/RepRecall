@@ -335,80 +335,81 @@ async function bulkAddMachines(e: any) {
           </div>
         </div>
 
-        {/* Add machine form */}
         <div id="add-machine-section">
-        <div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
-          <h2 className="text-white font-semibold text-lg mb-4">Add Machine</h2>
-          <form onSubmit={addMachine} className="flex flex-col gap-3">
-            <input
-              type="text"
-              placeholder="Machine name (e.g. Bench Press)"
-              value={newMachine}
-              onChange={e => setNewMachine(e.target.value)}
-              className="px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#080808', border: '1px solid #1A1A1A'}}
-            />
-            <input
-              type="text"
-              placeholder="Description (optional)"
-              value={newDescription}
-              onChange={e => setNewDescription(e.target.value)}
-              className="px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#080808', border: '1px solid #1A1A1A'}}
-            />
-            <input
-              type="number"
-              placeholder="Purchase price (optional, e.g. 1200)"
-              value={newPrice}
-              onChange={e => setNewPrice(e.target.value)}
-              className="px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#080808', border: '1px solid #1A1A1A'}}
-            />
-            <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1A1A1A'}}>
-              <button
-                type="button"
-                onClick={() => setNewType('strength')}
-                className="flex-1 py-3 text-sm font-semibold transition-colors"
-                style={{
-                  background: newType === 'strength' ? '#C23B0A' : '#080808',
-                  color: newType === 'strength' ? '#fff' : '#6B5E55'
-                }}
-              >
-                💪 Strength
-              </button>
-              <button
-                type="button"
-                onClick={() => setNewType('cardio')}
-                className="flex-1 py-3 text-sm font-semibold transition-colors"
-                style={{
-                  background: newType === 'cardio' ? '#C23B0A' : '#080808',
-                  color: newType === 'cardio' ? '#fff' : '#6B5E55'
-                }}
-              >
-                🏃 Cardio
-              </button>
-              <button
-                type="button"
-                onClick={() => setNewType('functional')}
-                className="flex-1 py-3 text-sm font-semibold transition-colors"
-                style={{
-                  background: newType === 'functional' ? '#C23B0A' : '#080808',
-                  color: newType === 'functional' ? '#fff' : '#6B5E55'
-                }}
-              >
-                🏋️ Functional
-              </button>
-            </div>
+          <div className="rounded-2xl mb-8 overflow-hidden" style={{background: '#0F0F0F'}}>
             <button
-              type="submit"
-              disabled={loading}
-              className="py-3 rounded-full font-semibold text-white"
-              style={{background: '#C23B0A'}}
+              onClick={() => setAddOpen(prev => !prev)}
+              className="w-full flex justify-between items-center p-6"
+              style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
             >
-              {loading ? 'Adding...' : 'Add Machine'}
+              <h2 className="text-white font-semibold text-lg">Add Machine</h2>
+              <span style={{color: '#6B5E55', fontSize: '18px', transform: addOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1}}>▾</span>
             </button>
-          </form>
-        </div>
+            {addOpen && (
+              <div className="px-6 pb-6">
+                <form onSubmit={addMachine} className="flex flex-col gap-3">
+                  <input
+                    type="text"
+                    placeholder="Machine name (e.g. Bench Press)"
+                    value={newMachine}
+                    onChange={e => setNewMachine(e.target.value)}
+                    className="px-4 py-3 rounded-lg text-white focus:outline-none"
+                    style={{background: '#080808', border: '1px solid #1A1A1A'}}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Description (optional)"
+                    value={newDescription}
+                    onChange={e => setNewDescription(e.target.value)}
+                    className="px-4 py-3 rounded-lg text-white focus:outline-none"
+                    style={{background: '#080808', border: '1px solid #1A1A1A'}}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Purchase price (optional, e.g. 1200)"
+                    value={newPrice}
+                    onChange={e => setNewPrice(e.target.value)}
+                    className="px-4 py-3 rounded-lg text-white focus:outline-none"
+                    style={{background: '#080808', border: '1px solid #1A1A1A'}}
+                  />
+                  <div className="flex rounded-lg overflow-hidden" style={{border: '1px solid #1A1A1A'}}>
+                    <button
+                      type="button"
+                      onClick={() => setNewType('strength')}
+                      className="flex-1 py-3 text-sm font-semibold transition-colors"
+                      style={{background: newType === 'strength' ? '#C23B0A' : '#080808', color: newType === 'strength' ? '#fff' : '#6B5E55'}}
+                    >
+                      💪 Strength
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewType('cardio')}
+                      className="flex-1 py-3 text-sm font-semibold transition-colors"
+                      style={{background: newType === 'cardio' ? '#C23B0A' : '#080808', color: newType === 'cardio' ? '#fff' : '#6B5E55'}}
+                    >
+                      🏃 Cardio
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewType('functional')}
+                      className="flex-1 py-3 text-sm font-semibold transition-colors"
+                      style={{background: newType === 'functional' ? '#C23B0A' : '#080808', color: newType === 'functional' ? '#fff' : '#6B5E55'}}
+                    >
+                      🏋️ Functional
+                    </button>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="py-3 rounded-full font-semibold text-white"
+                    style={{background: '#C23B0A'}}
+                  >
+                    {loading ? 'Adding...' : 'Add Machine'}
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
         </div>
 
 {/* Bulk add machines */}
@@ -417,7 +418,7 @@ async function bulkAddMachines(e: any) {
             onClick={() => setBulkOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-6"
             style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
-          >
+           >
             <h2 className="text-white font-semibold text-lg">Bulk Add Machines</h2>
             <span style={{color: '#6B5E55', fontSize: '18px', transform: bulkOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1}}>▾</span>
           </button>
