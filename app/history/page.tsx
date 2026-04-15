@@ -7,12 +7,23 @@ import BottomNav from '../components/BottomNav'
 export default function History() {
   const [workouts, setWorkouts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [timezone, setTimezone] = useState('America/New_York')
   const router = useRouter()
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
+      const { data: memberData } = await supabase
+        .from('gym_members')
+        .select('gym_id, gyms(timezone)')
+        .eq('user_id', user.id)
+        .single()
+      if (memberData?.gyms) {
+        setTimezone((memberData.gyms as any).timezone || 'America/New_York')
+      }
+
       const { data } = await supabase
         .from('workouts')
         .select('*, machines!workouts_machine_id_fkey(name, type)')
@@ -28,7 +39,9 @@ export default function History() {
   function groupByDay(workouts: any[]) {
     const groups: Record<string, any[]> = {}
     workouts.forEach(w => {
-      const dateStr = new Date(w.created_at).toDateString()
+      const dateStr = new Date(w.created_at).toLocaleDateString('en-US', {
+        timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit'
+      })
       if (!groups[dateStr]) groups[dateStr] = []
       groups[dateStr].push(w)
     })
@@ -36,17 +49,21 @@ export default function History() {
   }
 
   function formatDayLabel(dateStr: string) {
-    const d = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - d.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-    if (diffDays === 0) return 'Today'
-    if (diffDays === 1) return 'Yesterday'
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+    const todayStr = new Date().toLocaleDateString('en-US', {
+      timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit'
+    })
+    const yesterdayStr = new Date(Date.now() - 86400000).toLocaleDateString('en-US', {
+      timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit'
+    })
+    if (dateStr === todayStr) return 'Today'
+    if (dateStr === yesterdayStr) return 'Yesterday'
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      weekday: 'long', month: 'short', day: 'numeric'
+    })
   }
 
   function formatTime(date: string) {
-    return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: timezone })
   }
 
   function groupSets(items: any[]) {
