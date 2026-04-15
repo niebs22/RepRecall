@@ -143,17 +143,24 @@ export default function Analytics() {
     setMostUsed(stats[0] || null)
     setLeastUsed(stats[stats.length - 1] || null)
 
+    const gymTimezone = gyms.find(g => g.id === gymId)?.timezone || 'America/New_York'
+
     const days = [0,0,0,0,0,0,0]
     allWorkouts?.forEach(w => {
-      const day = new Date(w.created_at).getDay()
-      const adjusted = day === 0 ? 6 : day - 1
-      days[adjusted]++
+      const localDay = new Date(w.created_at).toLocaleDateString('en-US', {
+        weekday: 'short', timeZone: gymTimezone
+      })
+      const dayMap: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }
+      const adjusted = dayMap[localDay]
+      if (adjusted !== undefined) days[adjusted]++
     })
     setDayStats(days)
 
     const times = { morning: 0, afternoon: 0, evening: 0 }
     allWorkouts?.forEach(w => {
-      const hour = new Date(w.created_at).getHours()
+      const hour = parseInt(new Date(w.created_at).toLocaleTimeString('en-US', {
+        hour: 'numeric', hour12: false, timeZone: gymTimezone
+      }))
       if (hour >= 5 && hour < 11) times.morning++
       else if (hour >= 11 && hour < 17) times.afternoon++
       else if (hour >= 17 && hour < 22) times.evening++
