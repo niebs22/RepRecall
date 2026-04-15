@@ -12,6 +12,7 @@ export default function MyStats() {
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [challengePool, setChallengePool] = useState<any[]>([])
+  const [gymTimezone, setGymTimezone] = useState('America/New_York')
   const [progressMachineId, setProgressMachineId] = useState('')
   const [progressExercise, setProgressExercise] = useState('')
   const router = useRouter()
@@ -21,6 +22,15 @@ export default function MyStats() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
+      const { data: memberData } = await supabase
+        .from('gym_members')
+        .select('gym_id, gyms(timezone)')
+        .eq('user_id', user.id)
+        .single()
+      if (memberData?.gyms) {
+        setGymTimezone((memberData.gyms as any).timezone || 'America/New_York')
+      }
+
       const { data } = await supabase
         .from('workouts')
         .select('*, machines!workouts_machine_id_fkey(name, type)')
@@ -195,11 +205,11 @@ export default function MyStats() {
   function daysSince(date: string) {
     const now = new Date()
     const past = new Date(date)
-    const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const pastDate = new Date(past.getFullYear(), past.getMonth(), past.getDate())
-    const diffMs = nowDate.getTime() - pastDate.getTime()
+    const todayStr = now.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    const pastStr = past.toLocaleDateString('en-US', { timeZone: gymTimezone, year: 'numeric', month: '2-digit', day: '2-digit' })
+    if (todayStr === pastStr) return 'Today'
+    const diffMs = now.getTime() - past.getTime()
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
-    if (diffDays === 0) return 'Today'
     if (diffDays === 1) return 'Yesterday'
     return `${diffDays}d ago`
   }
