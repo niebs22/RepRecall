@@ -68,15 +68,16 @@ export default function History() {
 
   function formatTime(date: string, tz?: string) {
     const zone = tz || timezone
+    const utcDate = new Date(date.endsWith('Z') ? date : date + 'Z')
     try {
       return new Intl.DateTimeFormat('en-US', {
         hour: 'numeric',
         minute: '2-digit',
         hour12: true,
         timeZone: zone
-      }).format(new Date(date))
+      }).format(utcDate)
     } catch {
-      return new Date(date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      return utcDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
     }
   }
 
