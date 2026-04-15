@@ -22,6 +22,7 @@ export default function Admin() {
   const [bulkNames, setBulkNames] = useState('')
   const [bulkLoading, setBulkLoading] = useState(false)
   const [bulkType, setBulkType] = useState('strength')
+  const [bulkOpen, setBulkOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -411,10 +412,18 @@ async function bulkAddMachines(e: any) {
         </div>
 
 {/* Bulk add machines */}
-<div className="rounded-2xl p-6 mb-8" style={{background: '#0F0F0F'}}>
-  <h2 className="text-white font-semibold text-lg mb-1">Bulk Add Machines</h2>
-  <p className="text-xs mb-4" style={{color: '#6B5E55'}}>One machine name per line</p>
-  <form onSubmit={bulkAddMachines} className="flex flex-col gap-3">
+        <div className="rounded-2xl mb-8 overflow-hidden" style={{background: '#0F0F0F'}}>
+          <button
+            onClick={() => setBulkOpen(prev => !prev)}
+            className="w-full flex justify-between items-center p-6"
+            style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+          >
+            <h2 className="text-white font-semibold text-lg">Bulk Add Machines</h2>
+            <span style={{color: '#6B5E55', fontSize: '18px', transform: bulkOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1}}>▾</span>
+          </button>
+          {bulkOpen && <div className="px-6 pb-6">
+          <p className="text-xs mb-4" style={{color: '#6B5E55'}}>One machine name per line</p>
+          <form onSubmit={bulkAddMachines} className="flex flex-col gap-3">
     <textarea
       placeholder={"Bench Press\nSquat Rack\nLeg Press\nCable Row"}
       value={bulkNames}
@@ -467,7 +476,8 @@ async function bulkAddMachines(e: any) {
       {bulkLoading ? 'Adding...' : `Add ${bulkNames.split('\n').filter(n => n.trim()).length || ''} Machines`}
     </button>
   </form>
-</div>
+          </div>}
+        </div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-semibold text-lg text-white">
             Your Machines <span className="text-sm font-normal" style={{color: '#6B5E55'}}>({machines.length})</span>
