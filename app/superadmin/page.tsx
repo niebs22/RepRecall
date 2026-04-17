@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 export default function SuperAdmin() {
   const [gyms, setGyms] = useState<any[]>([])
   const [newGymName, setNewGymName] = useState('')
+  const [newGymTimezone, setNewGymTimezone] = useState('America/New_York')
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [ownerEmail, setOwnerEmail] = useState<Record<string, string>>({})
@@ -46,8 +47,9 @@ export default function SuperAdmin() {
     e.preventDefault()
     if (!newGymName.trim()) return
     setLoading(true)
-    await supabase.from('gyms').insert({ name: newGymName.trim() })
+    await supabase.from('gyms').insert({ name: newGymName.trim(), timezone: newGymTimezone })
     setNewGymName('')
+    setNewGymTimezone('America/New_York')
     fetchGyms()
     setLoading(false)
   }
@@ -123,6 +125,19 @@ export default function SuperAdmin() {
               className="px-4 py-3 rounded-lg text-white focus:outline-none"
               style={{background: '#080808', border: '1px solid #1A1A1A'}}
             />
+            <select
+              value={newGymTimezone}
+              onChange={e => setNewGymTimezone(e.target.value)}
+              className="px-4 py-3 rounded-lg text-white focus:outline-none"
+              style={{background: '#080808', border: '1px solid #1A1A1A'}}
+            >
+              <option value="America/New_York">Eastern (ET)</option>
+              <option value="America/Chicago">Central (CT)</option>
+              <option value="America/Denver">Mountain (MT)</option>
+              <option value="America/Los_Angeles">Pacific (PT)</option>
+              <option value="America/Anchorage">Alaska (AKT)</option>
+              <option value="Pacific/Honolulu">Hawaii (HT)</option>
+            </select>
             <button
               type="submit"
               disabled={loading}
