@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [gymName, setGymName] = useState('')
+  const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
   const [gymTimezone, setGymTimezone] = useState('America/New_York')
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
@@ -51,6 +52,10 @@ export default function Dashboard() {
       }
     }
     getUser()
+
+    // Weight unit preference
+    const savedUnit = localStorage.getItem('weight_unit') as 'lbs' | 'kg' | null
+    if (savedUnit) setWeightUnit(savedUnit)
 
     // Install banner
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
@@ -342,6 +347,16 @@ export default function Dashboard() {
               <a href="/admin" className="text-sm" style={{color: '#6B5E55'}}>Admin</a>
             )}
             <button onClick={handleLogout} className="text-sm" style={{color: '#6B5E55'}}>Log Out</button>
+          <button
+            onClick={() => {
+              const next = weightUnit === 'lbs' ? 'kg' : 'lbs'
+              setWeightUnit(next)
+              localStorage.setItem('weight_unit', next)
+            }}
+            className="text-xs px-2 py-1 rounded-lg font-semibold"
+            style={{background: '#1A1A1A', color: '#6B5E55'}}>
+            {weightUnit}
+          </button>
           </div>
         </div>
 

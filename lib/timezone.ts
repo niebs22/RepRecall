@@ -34,3 +34,9 @@ export function getDayInZone(utcDate: string, timezone: string): number {
   const dayMap: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 }
   return dayMap[day] ?? 0
 }
+export function displayWeight(lbs: number, unit: 'lbs' | 'kg'): string {
+  if (unit === 'kg') {
+    return (Math.round(lbs * 0.453592 * 2) / 2).toFixed(1) + ' kg'
+  }
+  return lbs + ' lbs'
+}

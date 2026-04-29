@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { displayWeight } from '../../../lib/timezone'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
 function MachinePageInner() {
@@ -16,6 +17,7 @@ function MachinePageInner() {
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [variations, setVariations] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
+  const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
   const [gymTimezone, setGymTimezone] = useState('America/New_York')
   const [selectedExercise, setSelectedExercise] = useState('')
   const [showAddVariation, setShowAddVariation] = useState(false)
@@ -243,6 +245,8 @@ function MachinePageInner() {
           return
         }
         setUser(user)
+        const savedUnit = localStorage.getItem('weight_unit') as 'lbs' | 'kg' | null
+        if (savedUnit) setWeightUnit(savedUnit)
 
         const { data: existingMembership } = await supabase
           .from('gym_members')
@@ -1027,7 +1031,7 @@ if (validSets.length === 0) {
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
                         <p className="col-span-1 text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
                         <p className="col-span-5 text-white font-semibold">{s.reps}</p>
-                        <p className="col-span-6 text-white font-semibold">{s.weight} lbs</p>
+                        <p className="col-span-6 text-white font-semibold">{displayWeight(s.weight, weightUnit)}</p>
                       </div>
                     ))}
                     {lastSessionSets[0]?.superset && (
@@ -1114,7 +1118,7 @@ if (validSets.length === 0) {
                             <p className="text-xs font-bold w-4" style={{color: '#E8440C'}}>{j + 1}</p>
                             <p className="text-sm text-white">{w.reps} reps</p>
                             <p className="text-sm text-white">·</p>
-                            <p className="text-sm text-white">{w.weight} lbs</p>
+                            <p className="text-sm text-white">{displayWeight(w.weight, weightUnit)}</p>
                           </div>
                         ))}
                       </div>
