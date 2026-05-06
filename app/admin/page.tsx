@@ -42,16 +42,14 @@ export default function Admin() {
 
       let gym = null
 
-      if (profile.role === 'super_admin') {
-        // Super admin sees first gym for now
-        const { data } = await supabase
-          .from('gyms').select('*').limit(1).single()
-        gym = data
-      } else if (profile.role === 'gym_owner') {
-        // Gym owner sees their own gym
-        const { data } = await supabase
-          .from('gyms').select('*').eq('owner_id', user.id).single()
-        gym = data
+       if (profile.role === 'super_admin') {
+        const { data: memberData } = await supabase
+          .from('gym_members').select('gym_id').eq('user_id', user.id).single()
+        if (memberData) {
+          const { data } = await supabase
+            .from('gyms').select('*').eq('id', memberData.gym_id).single()
+          gym = data
+        }
       } else {
         // Regular members don't get admin access
         router.push('/dashboard')
