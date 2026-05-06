@@ -77,7 +77,7 @@ export default function ScanPage() {
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#C23B0A'}}>set</span></h1>
+          <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>
             Back
           </a>
@@ -103,7 +103,7 @@ export default function ScanPage() {
             <p className="text-sm mb-4" style={{color: '#6B5E55'}}>
               No problem — just open your phone camera app and point it at the QR code on any machine. It works exactly the same way.
             </p>
-            <p className="text-sm py-2 font-semibold" style={{color: '#C23B0A'}}>
+            <p className="text-sm py-2 font-semibold" style={{color: '#E8440C'}}>
               Swipe out of this app and open your Camera app
             </p>
             <a href="/dashboard" className="block mt-3 py-3 rounded-full font-semibold text-center" style={{border: '1px solid #1A1A1A', color: '#6B5E55'}}>

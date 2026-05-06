@@ -236,7 +236,7 @@ export default function Analytics() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span></h1></a>
+            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span></h1></a>
             <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Gym Analytics</p>
           </div>
           <a href="/admin" className="text-sm" style={{color: '#6B5E55'}}>Admin</a>
@@ -268,11 +268,11 @@ export default function Analytics() {
           </div>
           <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Active This Week</p>
-            <p className="text-3xl font-bold" style={{color: '#C23B0A'}}>{activeThisWeek}</p>
+            <p className="text-3xl font-bold" style={{color: '#E8440C'}}>{activeThisWeek}</p>
           </div>
           <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Workouts This Week</p>
-            <p className="text-3xl font-bold" style={{color: '#C23B0A'}}>{totalWorkoutsThisWeek}</p>
+            <p className="text-3xl font-bold" style={{color: '#E8440C'}}>{totalWorkoutsThisWeek}</p>
           </div>
           <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Total Machines</p>
@@ -282,16 +282,16 @@ export default function Analytics() {
 
         {machineStats.length > 0 && (
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="rounded-2xl p-4" style={{background: '#0F0F0F', borderLeft: '3px solid #C23B0A'}}>
-              <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#C23B0A'}}>Most Used</p>
+            <div className="rounded-2xl p-4" style={{background: '#0F0F0F', borderLeft: '3px solid #E8440C'}}>
+              <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#E8440C'}}>Most Used</p>
               <div className="flex flex-col gap-3">
                 {machineStats.slice(0, 3).map((m, i) => (
                   <div key={i} className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold w-4" style={{color: '#C23B0A'}}>#{i + 1}</span>
+                      <span className="text-xs font-bold w-4" style={{color: '#E8440C'}}>#{i + 1}</span>
                       <p className="text-white text-sm font-medium">{m.name}</p>
                     </div>
-                    <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{m.count}</p>
+                    <p className="text-xs font-semibold" style={{color: '#E8440C'}}>{m.count}</p>
                   </div>
                 ))}
               </div>
@@ -324,13 +324,13 @@ export default function Analytics() {
                   style={{
                     height: dayStats[i] === 0 ? '4px' : Math.max(4, dayStats[i] / maxDayCount * 60) + 'px',
                     background: i === todayIndex
-                      ? '#C23B0A'
+                      ? '#E8440C'
                       : dayStats[i] === Math.max(...dayStats)
-                      ? '#C23B0A'
+                      ? '#E8440C'
                       : '#1A1A1A'
                   }}
                 />
-                <p className="text-xs" style={{color: i === todayIndex ? '#C23B0A' : '#6B5E55'}}>{day}</p>
+                <p className="text-xs" style={{color: i === todayIndex ? '#E8440C' : '#6B5E55'}}>{day}</p>
               </div>
             ))}
           </div>
@@ -341,7 +341,7 @@ export default function Analytics() {
           <div className="flex flex-col gap-3">
             {[
               { label: 'Morning', sublabel: '5am – 11am', count: timeStats.morning, color: '#F59E0B' },
-              { label: 'Afternoon', sublabel: '11am – 5pm', count: timeStats.afternoon, color: '#C23B0A' },
+              { label: 'Afternoon', sublabel: '11am – 5pm', count: timeStats.afternoon, color: '#E8440C' },
               { label: 'Evening', sublabel: '5pm – 10pm', count: timeStats.evening, color: '#8B5CF6' }
             ].map((slot, i) => (
               <div key={i}>
@@ -489,7 +489,7 @@ export default function Analytics() {
                           )}
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-semibold" style={{color: isUnused ? '#EF4444' : '#C23B0A'}}>{machine.count} sessions</p>
+                          <p className="text-xs font-semibold" style={{color: isUnused ? '#EF4444' : '#E8440C'}}>{machine.count} sessions</p>
                           <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(machine.lastUsed)}</p>
                         </div>
                       </div>
@@ -498,7 +498,7 @@ export default function Analytics() {
                           className="h-1.5 rounded-full"
                           style={{
                             width: machine.count === 0 ? '2%' : (machine.count / maxCount * 100) + '%',
-                            background: isUnused ? '#EF4444' : 'linear-gradient(90deg, #C23B0A, #C23B0A)'
+                            background: isUnused ? '#EF4444' : 'linear-gradient(90deg, #E8440C, #E8440C)'
                           }}
                         />
                       </div>

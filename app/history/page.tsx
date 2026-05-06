@@ -134,7 +134,7 @@ export default function History() {
 
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
-            scan<span style={{fontWeight: 900, color: '#C23B0A'}}>set</span>
+            scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
           </h1>
         </div>
 
@@ -147,14 +147,14 @@ export default function History() {
             {grouped.map((group, gi) => (
               <div key={gi}>
                 <p className="text-xs font-bold tracking-widest uppercase mb-3"
-                  style={{color: gi === 0 ? '#C23B0A' : '#6B5E55'}}>
+                  style={{color: gi === 0 ? '#E8440C' : '#6B5E55'}}>
                   {formatDayLabel(group.date)}
                 </p>
                 <div className="flex flex-col gap-2">
                   {groupSets(group.items).map((w, wi) => (
                     <a key={wi} href={'/machine/' + w.machine_id + '?from=history' + (w.exercise_name ? '&exercise=' + encodeURIComponent(w.exercise_name) : '')}
                       className="rounded-xl p-4 flex justify-between items-center"
-                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
+                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
                       <div>
                         <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>
                           {w.exercise_name || w.machines?.name}
@@ -162,7 +162,7 @@ export default function History() {
                         <p className="text-xs mt-1" style={{color: '#6B5E55'}}>{formatSummary(w)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{formatTime(w.created_at, timezone)}</p>
+                        <p className="text-xs font-semibold" style={{color: '#E8440C'}}>{formatTime(w.created_at, timezone)}</p>
                       </div>
                     </a>
                   ))}

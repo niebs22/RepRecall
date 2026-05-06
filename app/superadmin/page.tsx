@@ -107,7 +107,7 @@ export default function SuperAdmin() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span></h1>
+            <h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span></h1>
             <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Super Admin</p>
           </div>
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Dashboard</a>
@@ -142,7 +142,7 @@ export default function SuperAdmin() {
               type="submit"
               disabled={loading}
               className="py-3 rounded-full font-semibold text-white"
-              style={{background: '#C23B0A'}}
+              style={{background: '#E8440C'}}
             >
               {loading ? 'Adding...' : 'Add Gym'}
             </button>
@@ -165,11 +165,11 @@ export default function SuperAdmin() {
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#C23B0A' : '#6B5E55'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: gym.owner_id ? '#E8440C' : '#6B5E55'}}></div>
                     <p className="text-white font-medium text-sm">{gym.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
                       background: gym.owner_id ? 'rgba(194,59,10,0.1)' : 'rgba(100,116,139,0.1)',
-                      color: gym.owner_id ? '#C23B0A' : '#6B5E55'
+                      color: gym.owner_id ? '#E8440C' : '#6B5E55'
                     }}>
                       {gym.owner_id ? 'Owner set' : 'No owner'}
                     </span>
@@ -186,13 +186,13 @@ export default function SuperAdmin() {
                     <div>
                       <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Member Join URL</p>
                       <div className="flex gap-2">
-                        <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#080808', color: '#C23B0A'}}>
+                        <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#080808', color: '#E8440C'}}>
                           /join/{gym.code}
                         </p>
                         <button
                           onClick={() => copyJoinUrl(gym.code)}
                           className="text-xs px-3 py-2 rounded-lg font-semibold text-white"
-                          style={{background: '#C23B0A'}}
+                          style={{background: '#E8440C'}}
                         >
                           Copy
                         </button>
@@ -214,7 +214,7 @@ export default function SuperAdmin() {
                         <button
                           onClick={() => generateSetupLink(gym.id)}
                           className="text-xs px-3 py-2 rounded-lg font-semibold text-white whitespace-nowrap"
-                          style={{background: '#C23B0A'}}
+                          style={{background: '#E8440C'}}
                         >
                           Generate
                         </button>
@@ -227,7 +227,7 @@ export default function SuperAdmin() {
                           <button
                             onClick={() => copyLink(gym.id)}
                             className="text-xs px-3 py-2 rounded-lg font-semibold text-white whitespace-nowrap"
-                            style={{background: copied[gym.id] ? '#1A1A1A' : '#C23B0A', color: copied[gym.id] ? '#C23B0A' : '#fff'}}
+                            style={{background: copied[gym.id] ? '#1A1A1A' : '#E8440C', color: copied[gym.id] ? '#E8440C' : '#fff'}}
                           >
                             {copied[gym.id] ? 'Copied!' : 'Copy'}
                           </button>

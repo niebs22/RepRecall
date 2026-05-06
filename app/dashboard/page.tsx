@@ -340,7 +340,7 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
-            scan<span style={{fontWeight: 900, color: '#D94412'}}>set</span>
+            scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
           </h1>
           <div className="flex items-center gap-4">
             {profile?.role && profile.role !== 'member' && (
@@ -367,8 +367,8 @@ export default function Dashboard() {
           </h2>
           {gymName && (
             <p className="text-xs font-bold tracking-widest mt-1 mb-1 flex items-center gap-1.5"
-              style={{color: '#C23B0A', textTransform: 'uppercase', letterSpacing: '2px'}}>
-              <span style={{width: '5px', height: '5px', borderRadius: '50%', background: '#C23B0A', display: 'inline-block'}}></span>
+              style={{color: '#E8440C', textTransform: 'uppercase', letterSpacing: '2px'}}>
+              <span style={{width: '5px', height: '5px', borderRadius: '50%', background: '#E8440C', display: 'inline-block'}}></span>
               {gymName}
             </p>
           )}
@@ -397,16 +397,16 @@ export default function Dashboard() {
             ) : (
               <div className="flex flex-col gap-2">
                 <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold" style={{color: '#C23B0A', minWidth: '16px'}}>1</span>
-                  <p className="text-xs text-white">Tap the <span style={{color: '#C23B0A'}}>Share</span> button at the bottom of Safari</p>
+                  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
+                  <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>Share</span> button at the bottom of Safari</p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold" style={{color: '#C23B0A', minWidth: '16px'}}>2</span>
-                  <p className="text-xs text-white">Tap <span style={{color: '#C23B0A'}}>"Add to Home Screen"</span></p>
+                  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
+                  <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span></p>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold" style={{color: '#C23B0A', minWidth: '16px'}}>3</span>
-                  <p className="text-xs text-white">Tap <span style={{color: '#C23B0A'}}>"Add"</span></p>
+                  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
+                  <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
                 </div>
                 <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
                   Already installed — dismiss
@@ -423,7 +423,7 @@ export default function Dashboard() {
             <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
-            style={{background: '#D44010', color: '#080808', boxShadow: '0 6px 20px rgba(194,59,10,0.15)'}}>
+            style={{background: '#E8440C', color: '#080808', boxShadow: '0 6px 20px rgba(232,68,12,0.15)'}}>
             <span style={{fontSize: '20px'}}></span> Scan QR Code
           </a>
           <div className="relative">
@@ -451,14 +451,14 @@ export default function Dashboard() {
               {totalWeightLifted.toLocaleString()}
             </p>
             <p className="text-xs mt-1" style={{color: '#6B5E55'}}>lbs lifted</p>
-            <p className="text-xs mt-2 font-semibold" style={{color: '#C23B0A'}}>
+            <p className="text-xs mt-2 font-semibold" style={{color: '#E8440C'}}>
               🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants
             </p>
           </div>
 
           {/* My Stats box with sparkline */}
           <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
-            style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderTop: '2px solid #C23B0A'}}>
+            style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderTop: '2px solid #E8440C'}}>
             <div>
               <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>My Stats</p>
               <p className="text-sm font-semibold" style={{color: '#E8E0D8'}}>PRs & trends</p>
@@ -515,7 +515,7 @@ export default function Dashboard() {
         {/* Challenge box */}
         {challengeExercises.length === 0 ? (
           <div className="rounded-2xl mb-4 p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
@@ -528,7 +528,7 @@ export default function Dashboard() {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
                     {challengePool.length > 4 && (
                       <button
                         onClick={e => { e.stopPropagation(); shuffleChallenges() }}
@@ -558,7 +558,7 @@ export default function Dashboard() {
                   <a key={i}
                     href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
                     className="flex justify-between items-center p-4 rounded-xl"
-                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
+                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
                     <div>
                       <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
                       <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -567,7 +567,7 @@ export default function Dashboard() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>
+                      <p className="text-xs font-semibold" style={{color: '#E8440C'}}>
                         {(() => {
                           const days = Math.round((new Date().getTime() - new Date(ex.lastDate).getTime()) / (1000 * 60 * 60 * 24))
                           return days === 1 ? 'Yesterday' : `${days}d ago`
@@ -596,13 +596,13 @@ export default function Dashboard() {
                 key={workout.machine_id}
                 href={'/machine/' + workout.machine_id}
                 className="rounded-xl p-4 flex justify-between items-center"
-                style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
+                style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
                 <div>
                   <p className="font-semibold" style={{color: '#E8E0D8'}}>{workout.exercise_name || workout.machines?.name}</p>
                   <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{formatWorkoutSummary(workout)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>{daysSince(workout.created_at)}</p>
+                  <p className="text-xs font-semibold" style={{color: '#E8440C'}}>{daysSince(workout.created_at)}</p>
                   <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
               </a>

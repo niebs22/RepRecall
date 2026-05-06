@@ -93,7 +93,7 @@ function OwnerSetupForm() {
   if (status === 'done') return (
     <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#C23B0A'}}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#E8440C'}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">You're all set!</h2>
@@ -107,12 +107,12 @@ function OwnerSetupForm() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-1">
-            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span>
+            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
           </h1>
-          <p className="text-sm tracking-widest uppercase" style={{color: '#C23B0A'}}>Gym Owner Setup</p>
+          <p className="text-sm tracking-widest uppercase" style={{color: '#E8440C'}}>Gym Owner Setup</p>
         </div>
 
-        <div className="rounded-2xl p-4 mb-6" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
+        <div className="rounded-2xl p-4 mb-6" style={{background: '#0F0F0F', border: '1px solid #E8440C'}}>
           <p className="text-xs uppercase tracking-widest mb-1" style={{color: '#6B5E55'}}>Setting up</p>
           <p className="text-lg font-bold text-white">{gymName}</p>
           <p className="text-xs mt-1" style={{color: '#6B5E55'}}>{invite?.email}</p>
@@ -142,7 +142,7 @@ function OwnerSetupForm() {
             type="submit"
             disabled={status === 'submitting'}
             className="py-3 rounded-full font-semibold text-white"
-            style={{background: '#C23B0A'}}
+            style={{background: '#E8440C'}}
           >
             {status === 'submitting' ? 'Setting up...' : 'Create My Account'}
           </button>

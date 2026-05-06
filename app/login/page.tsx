@@ -38,9 +38,9 @@ function LoginForm() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-1">
-            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span>
+            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
           </h1>
-          <p className="text-sm tracking-widest uppercase" style={{color: '#C23B0A'}}>Welcome Back</p>
+          <p className="text-sm tracking-widest uppercase" style={{color: '#E8440C'}}>Welcome Back</p>
         </div>
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <input
@@ -60,15 +60,15 @@ function LoginForm() {
             style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
           />
           {gymCode && (
-            <div className="rounded-lg px-4 py-3" style={{background: '#0F0F0F', border: '1px solid #C23B0A'}}>
-              <p className="text-xs" style={{color: '#C23B0A'}}>✓ You'll be joined to your gym after logging in</p>
+            <div className="rounded-lg px-4 py-3" style={{background: '#0F0F0F', border: '1px solid #E8440C'}}>
+              <p className="text-xs" style={{color: '#E8440C'}}>✓ You'll be joined to your gym after logging in</p>
             </div>
           )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
             type="submit"
             className="py-3 rounded-full font-semibold text-white"
-            style={{background: '#C23B0A'}}
+            style={{background: '#E8440C'}}
           >
             Log In
           </button>
@@ -78,7 +78,7 @@ function LoginForm() {
 </p>
 <p className="text-center mt-3" style={{color: '#6B5E55'}}>
   No account?{' '}
-  <a href="/signup" style={{color: '#C23B0A'}}>Sign Up</a>
+  <a href="/signup" style={{color: '#E8440C'}}>Sign Up</a>
 </p>
       </div>
     </main>

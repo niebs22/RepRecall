@@ -23,11 +23,11 @@ export default function ForgotPassword() {
     <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
         <h1 className="text-3xl font-bold text-white mb-4">
-          <span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span>
+          <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
         </h1>
         <p className="text-white font-semibold text-lg mb-2">Check your email</p>
         <p style={{color: '#6B5E55'}}>We sent you a password reset link.</p>
-        <a href="/login" className="block mt-6 text-sm" style={{color: '#C23B0A'}}>Back to Login</a>
+        <a href="/login" className="block mt-6 text-sm" style={{color: '#E8440C'}}>Back to Login</a>
       </div>
     </main>
   )
@@ -37,9 +37,9 @@ export default function ForgotPassword() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-1">
-            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span>
+            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
           </h1>
-          <p className="text-sm tracking-widest uppercase" style={{color: '#C23B0A'}}>Reset Password</p>
+          <p className="text-sm tracking-widest uppercase" style={{color: '#E8440C'}}>Reset Password</p>
         </div>
         <form onSubmit={handleReset} className="flex flex-col gap-4">
           <input
@@ -54,7 +54,7 @@ export default function ForgotPassword() {
           <button
             type="submit"
             className="py-3 rounded-full font-semibold text-white"
-            style={{background: '#C23B0A'}}
+            style={{background: '#E8440C'}}
           >
             Send Reset Link
           </button>

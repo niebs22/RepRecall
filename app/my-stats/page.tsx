@@ -234,7 +234,7 @@ export default function MyStats() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
-            scan<span style={{fontWeight: 900, color: '#C23B0A'}}>set</span>
+            scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
           </h1>
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>← Dashboard</a>
         </div>
@@ -266,7 +266,7 @@ export default function MyStats() {
             {Array.from({length: 8}, (_, i) => (
               <div key={i} style={{
                 width: '8px', height: '8px', borderRadius: '2px',
-                background: i < activeWeeks ? '#C23B0A' : '#1A1A1A'
+                background: i < activeWeeks ? '#E8440C' : '#1A1A1A'
               }}/>
             ))}
           </div>
@@ -280,11 +280,11 @@ export default function MyStats() {
               const height = Math.max((week.days / maxDays) * 64, week.days > 0 ? 12 : 6)
               return (
                 <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                  <p className="text-xs font-bold" style={{color: '#C23B0A'}}>{week.days > 0 ? week.days : ''}</p>
+                  <p className="text-xs font-bold" style={{color: '#E8440C'}}>{week.days > 0 ? week.days : ''}</p>
                    <div className="w-full rounded" style={{
                     height: `${height}px`,
                     background: week.days > 0
-                      ? i === 3 ? '#C23B0A' : '#6B2510'
+                      ? i === 3 ? '#E8440C' : '#6B2510'
                       : '#1A1A1A'
                   }}/>
                   <p className="text-center" style={{color: '#6B5E55', fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
@@ -301,11 +301,11 @@ export default function MyStats() {
             {topEquipment.map((eq, i) => (
               <div key={i} className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold w-4" style={{color: '#C23B0A'}}>#{i + 1}</span>
+                  <span className="text-xs font-bold w-4" style={{color: '#E8440C'}}>#{i + 1}</span>
                   <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{eq.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-bold" style={{color: '#C23B0A'}}>{eq.count} sessions</p>
+                  <p className="text-xs font-bold" style={{color: '#E8440C'}}>{eq.count} sessions</p>
                   <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(eq.lastDate)}</p>
                 </div>
               </div>
@@ -319,7 +319,7 @@ export default function MyStats() {
         {/* Looking for a Challenge */}
         {challengeExercises.length === 0 ? (
           <div className="rounded-2xl mb-4 p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
@@ -332,7 +332,7 @@ export default function MyStats() {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#C23B0A'}}>Looking for a Challenge?</p>
+                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
                     {challengePool.length > 4 && (
                       <button
                         onClick={e => { e.stopPropagation(); shuffleChallenges() }}
@@ -361,7 +361,7 @@ export default function MyStats() {
                   <a key={i}
                     href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
                     className="flex justify-between items-center p-4 rounded-xl"
-                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #C23B0A'}}>
+                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
                     <div>
                       <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
                       <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -370,7 +370,7 @@ export default function MyStats() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold" style={{color: '#C23B0A'}}>
+                      <p className="text-xs font-semibold" style={{color: '#E8440C'}}>
                         {(() => {
                           const days = Math.round((new Date().getTime() - new Date(ex.lastDate).getTime()) / (1000 * 60 * 60 * 24))
                           return days === 1 ? 'Yesterday' : `${days}d ago`

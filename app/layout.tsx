@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   keywords: ["gym", "workout tracker", "fitness", "QR code", "weight training"],
   authors: [{ name: "ScanSet" }],
   manifest: "/manifest.json",
-  themeColor: "#C23B0A",
+  themeColor: "#E8440C",
   other: {
     "mobile-web-app-capable": "yes",
   },

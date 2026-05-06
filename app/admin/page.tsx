@@ -161,7 +161,7 @@ async function bulkAddMachines(e: any) {
     ctx.textAlign = 'left'
     ctx.fillText('scan', startX, 44)
     ctx.font = '900 26px Helvetica'
-    ctx.fillStyle = '#C23B0A'
+    ctx.fillStyle = '#E8440C'
     ctx.fillText('set', startX + scanWidth, 44)
 
     // Divider
@@ -193,7 +193,7 @@ async function bulkAddMachines(e: any) {
 
     // Tagline
     ctx.font = '10px Helvetica'
-    ctx.fillStyle = '#C23B0A'
+    ctx.fillStyle = '#E8440C'
     ctx.textAlign = 'center'
     ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 346)
 
@@ -308,7 +308,7 @@ async function bulkAddMachines(e: any) {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#C23B0A', fontWeight: 900}}>set</span></h1></a>
+            <a href="/dashboard"><h1 className="text-2xl font-bold text-white"><span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span></h1></a>
             <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>Admin Panel {gymName ? '— ' + gymName : ''}</p>
           </div>
           <div className="flex gap-4">
@@ -376,7 +376,7 @@ async function bulkAddMachines(e: any) {
                       type="button"
                       onClick={() => setNewType('strength')}
                       className="flex-1 py-3 text-sm font-semibold transition-colors"
-                      style={{background: newType === 'strength' ? '#C23B0A' : '#080808', color: newType === 'strength' ? '#fff' : '#6B5E55'}}
+                      style={{background: newType === 'strength' ? '#E8440C' : '#080808', color: newType === 'strength' ? '#fff' : '#6B5E55'}}
                     >
                       💪 Strength
                     </button>
@@ -384,7 +384,7 @@ async function bulkAddMachines(e: any) {
                       type="button"
                       onClick={() => setNewType('cardio')}
                       className="flex-1 py-3 text-sm font-semibold transition-colors"
-                      style={{background: newType === 'cardio' ? '#C23B0A' : '#080808', color: newType === 'cardio' ? '#fff' : '#6B5E55'}}
+                      style={{background: newType === 'cardio' ? '#E8440C' : '#080808', color: newType === 'cardio' ? '#fff' : '#6B5E55'}}
                     >
                       🏃 Cardio
                     </button>
@@ -392,7 +392,7 @@ async function bulkAddMachines(e: any) {
                       type="button"
                       onClick={() => setNewType('functional')}
                       className="flex-1 py-3 text-sm font-semibold transition-colors"
-                      style={{background: newType === 'functional' ? '#C23B0A' : '#080808', color: newType === 'functional' ? '#fff' : '#6B5E55'}}
+                      style={{background: newType === 'functional' ? '#E8440C' : '#080808', color: newType === 'functional' ? '#fff' : '#6B5E55'}}
                     >
                       🏋️ Functional
                     </button>
@@ -401,7 +401,7 @@ async function bulkAddMachines(e: any) {
                     type="submit"
                     disabled={loading}
                     className="py-3 rounded-full font-semibold text-white"
-                    style={{background: '#C23B0A'}}
+                    style={{background: '#E8440C'}}
                   >
                     {loading ? 'Adding...' : 'Add Machine'}
                   </button>
@@ -438,7 +438,7 @@ async function bulkAddMachines(e: any) {
                 onClick={() => setBulkType('strength')}
                 className="flex-1 py-3 text-sm font-semibold transition-colors"
                 style={{
-                  background: bulkType === 'strength' ? '#C23B0A' : '#080808',
+                  background: bulkType === 'strength' ? '#E8440C' : '#080808',
                   color: bulkType === 'strength' ? '#fff' : '#6B5E55'
                 }}
               >
@@ -449,7 +449,7 @@ async function bulkAddMachines(e: any) {
                 onClick={() => setBulkType('cardio')}
                 className="flex-1 py-3 text-sm font-semibold transition-colors"
                 style={{
-                  background: bulkType === 'cardio' ? '#C23B0A' : '#080808',
+                  background: bulkType === 'cardio' ? '#E8440C' : '#080808',
                   color: bulkType === 'cardio' ? '#fff' : '#6B5E55'
                 }}
               >
@@ -460,7 +460,7 @@ async function bulkAddMachines(e: any) {
                 onClick={() => setBulkType('functional')}
                 className="flex-1 py-3 text-sm font-semibold transition-colors"
                 style={{
-                  background: bulkType === 'functional' ? '#C23B0A' : '#080808',
+                  background: bulkType === 'functional' ? '#E8440C' : '#080808',
                   color: bulkType === 'functional' ? '#fff' : '#6B5E55'
                 }}
               >
@@ -471,7 +471,7 @@ async function bulkAddMachines(e: any) {
       type="submit"
       disabled={bulkLoading}
       className="py-3 rounded-full font-semibold text-white"
-      style={{background: '#C23B0A'}}
+      style={{background: '#E8440C'}}
     >
       {bulkLoading ? 'Adding...' : `Add ${bulkNames.split('\n').filter(n => n.trim()).length || ''} Machines`}
     </button>
@@ -487,7 +487,7 @@ async function bulkAddMachines(e: any) {
               id="export-btn"
               onClick={exportAllCards}
               className="text-sm px-4 py-2 rounded-full font-semibold text-white"
-              style={{background: '#C23B0A'}}>
+              style={{background: '#E8440C'}}>
               Export All Cards
             </button>
           )}
@@ -504,11 +504,11 @@ async function bulkAddMachines(e: any) {
                   className="w-full px-4 py-3 flex justify-between items-center"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#E8440C' : '#E8440C'}}></div>
                     <p className="text-white font-medium text-sm">{machine.name}</p>
                     <span className="text-xs px-2 py-0.5 rounded-full" style={{
                       background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
-                      color: machine.type === 'cardio' ? '#C23B0A' : '#C23B0A'
+                      color: machine.type === 'cardio' ? '#E8440C' : '#E8440C'
                     }}>
                       {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
                     </span>
@@ -536,7 +536,7 @@ async function bulkAddMachines(e: any) {
                         <button
                           onClick={() => downloadQR(machine.id, machine.name)}
                           className="py-2 rounded-full text-sm font-semibold text-white text-center"
-                          style={{background: '#C23B0A'}}
+                          style={{background: '#E8440C'}}
                         >
                           Download QR
                         </button>
@@ -561,13 +561,13 @@ async function bulkAddMachines(e: any) {
                             onChange={e => setPriceInput(e.target.value)}
                             placeholder="e.g. 1200"
                             className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
-                            style={{background: '#080808', border: '1px solid #C23B0A'}}
+                            style={{background: '#080808', border: '1px solid #E8440C'}}
                             autoFocus
                           />
                           <button
                             onClick={() => savePurchasePrice(machine.id)}
                             className="px-4 py-2 rounded-lg text-white text-sm font-semibold"
-                            style={{background: '#C23B0A'}}>
+                            style={{background: '#E8440C'}}>
                             Save
                           </button>
                           <button
@@ -585,7 +585,7 @@ async function bulkAddMachines(e: any) {
                           <button
                             onClick={() => { setEditingPrice(machine.id); setPriceInput(machine.purchase_price || '') }}
                             className="text-xs px-3 py-1 rounded-lg font-semibold"
-                            style={{color: '#C23B0A', background: 'rgba(194,59,10,0.1)'}}>
+                            style={{color: '#E8440C', background: 'rgba(194,59,10,0.1)'}}>
                             {machine.purchase_price ? 'Edit' : 'Add Price'}
                           </button>
                         </div>

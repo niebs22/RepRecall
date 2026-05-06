@@ -29,13 +29,13 @@ export default function BottomNav() {
             style={{
               width: '58px', height: '58px',
               background: '#080808',
-              border: '2px solid #C23B0A',
+              border: '2px solid #E8440C',
               boxShadow: '0 0 12px rgba(194,59,10,0.2)'
             }}>
             <img src="/icon-192.png" width="32" height="32" style={{borderRadius: '6px'}} />
           </div>
           <span className="text-xs font-bold uppercase tracking-wide"
-            style={{color: '#C23B0A', letterSpacing: '0.5px'}}>
+            style={{color: '#E8440C', letterSpacing: '0.5px'}}>
             Scan
           </span>
         </a>
