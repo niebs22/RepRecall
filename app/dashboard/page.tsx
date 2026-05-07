@@ -381,7 +381,7 @@ export default function Dashboard() {
 
         {/* Install banner */}
         {showInstallBanner && (
-          <div className="rounded-2xl p-4 mb-4" style={{background: '#111111', border: '1px solid #D4A017'}}>
+          <div className="rounded-2xl p-4 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #D4A017'}}>
             <div className="flex justify-between items-start mb-2">
               <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Add ScanSet to your home screen</p>
               <button onClick={dismissBanner} style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
@@ -417,7 +417,7 @@ export default function Dashboard() {
         )}
 
         {/* Scan card */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#111111', border: '1px solid #222222'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
           <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Ready to train?</p>
           
             <a
@@ -445,7 +445,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3 mb-4">
 
           {/* Elephant box */}
-<div className="rounded-2xl p-4 flex flex-col justify-between" style={{background: '#111111', border: '1px solid #222222'}}>
+<div className="rounded-2xl p-4 flex flex-col justify-between" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
   <div>
     <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime</p>
     <p style={{fontSize: '32px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
@@ -477,7 +477,7 @@ export default function Dashboard() {
 
           {/* My Stats box with sparkline */}
           <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
-            style={{background: '#111111', border: '1px solid #222222', borderTop: '2px solid #E8440C'}}>
+            style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderTop: '2px solid #E8440C'}}>
             <div>
               <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>My Stats</p>
               <p className="text-sm font-semibold" style={{color: '#E8E0D8'}}>PRs & trends</p>
@@ -533,12 +533,12 @@ export default function Dashboard() {
 
         {/* Challenge box */}
         {challengeExercises.length === 0 ? (
-          <div className="rounded-2xl mb-4 p-5" style={{background: '#111111', border: '1px solid #222222', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)'}}>
+          <div className="rounded-2xl mb-4 p-5" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
-          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#111111', border: '1px solid #222222'}}>
+          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
             <button
               onClick={() => setChallengeOpen(prev => !prev)}
               className="w-full p-5 text-left"
@@ -615,7 +615,7 @@ export default function Dashboard() {
                 key={workout.machine_id}
                 href={'/machine/' + workout.machine_id}
                 className="rounded-xl p-4 flex justify-between items-center"
-                style={{background: '#111111', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
+                style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
                 <div>
                   <p className="font-semibold" style={{color: '#E8E0D8'}}>{workout.exercise_name || workout.machines?.name}</p>
                   <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{formatWorkoutSummary(workout)}</p>
