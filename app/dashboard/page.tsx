@@ -354,7 +354,7 @@ export default function Dashboard() {
               localStorage.setItem('weight_unit', next)
             }}
             className="text-xs px-2 py-1 rounded-lg font-semibold"
-            style={{background: '#1A1A1A', color: '#6B5E55'}}>
+            style={{background: '#222222', color: '#6B5E55'}}>
             {weightUnit}
           </button>
           </div>
@@ -381,7 +381,7 @@ export default function Dashboard() {
 
         {/* Install banner */}
         {showInstallBanner && (
-          <div className="rounded-2xl p-4 mb-4" style={{background: '#0F0F0F', border: '1px solid #D4A017'}}>
+          <div className="rounded-2xl p-4 mb-4" style={{background: '#111111', border: '1px solid #D4A017'}}>
             <div className="flex justify-between items-start mb-2">
               <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Add ScanSet to your home screen</p>
               <button onClick={dismissBanner} style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
@@ -417,13 +417,13 @@ export default function Dashboard() {
         )}
 
         {/* Scan card */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: '#111111', border: '1px solid #222222'}}>
           <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Ready to train?</p>
           
             <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
-            style={{background: '#E8440C', color: '#080808', boxShadow: '0 6px 20px rgba(232,68,12,0.15)'}}>
+            style={{background: '#E8440C', color: '#ffffff', boxShadow: '0 6px 20px rgba(232,68,12,0.15)'}}>
             <span style={{fontSize: '20px'}}></span> Scan QR Code
           </a>
           <div className="relative">
@@ -431,7 +431,7 @@ export default function Dashboard() {
               onChange={handleMachineSelect}
               defaultValue=""
               className="w-full px-4 py-3 rounded-lg appearance-none focus:outline-none"
-              style={{background: '#080808', border: '1px solid #1A1A1A', color: '#6B5E55'}}>
+              style={{background: '#080808', border: '1px solid #222222', color: '#6B5E55'}}>
               <option value="" disabled>Select equipment manually</option>
               {allMachines.map(machine => (
                 <option key={machine.id} value={machine.id}>{machine.name}</option>
@@ -445,7 +445,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3 mb-4">
 
           {/* Elephant box */}
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl p-4" style={{background: '#111111', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime</p>
             <p style={{fontSize: '26px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
               {totalWeightLifted.toLocaleString()}
@@ -458,7 +458,7 @@ export default function Dashboard() {
 
           {/* My Stats box with sparkline */}
           <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
-            style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderTop: '2px solid #E8440C'}}>
+            style={{background: '#111111', border: '1px solid #222222', borderTop: '2px solid #E8440C'}}>
             <div>
               <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>My Stats</p>
               <p className="text-sm font-semibold" style={{color: '#E8E0D8'}}>PRs & trends</p>
@@ -514,12 +514,12 @@ export default function Dashboard() {
 
         {/* Challenge box */}
         {challengeExercises.length === 0 ? (
-          <div className="rounded-2xl mb-4 p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl mb-4 p-5" style={{background: '#111111', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
-          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#111111', border: '1px solid #222222'}}>
             <button
               onClick={() => setChallengeOpen(prev => !prev)}
               className="w-full p-5 text-left"
@@ -533,7 +533,7 @@ export default function Dashboard() {
                       <button
                         onClick={e => { e.stopPropagation(); shuffleChallenges() }}
                         className="text-xs px-1.5 py-0.5 rounded"
-                        style={{color: '#6B5E55', background: '#1A1A1A', lineHeight: 1}}
+                        style={{color: '#6B5E55', background: '#222222', lineHeight: 1}}
                         title="Shuffle"
                       >
                         ↻
@@ -558,7 +558,7 @@ export default function Dashboard() {
                   <a key={i}
                     href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
                     className="flex justify-between items-center p-4 rounded-xl"
-                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
+                    style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
                     <div>
                       <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
                       <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -596,7 +596,7 @@ export default function Dashboard() {
                 key={workout.machine_id}
                 href={'/machine/' + workout.machine_id}
                 className="rounded-xl p-4 flex justify-between items-center"
-                style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
+                style={{background: '#111111', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
                 <div>
                   <p className="font-semibold" style={{color: '#E8E0D8'}}>{workout.exercise_name || workout.machines?.name}</p>
                   <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{formatWorkoutSummary(workout)}</p>
