@@ -445,16 +445,35 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 gap-3 mb-4">
 
           {/* Elephant box */}
-          <div className="rounded-2xl p-4" style={{background: '#111111', border: '1px solid #222222'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime</p>
-            <p style={{fontSize: '26px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-              {totalWeightLifted.toLocaleString()}
-            </p>
-            <p className="text-xs mt-1" style={{color: '#6B5E55'}}>lbs lifted</p>
-            <p className="text-xs mt-2 font-semibold" style={{color: '#E8440C'}}>
-              🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants
-            </p>
+<div className="rounded-2xl p-4 flex flex-col justify-between" style={{background: '#111111', border: '1px solid #222222'}}>
+  <div>
+    <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifetime</p>
+    <p style={{fontSize: '32px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
+      {totalWeightLifted.toLocaleString()}
+    </p>
+    <p className="text-xs mt-1 mb-2" style={{color: '#6B5E55'}}>lbs lifted</p>
+    <p className="text-xs font-semibold" style={{color: '#E8440C'}}>
+      🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants
+    </p>
+  </div>
+  <div className="mt-3">
+    {(() => {
+      const nextMilestone = Math.ceil(totalWeightLifted / 50000) * 50000
+      const prevMilestone = nextMilestone - 50000
+      const progress = ((totalWeightLifted - prevMilestone) / 50000) * 100
+      return (
+        <>
+          <div className="w-full rounded-full overflow-hidden" style={{height: '3px', background: '#222222'}}>
+            <div style={{width: `${progress}%`, height: '100%', background: '#E8440C', borderRadius: '2px'}}></div>
           </div>
+          <p className="text-xs mt-1.5" style={{color: '#6B5E55'}}>
+            Next: <span style={{color: '#E8440C', fontWeight: 700}}>{nextMilestone.toLocaleString()} lbs</span>
+          </p>
+        </>
+      )
+    })()}
+  </div>
+</div>
 
           {/* My Stats box with sparkline */}
           <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
