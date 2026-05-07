@@ -533,7 +533,7 @@ export default function Dashboard() {
 
         {/* Challenge box */}
         {challengeExercises.length === 0 ? (
-          <div className="rounded-2xl mb-4 p-5" style={{background: '#111111', border: '1px solid #222222'}}>
+          <div className="rounded-2xl mb-4 p-5" style={{background: '#111111', border: '1px solid #222222', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
