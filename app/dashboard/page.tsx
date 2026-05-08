@@ -466,20 +466,23 @@ export default function Dashboard() {
   </div>
   <div className="mt-3">
     {(() => {
-      const nextMilestone = Math.ceil(totalWeightLifted / 50000) * 50000
-      const prevMilestone = nextMilestone - 50000
-      const progress = ((totalWeightLifted - prevMilestone) / 50000) * 100
-      return (
-        <>
-          <div className="w-full rounded-full overflow-hidden" style={{height: '3px', background: '#222222'}}>
-            <div style={{width: `${progress}%`, height: '100%', background: '#E8440C', borderRadius: '2px'}}></div>
-          </div>
-          <p className="text-xs mt-1.5" style={{color: '#6B5E55'}}>
-            Next: <span style={{color: '#E8440C', fontWeight: 700}}>{nextMilestone.toLocaleString()} lbs</span>
-          </p>
-        </>
-      )
-    })()}
+  if (totalWeightLifted === 0) return (
+    <p className="text-xs mt-1.5" style={{color: '#6B5E55'}}>Log your first workout to start tracking.</p>
+  )
+  const nextMilestone = Math.ceil(totalWeightLifted / 50000) * 50000
+  const prevMilestone = nextMilestone - 50000
+  const progress = ((totalWeightLifted - prevMilestone) / 50000) * 100
+  return (
+    <>
+      <div className="w-full rounded-full overflow-hidden" style={{height: '3px', background: '#222222'}}>
+        <div style={{width: `${progress}%`, height: '100%', background: '#E8440C', borderRadius: '2px'}}></div>
+      </div>
+      <p className="text-xs mt-1.5" style={{color: '#6B5E55'}}>
+        Next: <span style={{color: '#E8440C', fontWeight: 700}}>{nextMilestone.toLocaleString()} lbs</span>
+      </p>
+    </>
+  )
+})()}
   </div>
 </div>
 
