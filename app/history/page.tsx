@@ -136,7 +136,7 @@ export default function History() {
   <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
     scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
   </h1>
-  <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Home</a>
+  <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Back to Dashboard</a>
 </div>
 
         <h2 className="text-3xl font-bold mb-6" style={{color: '#E8E0D8', letterSpacing: '-0.5px'}}>History</h2>
