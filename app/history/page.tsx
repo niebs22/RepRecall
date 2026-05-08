@@ -133,10 +133,11 @@ export default function History() {
       <div className="max-w-lg mx-auto">
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
-            scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
-          </h1>
-        </div>
+  <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
+    scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
+  </h1>
+  <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Home</a>
+</div>
 
         <h2 className="text-3xl font-bold mb-6" style={{color: '#E8E0D8', letterSpacing: '-0.5px'}}>History</h2>
 
@@ -154,7 +155,7 @@ export default function History() {
                   {groupSets(group.items).map((w, wi) => (
                     <a key={wi} href={'/machine/' + w.machine_id + '?from=history' + (w.exercise_name ? '&exercise=' + encodeURIComponent(w.exercise_name) : '')}
                       className="rounded-xl p-4 flex justify-between items-center"
-                      style={{background: '#0F0F0F', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
+                      style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
                       <div>
                         <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>
                           {w.exercise_name || w.machines?.name}
