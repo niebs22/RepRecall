@@ -244,12 +244,12 @@ export default function MyStats() {
         {/* Summary row */}
         {/* Summary row */}
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="rounded-2xl p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl p-5" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Sessions</p>
             <p className="font-bold" style={{fontSize: '42px', color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>{totalSessions}</p>
             <p className="text-xs mt-2" style={{color: '#6B5E55'}}>total logged</p>
           </div>
-          <div className="rounded-2xl p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl p-5" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Lifted</p>
             <p className="font-bold" style={{fontSize: '42px', color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
               {Math.round(totalWeight / 1000)}k
@@ -257,7 +257,7 @@ export default function MyStats() {
             <p className="text-xs mt-2" style={{color: '#6B5E55'}}>lbs all time</p>
           </div>
         </div>
-        <div className="rounded-2xl px-5 py-4 mb-4 flex justify-between items-center" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+        <div className="rounded-2xl px-5 py-4 mb-4 flex justify-between items-center" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
           <div>
             <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>Consistency</p>
             <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Active {activeWeeks} of the last 8 weeks</p>
@@ -266,14 +266,14 @@ export default function MyStats() {
             {Array.from({length: 8}, (_, i) => (
               <div key={i} style={{
                 width: '8px', height: '8px', borderRadius: '2px',
-                background: i < activeWeeks ? '#E8440C' : '#1A1A1A'
+                background: i < activeWeeks ? '#E8440C' : '#222222'
               }}/>
             ))}
           </div>
         </div>
 
         {/* 4-week trend */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
           <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>4-Week Trend</p>
           <div className="flex gap-3 items-end" style={{height: '80px'}}>
             {fourWeekTrend.map((week, i) => {
@@ -285,7 +285,7 @@ export default function MyStats() {
                     height: `${height}px`,
                     background: week.days > 0
                       ? i === 3 ? '#E8440C' : '#6B2510'
-                      : '#1A1A1A'
+                      : '#222222'
                   }}/>
                   <p className="text-center" style={{color: '#6B5E55', fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
                 </div>
@@ -295,7 +295,7 @@ export default function MyStats() {
         </div>
 
         {/* Top Equipment */}
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
           <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Top Equipment</p>
           <div className="flex flex-col gap-3">
             {topEquipment.map((eq, i) => (
@@ -318,12 +318,12 @@ export default function MyStats() {
 
         {/* Looking for a Challenge */}
         {challengeExercises.length === 0 ? (
-          <div className="rounded-2xl mb-4 p-5" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl mb-4 p-5" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
-          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl mb-4 overflow-hidden" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
             <button
               onClick={() => setChallengeOpen(prev => !prev)}
               className="w-full p-5 text-left"
@@ -337,7 +337,7 @@ export default function MyStats() {
                       <button
                         onClick={e => { e.stopPropagation(); shuffleChallenges() }}
                         className="text-xs px-1.5 py-0.5 rounded"
-                        style={{color: '#6B5E55', background: '#1A1A1A', lineHeight: 1}}
+                        style={{color: '#6B5E55', background: '#222222', lineHeight: 1}}
                         title="Shuffle"
                       >
                         ↻
@@ -361,7 +361,7 @@ export default function MyStats() {
                   <a key={i}
                     href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
                     className="flex justify-between items-center p-4 rounded-xl"
-                    style={{background: '#080808', border: '1px solid #1A1A1A', borderLeft: '2px solid #E8440C'}}>
+                    style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
                     <div>
                       <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
                       <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -419,9 +419,12 @@ export default function MyStats() {
                       style={{background: '#080808', border: '1px solid #1E1A2E', color: progressMachineId ? '#E8E0D8' : '#6B5E55'}}
                     >
                       <option value="">Select a machine...</option>
-                      {machines.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
+{machines.length === 0
+  ? <option disabled>Log a workout to see your progress here</option>
+  : machines.map(m => (
+      <option key={m.id} value={m.id}>{m.name}</option>
+    ))
+}
                     </select>
                   </div>
 
@@ -521,7 +524,7 @@ export default function MyStats() {
         })()}
 
         {/* PRs — collapsible */}
-        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
           <button
             onClick={() => setPrsOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
@@ -529,7 +532,7 @@ export default function MyStats() {
           >
             <div className="flex items-center gap-2">
               <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>Personal Records</p>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#222222', color: '#6B5E55'}}>
                 {prs.length}
               </span>
             </div>
@@ -548,7 +551,7 @@ export default function MyStats() {
                 <div className="flex flex-col gap-3">
                   {prs.map((pr, i) => (
                     <div key={i} className="flex justify-between items-center py-3"
-                      style={{borderBottom: i < prs.length - 1 ? '1px solid #1A1A1A' : 'none'}}>
+                      style={{borderBottom: i < prs.length - 1 ? '1px solid #222222' : 'none'}}>
                       <div>
                         <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{pr.exercise}</p>
                         <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{daysSince(pr.date)}</p>
