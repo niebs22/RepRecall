@@ -429,14 +429,22 @@ export default function Dashboard() {
           <div className="relative">
             <select
               onChange={handleMachineSelect}
-              defaultValue=""
-              className="w-full px-4 py-3 rounded-lg appearance-none focus:outline-none"
-              style={{background: '#080808', border: '1px solid #222222', color: '#6B5E55'}}>
-              <option value="" disabled>Select equipment manually</option>
-              {allMachines.map(machine => (
-                <option key={machine.id} value={machine.id}>{machine.name}</option>
-              ))}
-            </select>
+               defaultValue=""
+  className="w-full px-4 py-3 rounded-lg appearance-none focus:outline-none"
+  style={{background: '#080808', border: '1px solid #222222', color: '#6B5E55'}}>
+  <option value="" disabled>Select equipment manually</option>
+  {(['strength', 'cardio', 'functional'] as const).map(type => {
+    const machines = allMachines.filter(m => m.type === type)
+    if (machines.length === 0) return null
+    return (
+      <optgroup key={type} label={type.charAt(0).toUpperCase() + type.slice(1)}>
+        {machines.map(machine => (
+          <option key={machine.id} value={machine.id}>{machine.name}</option>
+        ))}
+      </optgroup>
+    )
+  })}
+</select>
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none" style={{color: '#6B5E55'}}>▾</div>
           </div>
         </div>
