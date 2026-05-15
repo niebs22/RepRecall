@@ -258,17 +258,23 @@ function MachinePageInner() {
         }
 
         if (!existingMembership) {
-          const { data: machineGym } = await supabase
-            .from('machines')
-            .select('gym_id')
-            .eq('id', id)
-            .single()
-          if (machineGym) {
-            await supabase
-              .from('gym_members')
-              .insert({ user_id: user.id, gym_id: machineGym.gym_id })
-          }
-        }
+  const { data: machineGym } = await supabase
+    .from('machines')
+    .select('gym_id')
+    .eq('id', id)
+    .single()
+  if (machineGym) {
+    const { data: gymData } = await supabase
+      .from('gyms')
+      .select('code')
+      .eq('id', machineGym.gym_id)
+      .single()
+    if (gymData?.code) {
+      router.push(`/join/${gymData.code}?next=/machine/${id}`)
+      return
+    }
+  }
+}
 
         const { data: machineData, error: machineError } = await supabase
           .from('machines').select('*').eq('id', id).single()
