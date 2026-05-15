@@ -64,6 +64,9 @@ export default function SuperAdmin() {
     const email = ownerEmail[gymId]
     if (!email) return
 
+    // Generate a token
+    const token = crypto.randomUUID()
+
     // Delete any existing unused invite for this gym
     await supabase
       .from('gym_owner_invites')
@@ -71,15 +74,15 @@ export default function SuperAdmin() {
       .eq('gym_id', gymId)
       .eq('used', false)
 
-    // Create new invite
+    // Create new invite with token
     const { data, error } = await supabase
       .from('gym_owner_invites')
-      .insert({ gym_id: gymId, email })
+      .insert({ gym_id: gymId, email, token, used: false })
       .select()
       .single()
 
     if (error || !data) {
-      alert('Error generating link. Check Supabase.')
+      alert(`Error generating link: ${error?.message}`)
       return
     }
 
