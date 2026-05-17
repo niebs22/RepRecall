@@ -245,8 +245,7 @@ function MachinePageInner() {
           return
         }
         setUser(user)
-        const savedUnit = localStorage.getItem('weight_unit') as 'lbs' | 'kg' | null
-        if (savedUnit) setWeightUnit(savedUnit)
+        
 
         const { data: existingMembership } = await supabase
           .from('gym_members')
