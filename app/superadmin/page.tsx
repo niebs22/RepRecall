@@ -411,18 +411,47 @@ export default function SuperAdmin() {
                 {expanded === gym.id && (
                   <div className="px-4 pb-4 pt-2 flex flex-col gap-4" style={{borderTop: '1px solid #222222'}}>
                     <div>
-                      <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Member Join URL</p>
-                      <div className="flex gap-2">
-                        <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#080808', color: '#E8440C'}}>
-                          /join/{gym.code}
-                        </p>
-                        <button onClick={() => copyJoinUrl(gym.code)}
-                          className="text-xs px-3 py-2 rounded-lg font-semibold text-white"
-                          style={{background: '#E8440C'}}>
-                          Copy
-                        </button>
-                      </div>
-                    </div>
+  <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Member Join URL</p>
+  <div className="flex gap-2 mb-3">
+    <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{background: '#080808', color: '#E8440C'}}>
+      /join/{gym.code}
+    </p>
+    <button
+      onClick={() => copyJoinUrl(gym.code)}
+      className="text-xs px-3 py-2 rounded-lg font-semibold text-white"
+      style={{background: '#E8440C'}}>
+      Copy
+    </button>
+  </div>
+  <div className="flex items-center gap-4">
+    <div className="p-3 rounded-xl" style={{background: 'white'}}>
+      <QRCodeCanvas
+        value={`https://scanset.app/join/${gym.code}`}
+        size={120}
+        level="H"
+      />
+    </div>
+    <div className="flex flex-col gap-2 flex-1">
+      <p className="text-xs" style={{color: '#6B5E55'}}>Scan to join {gym.name}</p>
+      <button
+        onClick={async () => {
+          const QRCode = await import('qrcode')
+          const url = await QRCode.toDataURL(
+            `https://scanset.app/join/${gym.code}`,
+            { width: 1200, margin: 2, color: { dark: '#000000', light: '#ffffff' } }
+          )
+          const a = document.createElement('a')
+          a.href = url
+          a.download = gym.name + '-Join-QR.png'
+          a.click()
+        }}
+        className="text-xs px-3 py-2 rounded-lg font-semibold text-white text-center"
+        style={{background: '#E8440C'}}>
+        Download QR (High Res)
+      </button>
+    </div>
+  </div>
+</div>
                     <div>
                       <p className="text-xs mb-1" style={{color: '#6B5E55'}}>Owner Setup Link</p>
                       <div className="flex gap-2 mb-2">
