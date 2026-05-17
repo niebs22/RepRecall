@@ -52,7 +52,7 @@ export default function Dashboard() {
     }
     getUser()
 
-    
+
 
     // Install banner
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
@@ -385,17 +385,17 @@ export default function Dashboard() {
             ) : (
               <div className="flex flex-col gap-2">
                 <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
-                  <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>Share</span> button at the bottom of Safari</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
-                  <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span></p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
-                  <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
-                </div>
+  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
+  <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>Share</span> button at the bottom of Safari</p>
+</div>
+<div className="flex items-start gap-2">
+  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
+  <p className="text-xs text-white">Scroll down and tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span> — you may need to tap <span style={{color: '#E8440C'}}>"View More"</span> to find it</p>
+</div>
+<div className="flex items-start gap-2">
+  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
+  <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
+</div>
                 <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
                   Already installed — dismiss
                 </button>
