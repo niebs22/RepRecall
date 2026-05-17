@@ -26,15 +26,16 @@ function SignupForm() {
   async function handleSignup(e: any) {
     e.preventDefault()
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
-          pending_gym_code: gymCode || null
-        }
-      }
-    })
+  email,
+  password,
+  options: {
+    emailRedirectTo: 'https://scanset.app/auth/callback',
+    data: {
+      full_name: name,
+      pending_gym_code: gymCode || null
+    }
+  }
+})
     if (error) {
       setError(error.message)
     } else {
