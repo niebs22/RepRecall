@@ -26,20 +26,31 @@ function SignupForm() {
   async function handleSignup(e: any) {
     e.preventDefault()
     const { error } = await supabase.auth.signUp({
-  email,
-  password,
-  options: {
-    emailRedirectTo: 'https://scanset.app/auth/callback',
-    data: {
-      full_name: name,
-      pending_gym_code: gymCode || null
-    }
-  }
-})
+      email,
+      password,
+      options: {
+        emailRedirectTo: 'https://scanset.app/auth/callback',
+        data: {
+          full_name: name,
+          pending_gym_code: gymCode || null
+        }
+      }
+    })
     if (error) {
       setError(error.message)
     } else {
-      setSuccess(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        const pendingNext = localStorage.getItem('pending_next_url')
+        if (pendingNext) {
+          localStorage.removeItem('pending_next_url')
+          router.push(pendingNext)
+        } else {
+          router.push('/dashboard')
+        }
+      } else {
+        setSuccess(true)
+      }
     }
   }
 
