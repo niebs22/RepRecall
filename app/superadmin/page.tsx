@@ -27,6 +27,7 @@ export default function SuperAdmin() {
   const [newType, setNewType] = useState('strength')
   const [machineLoading, setMachineLoading] = useState(false)
   const [expandedMachine, setExpandedMachine] = useState<string | null>(null)
+  const [quantities, setQuantities] = useState<Record<string, number>>({})
 
   const router = useRouter()
 
@@ -135,8 +136,15 @@ export default function SuperAdmin() {
     const marginY = (11 - rows * cardH) / 2
     const cropSize = 0.08
 
-    for (let i = 0; i < gymMachines.length; i++) {
-      const machine = gymMachines[i]
+    // Expand machines by quantity
+const expandedMachines: any[] = []
+gymMachines.forEach(machine => {
+  const qty = quantities[machine.id] ?? 1
+  for (let q = 0; q < qty; q++) expandedMachines.push(machine)
+})
+
+for (let i = 0; i < expandedMachines.length; i++) {
+      const machine = expandedMachines[i]
       const posOnPage = i % cardsPerPage
       const col = posOnPage % cols
       const row = Math.floor(posOnPage / cols)
@@ -341,42 +349,55 @@ export default function SuperAdmin() {
 
               {/* Machine list */}
               {gymMachines.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  {gymMachines.map(machine => (
-                    <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#080808', border: '1px solid #222222'}}>
-                      <button onClick={() => setExpandedMachine(expandedMachine === machine.id ? null : machine.id)}
-                        className="w-full px-4 py-3 flex justify-between items-center"
-                        style={{background: 'transparent', border: 'none', cursor: 'pointer'}}>
-                        <div className="flex items-center gap-3">
-                          <p className="text-white text-sm font-medium">{machine.name}</p>
-                          <span className="text-xs px-2 py-0.5 rounded-full"
-                            style={{background: 'rgba(232,68,12,0.1)', color: '#E8440C'}}>
-                            {machine.type}
-                          </span>
-                        </div>
-                        <span style={{color: '#6B5E55', transform: expandedMachine === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>▾</span>
-                      </button>
-                      {expandedMachine === machine.id && (
-                        <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #222222'}}>
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 rounded-lg" style={{background: 'white'}}>
-                              <QRCodeCanvas value={'https://scanset.app/machine/' + machine.id} size={80} level="H"/>
-                            </div>
-                            <div className="flex flex-col gap-2 flex-1">
-                              <p className="text-xs" style={{color: '#6B5E55'}}>ID: {machine.id.slice(0, 8)}...</p>
-                              <button onClick={() => deleteMachine(machine.id)}
-                                className="py-2 rounded-full text-sm font-semibold"
-                                style={{background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444'}}>
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+  <div className="flex flex-col gap-2">
+    {gymMachines.map(machine => (
+      <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#080808', border: '1px solid #222222'}}>
+        <div className="w-full px-4 py-3 flex justify-between items-center gap-3">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <p className="text-white text-sm font-medium truncate">{machine.name}</p>
+            <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+              style={{background: 'rgba(232,68,12,0.1)', color: '#E8440C'}}>
+              {machine.type}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs" style={{color: '#6B5E55'}}>Qty</span>
+            <input
+              type="number"
+              min="1"
+              max="99"
+              value={quantities[machine.id] ?? 1}
+              onChange={e => setQuantities(prev => ({...prev, [machine.id]: Math.max(1, parseInt(e.target.value) || 1)}))}
+              className="w-14 px-2 py-1 rounded-lg text-white text-center focus:outline-none text-sm"
+              style={{background: '#1A1A1A', border: '1px solid #333333'}}
+            />
+            <button onClick={() => setExpandedMachine(expandedMachine === machine.id ? null : machine.id)}
+              style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer',
+                transform: expandedMachine === machine.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s', fontSize: '16px'}}>▾</button>
+          </div>
+        </div>
+        {expandedMachine === machine.id && (
+          <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #222222'}}>
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-lg" style={{background: 'white'}}>
+                <QRCodeCanvas value={'https://scanset.app/machine/' + machine.id} size={80} level="H"/>
+              </div>
+              <div className="flex flex-col gap-2 flex-1">
+                <p className="text-xs" style={{color: '#6B5E55'}}>ID: {machine.id.slice(0, 8)}...</p>
+                <button onClick={() => deleteMachine(machine.id)}
+                  className="py-2 rounded-full text-sm font-semibold"
+                  style={{background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444'}}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+)}
             </>
           )}
         </div>
