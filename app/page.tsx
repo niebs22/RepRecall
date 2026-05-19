@@ -23,7 +23,7 @@ export default function Home() {
           <h1 className="text-5xl font-bold text-white mb-1">
             <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
           </h1>
-          <p className="text-sm font-semibold tracking-widest uppercase" style={{color: '#E8440C'}}>Scan. Lift. Repeat.</p>
+          <p className="text-sm font-semibold tracking-widest uppercase" style={{color: '#E8440C'}}>Scan. Lift. Improve.</p>
         </div>
         <p className="mb-10 max-w-xs mx-auto" style={{color: '#6B5E55'}}>Simplifying the way gym-goers log and recall their workouts</p>
         <div className="flex flex-col gap-4">
