@@ -165,7 +165,7 @@ async function bulkAddMachines(e: any) {
     ctx.fillText('set', startX + scanWidth, 44)
 
     // Divider
-    ctx.strokeStyle = '#1A1A1A'
+    ctx.strokeStyle = '#222222'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(30, 58)
@@ -184,7 +184,7 @@ async function bulkAddMachines(e: any) {
     ctx.fillText(machineName, cardWidth / 2, 314)
 
     // Divider
-    ctx.strokeStyle = '#1A1A1A'
+    ctx.strokeStyle = '#222222'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(30, 326)
@@ -321,12 +321,12 @@ async function bulkAddMachines(e: any) {
 
         {/* Quick action cards */}
         <div className="grid grid-cols-2 gap-3 mb-8">
-          <a href="/admin/analytics" className="rounded-2xl p-5 flex flex-col gap-2" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <a href="/admin/analytics" className="rounded-2xl p-5 flex flex-col gap-2" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p style={{fontSize: '24px'}}>📊</p>
             <p className="font-bold text-white text-sm">Analytics</p>
             <p className="text-xs" style={{color: '#6B5E55'}}>Member activity, equipment usage</p>
           </a>
-          <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+          <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}
             onClick={() => document.getElementById('export-btn')?.click()}>
             <p style={{fontSize: '24px'}}>🖨️</p>
             <p className="font-bold text-white text-sm">Export All QR Cards</p>
@@ -335,7 +335,7 @@ async function bulkAddMachines(e: any) {
         </div>
 
         <div id="add-machine-section">
-          <div className="rounded-2xl mb-8 overflow-hidden" style={{background: '#0F0F0F'}}>
+          <div className="rounded-2xl mb-8 overflow-hidden" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
             <button
               onClick={() => setAddOpen(prev => !prev)}
               className="w-full flex justify-between items-center p-6"
@@ -412,7 +412,7 @@ async function bulkAddMachines(e: any) {
         </div>
 
 {/* Bulk add machines */}
-        <div className="rounded-2xl mb-8 overflow-hidden" style={{background: '#0F0F0F'}}>
+        <div className="rounded-2xl mb-8 overflow-hidden" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
           <button
             onClick={() => setBulkOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-6"
@@ -498,7 +498,7 @@ async function bulkAddMachines(e: any) {
         ) : (
           <div className="flex flex-col gap-2">
             {machines.map(machine => (
-              <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+              <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
                 <button
                   onClick={() => toggleExpand(machine.id)}
                   className="w-full px-4 py-3 flex justify-between items-center"
