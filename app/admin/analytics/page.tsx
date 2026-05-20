@@ -252,7 +252,7 @@ export default function Analytics() {
                 setGymName(gyms.find(g => g.id === e.target.value)?.name || '')
               }}
               className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-              style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+              style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #1A1A1A'}}
             >
               {gyms.map(g => (
                 <option key={g.id} value={g.id}>{g.name}</option>
@@ -262,19 +262,19 @@ export default function Analytics() {
         )}
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+          <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Total Members</p>
             <p className="text-3xl font-bold text-white">{totalMembers}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+          <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Active This Week</p>
             <p className="text-3xl font-bold" style={{color: '#E8440C'}}>{activeThisWeek}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+          <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Workouts This Week</p>
             <p className="text-3xl font-bold" style={{color: '#E8440C'}}>{totalWorkoutsThisWeek}</p>
           </div>
-          <div className="rounded-2xl p-4" style={{background: '#0F0F0F'}}>
+          <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
             <p className="text-xs mb-1 uppercase tracking-widest" style={{color: '#6B5E55'}}>Total Machines</p>
             <p className="text-3xl font-bold text-white">{machineStats.length}</p>
           </div>
@@ -282,7 +282,7 @@ export default function Analytics() {
 
         {machineStats.length > 0 && (
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <div className="rounded-2xl p-4" style={{background: '#0F0F0F', borderLeft: '3px solid #E8440C'}}>
+            <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', borderLeft: '3px solid #E8440C'}}>
               <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#E8440C'}}>Most Used</p>
               <div className="flex flex-col gap-3">
                 {machineStats.slice(0, 3).map((m, i) => (
@@ -296,7 +296,7 @@ export default function Analytics() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl p-4" style={{background: '#0F0F0F', borderLeft: '3px solid #EF4444'}}>
+            <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', borderLeft: '3px solid #EF4444'}}>
               <p className="text-xs mb-3 uppercase tracking-widest" style={{color: '#EF4444'}}>Least Used</p>
               <div className="flex flex-col gap-3">
                 {[...machineStats].reverse().slice(0, 3).map((m, i) => (
@@ -313,7 +313,7 @@ export default function Analytics() {
           </div>
         )}
 
-        <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F'}}>
+        <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
           <p className="text-white font-semibold mb-4">Busiest Days</p>
           <div className="flex gap-1.5 items-end justify-between">
             {dayLabels.map((day, i) => (
@@ -327,7 +327,7 @@ export default function Analytics() {
                       ? '#E8440C'
                       : dayStats[i] === Math.max(...dayStats)
                       ? '#E8440C'
-                      : '#1A1A1A'
+                      : '#222222'
                   }}
                 />
                 <p className="text-xs" style={{color: i === todayIndex ? '#E8440C' : '#6B5E55'}}>{day}</p>
@@ -336,7 +336,7 @@ export default function Analytics() {
           </div>
         </div>
 
-        <div className="rounded-2xl p-5 mb-6" style={{background: '#0F0F0F'}}>
+        <div className="rounded-2xl p-5 mb-6" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
           <p className="text-white font-semibold mb-4">Busiest Times</p>
           <div className="flex flex-col gap-3">
             {[
@@ -368,7 +368,7 @@ export default function Analytics() {
 
         {/* New Member Return Rate */}
         {returnRate !== null && (
-          <div className="rounded-2xl p-5 mb-4" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #1A1A1A'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Member Return Rate</p>
             <div className="flex justify-between items-end mb-3">
               <div>
@@ -383,7 +383,7 @@ export default function Analytics() {
                 </p>
               </div>
             </div>
-            <div className="w-full rounded-full h-2" style={{background: '#1A1A1A'}}>
+            <div className="w-full rounded-full h-2" style={{background: '#222222'}}>
               <div className="h-2 rounded-full" style={{
                 width: returnRate + '%',
                 background: returnRate >= 70 ? '#22C55E' : returnRate >= 40 ? '#F59E0B' : '#EF4444'
@@ -393,7 +393,7 @@ export default function Analytics() {
         )}
 
         {/* At-Risk Members */}
-        <div className="rounded-2xl overflow-hidden mb-4" style={{background: '#0F0F0F'}}>
+        <div className="rounded-2xl overflow-hidden mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
           <button
             onClick={() => setAtRiskOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
@@ -402,7 +402,7 @@ export default function Analytics() {
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-lg text-white">At-Risk Members</h2>
               <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{background: atRiskMembers.length > 0 ? 'rgba(239,68,68,0.15)' : '#1A1A1A',
+                style={{background: atRiskMembers.length > 0 ? 'rgba(239,68,68,0.15)' : '#222222',
                   color: atRiskMembers.length > 0 ? '#EF4444' : '#6B5E55'}}>
                 {atRiskMembers.length}
               </span>
@@ -441,7 +441,7 @@ export default function Analytics() {
           )}
         </div>
 
-        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
           <button
             onClick={() => setEquipmentOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
@@ -449,7 +449,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-lg text-white">Equipment Usage</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#222222', color: '#6B5E55'}}>
                 {machineStats.length}
               </span>
             </div>
@@ -493,7 +493,7 @@ export default function Analytics() {
                           <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(machine.lastUsed)}</p>
                         </div>
                       </div>
-                      <div className="w-full rounded-full h-1.5 mb-2" style={{background: '#1A1A1A'}}>
+                      <div className="w-full rounded-full h-1.5 mb-2" style={{background: '#222222'}}>
                         <div
                           className="h-1.5 rounded-full"
                           style={{
@@ -514,7 +514,7 @@ export default function Analytics() {
             </div>
           )}
         </div>
-        <div className="rounded-2xl overflow-hidden mb-6" style={{background: '#0F0F0F'}}>
+        <div className="rounded-2xl overflow-hidden mb-6" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)'}}>
           <button
             onClick={() => setMembersOpen(prev => !prev)}
             className="w-full flex justify-between items-center p-5"
@@ -522,7 +522,7 @@ export default function Analytics() {
           >
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-lg text-white">Members</h2>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#1A1A1A', color: '#6B5E55'}}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: '#222222', color: '#6B5E55'}}>
                 {members.length}
               </span>
             </div>
