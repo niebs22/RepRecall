@@ -245,7 +245,7 @@ function MachinePageInner() {
           return
         }
         setUser(user)
-        
+
 
         const { data: existingMembership } = await supabase
           .from('gym_members')
@@ -255,7 +255,24 @@ function MachinePageInner() {
         if (existingMembership?.gyms) {
           setGymTimezone((existingMembership.gyms as any).timezone || 'America/New_York')
         }
-
+if (existingMembership) {
+  const { data: machineCheck } = await supabase
+    .from('machines')
+    .select('gym_id')
+    .eq('id', id)
+    .single()
+  if (machineCheck && machineCheck.gym_id !== existingMembership.gym_id) {
+    const { data: gymData } = await supabase
+      .from('gyms')
+      .select('code')
+      .eq('id', machineCheck.gym_id)
+      .single()
+    if (gymData?.code) {
+      router.push(`/join/${gymData.code}?next=/machine/${id}`)
+      return
+    }
+  }
+}
         if (!existingMembership) {
   const { data: machineGym } = await supabase
     .from('machines')
