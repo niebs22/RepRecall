@@ -7,7 +7,7 @@ export default function JoinGym() {
   const pathname = usePathname()
   const code = pathname?.split('/').pop()
   const [gym, setGym] = useState<any>(null)
-  const [status, setStatus] = useState<'loading' | 'join' | 'done' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'join' | 'done' | 'error' | 'wrong_gym'>('loading')
   const router = useRouter()
 
   useEffect(() => {
@@ -22,13 +22,25 @@ export default function JoinGym() {
 
       const { data: { user } } = await supabase.auth.getUser()
 
-      if (!user) {
-        localStorage.setItem('pending_gym_code', code)
-        setStatus('join')
-        return
-      }
+if (!user) {
+  localStorage.setItem('pending_gym_code', code)
+  setStatus('join')
+  return
+}
 
-      await linkUserToGym(user.id, gymData.id)
+// Check if user already belongs to a different gym
+const { data: existingMembership } = await supabase
+  .from('gym_members')
+  .select('gym_id')
+  .eq('user_id', user.id)
+  .single()
+
+if (existingMembership && existingMembership.gym_id !== gymData.id) {
+  setStatus('wrong_gym')
+  return
+}
+
+await linkUserToGym(user.id, gymData.id)
     }
     load()
   }, [code])
@@ -59,7 +71,20 @@ export default function JoinGym() {
       </div>
     </main>
   )
-
+if (status === 'wrong_gym') return (
+    <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#080808'}}>
+      <div className="text-center">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#1A1A1A', border: '1px solid #222222'}}>
+          <span className="text-2xl">🔒</span>
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">Wrong Gym</h2>
+        <p className="mb-6" style={{color: '#6B5E55'}}>You're already a member of a different gym. Each account can only belong to one gym at a time.</p>
+        <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-white inline-block" style={{background: '#E8440C'}}>
+          Back to Dashboard
+        </a>
+      </div>
+    </main>
+  )
   if (status === 'done') return (
     <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
