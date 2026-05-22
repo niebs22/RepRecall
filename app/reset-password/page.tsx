@@ -57,7 +57,7 @@ export default function ResetPassword() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
-            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}
           />
           <input
             type="password"
@@ -65,7 +65,7 @@ export default function ResetPassword() {
             value={confirm}
             onChange={e => setConfirm(e.target.value)}
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
-            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}
           />
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
