@@ -496,7 +496,7 @@ export default function Dashboard() {
                   <svg viewBox={`0 0 ${w} ${h}`} style={{width: '100%', height: '32px', overflow: 'visible'}}>
                     <defs>
                       <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.3"/>
+                        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.5"/>
                         <stop offset="100%" stopColor="#9B6DFF" stopOpacity="0"/>
                       </linearGradient>
                     </defs>
@@ -512,7 +512,7 @@ export default function Dashboard() {
                       points={points}
                       fill="none"
                       stroke="#9B6DFF"
-                      strokeWidth="2"
+                      strokeWidth="3"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
