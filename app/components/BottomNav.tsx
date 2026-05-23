@@ -6,7 +6,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50"
-      style={{background: '#080808', borderTop: '1px solid #1A1A1A', height: '80px'}}>
+      style={{background: '#080808', borderTop: '1px solid #222222', height: '80px'}}>
       <div className="max-w-lg mx-auto h-full flex items-center justify-around px-4 pb-2">
 
         {/* Home */}
