@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [challengePool, setChallengePool] = useState<any[]>([])
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
+  const [isChrome, setIsChrome] = useState(false)
   const [showIOSSteps, setShowIOSSteps] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
 
@@ -61,7 +62,9 @@ export default function Dashboard() {
       setShowInstallBanner(true)
     }
     const ios = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())
-    setIsIOS(ios)
+setIsIOS(ios)
+const chrome = /android/.test(navigator.userAgent.toLowerCase()) || (!ios && /chrome/.test(navigator.userAgent.toLowerCase()))
+setIsChrome(chrome)
     const handler = (e: any) => { e.preventDefault(); setDeferredPrompt(e) }
     window.addEventListener('beforeinstallprompt', handler)
     return () => window.removeEventListener('beforeinstallprompt', handler)
@@ -258,7 +261,7 @@ export default function Dashboard() {
   }
 
   async function handleInstall() {
-    if (isIOS) { setShowIOSSteps(true); return }
+    if (isIOS || isChrome) { setShowIOSSteps(true); return }
     if (deferredPrompt) {
       deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
@@ -376,31 +379,49 @@ export default function Dashboard() {
             </div>
             <p className="text-xs mb-3" style={{color: '#6B5E55'}}>Get the full app experience — faster access, works offline</p>
             {!showIOSSteps ? (
-              <button
-                onClick={handleInstall}
-                className="w-full py-2.5 rounded-full font-semibold text-white text-sm"
-                style={{background: '#D4A017'}}>
-                Add to Home Screen
-              </button>
-            ) : (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-start gap-2">
-  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
-  <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>Share</span> button at the bottom of Safari</p>
-</div>
-<div className="flex items-start gap-2">
-  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
-  <p className="text-xs text-white">Scroll down and tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span> — you may need to tap <span style={{color: '#E8440C'}}>"View More"</span> to find it</p>
-</div>
-<div className="flex items-start gap-2">
-  <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
-  <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
-</div>
-                <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
-                  Already installed — dismiss
-                </button>
-              </div>
-            )}
+  <button
+    onClick={handleInstall}
+    className="w-full py-2.5 rounded-full font-semibold text-white text-sm"
+    style={{background: '#D4A017'}}>
+    Add to Home Screen
+  </button>
+) : isChrome ? (
+  <div className="flex flex-col gap-2">
+    <div className="flex items-start gap-2">
+      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
+      <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>⋮ menu</span> in the top right of Chrome</p>
+    </div>
+    <div className="flex items-start gap-2">
+      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
+      <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span></p>
+    </div>
+    <div className="flex items-start gap-2">
+      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
+      <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
+    </div>
+    <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
+      Already installed — dismiss
+    </button>
+  </div>
+) : (
+  <div className="flex flex-col gap-2">
+    <div className="flex items-start gap-2">
+      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
+      <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>Share</span> button at the bottom of Safari</p>
+    </div>
+    <div className="flex items-start gap-2">
+      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
+      <p className="text-xs text-white">Scroll down and tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span> — you may need to tap <span style={{color: '#E8440C'}}>"View More"</span> to find it</p>
+    </div>
+    <div className="flex items-start gap-2">
+      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
+      <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
+    </div>
+    <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
+      Already installed — dismiss
+    </button>
+  </div>
+)}
           </div>
         )}
 
