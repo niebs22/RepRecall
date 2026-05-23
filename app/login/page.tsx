@@ -57,7 +57,7 @@ function LoginForm() {
             value={password}
             onChange={e => setPassword(e.target.value)}
             className="px-4 py-3 rounded-lg text-white focus:outline-none"
-            style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}
+            style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}
           />
           {gymCode && (
             <div className="rounded-lg px-4 py-3" style={{background: '#0F0F0F', border: '1px solid #E8440C'}}>
