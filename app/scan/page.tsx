@@ -87,7 +87,7 @@ export default function ScanPage() {
           Point your camera at a QR code on any piece of equipment
         </p>
 
-        <div className="rounded-2xl overflow-hidden mb-4" style={{background: '#0F0F0F', minHeight: '200px'}}>
+        <div className="rounded-2xl overflow-hidden mb-4" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', minHeight: '200px'}}>
           <video
             ref={videoRef}
             className="w-full"
@@ -98,7 +98,7 @@ export default function ScanPage() {
         </div>
 
         {showFallback && (
-          <div className="rounded-2xl p-5 text-center" style={{background: '#0F0F0F', border: '1px solid #1A1A1A'}}>
+          <div className="rounded-2xl p-5 text-center" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p className="text-white font-semibold mb-2">Camera not loading?</p>
             <p className="text-sm mb-4" style={{color: '#6B5E55'}}>
               No problem — just open your phone camera app and point it at the QR code on any machine. It works exactly the same way.
@@ -106,7 +106,7 @@ export default function ScanPage() {
             <p className="text-sm py-2 font-semibold" style={{color: '#E8440C'}}>
               Swipe out of this app and open your Camera app
             </p>
-            <a href="/dashboard" className="block mt-3 py-3 rounded-full font-semibold text-center" style={{border: '1px solid #1A1A1A', color: '#6B5E55'}}>
+            <a href="/dashboard" className="block mt-3 py-3 rounded-full font-semibold text-center" style={{border: '1px solid #222222', color: '#6B5E55'}}>
               Back to Dashboard
             </a>
           </div>
