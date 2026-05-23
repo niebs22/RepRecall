@@ -24,6 +24,7 @@ export default function Admin() {
   const [bulkType, setBulkType] = useState('strength')
   const [bulkOpen, setBulkOpen] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
+  const [quantities, setQuantities] = useState<Record<string, number>>({})
 
   useEffect(() => {
     async function load() {
@@ -223,8 +224,14 @@ async function bulkAddMachines(e: any) {
     const marginY = (11 - rows * cardH) / 2
     const cropSize = 0.08
 
-    for (let i = 0; i < machines.length; i++) {
-      const machine = machines[i]
+    const expandedMachines: any[] = []
+    machines.forEach(machine => {
+      const qty = quantities[machine.id] ?? 1
+      for (let q = 0; q < qty; q++) expandedMachines.push(machine)
+    })
+
+    for (let i = 0; i < expandedMachines.length; i++) {
+      const machine = expandedMachines[i]
       const posOnPage = i % cardsPerPage
       const col = posOnPage % cols
       const row = Math.floor(posOnPage / cols)
@@ -499,24 +506,32 @@ async function bulkAddMachines(e: any) {
           <div className="flex flex-col gap-2">
             {machines.map(machine => (
               <div key={machine.id} className="rounded-xl overflow-hidden" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
-                <button
-                  onClick={() => toggleExpand(machine.id)}
-                  className="w-full px-4 py-3 flex justify-between items-center"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{background: machine.type === 'cardio' ? '#E8440C' : '#E8440C'}}></div>
-                    <p className="text-white font-medium text-sm">{machine.name}</p>
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{
-                      background: machine.type === 'cardio' ? 'rgba(184,134,11,0.1)' : 'rgba(37,99,235,0.1)',
-                      color: machine.type === 'cardio' ? '#E8440C' : '#E8440C'
-                    }}>
-                      {machine.type === 'cardio' ? 'Cardio' : 'Strength'}
-                    </span>
-                  </div>
-                  <span style={{color: '#6B5E55', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s'}}>
-                    ▾
-                  </span>
-                </button>
+                <div className="w-full px-4 py-3 flex justify-between items-center gap-3">
+  <button
+    onClick={() => toggleExpand(machine.id)}
+    className="flex items-center gap-3 flex-1 min-w-0 text-left"
+    style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+  >
+    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{background: '#E8440C'}}></div>
+    <p className="text-white font-medium text-sm truncate">{machine.name}</p>
+    <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{
+      background: 'rgba(232,68,12,0.1)', color: '#E8440C'
+    }}>
+      {machine.type === 'cardio' ? 'Cardio' : machine.type === 'functional' ? 'Functional' : 'Strength'}
+    </span>
+  </button>
+  <div className="flex items-center gap-2 flex-shrink-0">
+    <span className="text-xs" style={{color: '#6B5E55'}}>Qty</span>
+    <input
+      type="number" min="1" max="99"
+      value={quantities[machine.id] ?? 1}
+      onChange={e => setQuantities(prev => ({...prev, [machine.id]: Math.max(1, parseInt(e.target.value) || 1)}))}
+      className="w-14 px-2 py-1 rounded-lg text-white text-center focus:outline-none text-sm"
+      style={{background: '#1A1A1A', border: '1px solid #333333'}}
+    />
+    <span style={{color: '#6B5E55', transform: expanded === machine.id ? 'rotate(180deg)' : 'rotate(0deg)', display: 'inline-block', transition: 'transform 0.2s', fontSize: '16px'}}>▾</span>
+  </div>
+</div>
 
                 {expanded === machine.id && (
                   <div className="px-4 pb-4 pt-2" style={{borderTop: '1px solid #1A1A1A'}}>
