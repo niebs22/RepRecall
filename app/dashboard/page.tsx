@@ -372,7 +372,7 @@ setIsChrome(chrome)
 
         {/* Install banner */}
         {showInstallBanner && (
-          <div className="rounded-2xl p-4 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #D4A017'}}>
+          <div className="rounded-2xl p-4 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #FFD700'}}>
             <div className="flex justify-between items-start mb-2">
               <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Add ScanSet to your home screen</p>
               <button onClick={dismissBanner} style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
@@ -382,8 +382,8 @@ setIsChrome(chrome)
   <button
     onClick={handleInstall}
     className="w-full py-2.5 rounded-full font-semibold text-white text-sm"
-    style={{background: '#D4A017'}}>
-    Add to Home Screen
+    style={{background: '#FFD700', color: '#080808'}}>
+     Add to Home Screen
   </button>
 ) : isChrome ? (
   <div className="flex flex-col gap-2">
