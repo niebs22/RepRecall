@@ -377,7 +377,7 @@ setIsChrome(chrome)
               <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>Add ScanSet to your home screen</p>
               <button onClick={dismissBanner} style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
             </div>
-            <p className="text-xs mb-3" style={{color: '#6B5E55'}}>Get the full app experience — one tap from your home screen</p>
+            <p className="text-xs mb-3" style={{color: '#6B5E55'}}>Skip the browser, use ScanSet as a full app on your home screen</p>
             {!showIOSSteps ? (
   <button
     onClick={handleInstall}
