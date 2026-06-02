@@ -442,7 +442,7 @@ setIsChrome(chrome)
 {/* Active Routine Banner */}
 {activeRoutine && (
   <div className="rounded-2xl p-4 mb-4 flex justify-between items-center"
-    style={{background: '#3D8B7A'}}>
+    style={{background: '#1D6FE8'}}>
     <div>
       <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: 'rgba(255,255,255,0.6)'}}>Active Routine</p>
       <p className="font-bold text-white">{activeRoutine.name}</p>
@@ -669,11 +669,11 @@ setIsChrome(chrome)
         className="flex items-center gap-2"
         style={{background: 'transparent', border: 'none', cursor: 'pointer'}}>
         <h2 className="font-semibold text-white">My Routines</h2>
-        <span style={{color: '#3D8B7A', fontSize: '18px', transform: routinesOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1}}>▾</span>
+        <span style={{color: '#1D6FE8', fontSize: '18px', transform: routinesOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1}}>▾</span>
       </button>
       <a href="/routines/create"
         className="text-xs font-bold px-3 py-1.5 rounded-full"
-        style={{color: '#3D8B7A', background: 'rgba(61,139,122,0.1)', border: '1px solid rgba(61,139,122,0.3)'}}>
+        style={{color: '#1D6FE8', background: 'rgba(29,111,232,0.1)', border: '1px solid rgba(29,111,232,0.3)'}}>
         + Create
       </a>
     </div>
@@ -681,7 +681,7 @@ setIsChrome(chrome)
       <div className="flex flex-col gap-2 px-5 pb-5">
         {routines.map(routine => (
           <div key={routine.id} className="flex justify-between items-center px-4 py-3 rounded-xl"
-            style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #3D8B7A'}}>
+            style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #1D6FE8'}}>
             <div>
               <p className="font-semibold text-sm text-white">{routine.name}</p>
               <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -691,13 +691,14 @@ setIsChrome(chrome)
             </div>
             <button
               onClick={() => {
-                const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
-                const full = { ...routine, routine_machines: sorted }
-                localStorage.setItem('active_routine', JSON.stringify(full))
-                setActiveRoutine(full)
-              }}
+            const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
+            const full = { ...routine, routine_machines: sorted }
+              localStorage.setItem('active_routine', JSON.stringify(full))
+                 setActiveRoutine(full)
+              router.push(`/routines/${routine.id}`)
+           }}
               className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-              style={{background: '#3D8B7A', border: 'none', cursor: 'pointer'}}>
+              style={{background: '#1D6FE8', border: 'none', cursor: 'pointer'}}>
               Start
             </button>
           </div>
@@ -710,11 +711,11 @@ setIsChrome(chrome)
 {/* Create first routine prompt */}
 {routines.length === 0 && (
   <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
-    <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#3D8B7A'}}>My Routines</p>
+    <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#1D6FE8'}}>My Routines</p>
     <p className="text-sm mb-3" style={{color: '#6B5E55'}}>Save your go-to workouts and start them with one tap.</p>
     <a href="/routines/create"
       className="inline-block text-sm font-bold px-4 py-2 rounded-full"
-      style={{color: '#3D8B7A', background: 'rgba(61,139,122,0.1)', border: '1px solid rgba(61,139,122,0.3)'}}>
+      style={{color: '#1D6FE8', background: 'rgba(29,111,232,0.1)', border: '1px solid rgba(29,111,232,0.3)'}}>
       + Create your first routine
     </a>
   </div>
