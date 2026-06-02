@@ -21,6 +21,9 @@ export default function Dashboard() {
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [challengePool, setChallengePool] = useState<any[]>([])
+  const [routines, setRoutines] = useState<any[]>([])
+  const [activeRoutine, setActiveRoutine] = useState<any>(null)
+  const [routinesOpen, setRoutinesOpen] = useState(true)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [isIOS, setIsIOS] = useState(false)
   const [isChrome, setIsChrome] = useState(false)
@@ -49,12 +52,15 @@ export default function Dashboard() {
         fetchLiftStats(user.id)
         fetchFourWeekData(user.id)
         fetchChallengeExercises(user.id)
+        fetchRoutines(user.id)
       }
     }
     getUser()
 
 
 
+    const savedRoutine = localStorage.getItem('active_routine')
+    if (savedRoutine) setActiveRoutine(JSON.parse(savedRoutine))
     // Install banner
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
     const dismissed = localStorage.getItem('install_banner_dismissed')
@@ -202,6 +208,14 @@ setIsChrome(chrome)
     setFourWeekData(weeks)
   }
 
+  async function fetchRoutines(userId: string) {
+  const { data } = await supabase
+    .from('routines')
+    .select('*, routine_machines(*, machines(*))')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (data) setRoutines(data)
+}
   async function fetchChallengeExercises(userId: string) {
     const { data } = await supabase
       .from('workouts')
@@ -425,6 +439,30 @@ setIsChrome(chrome)
           </div>
         )}
 
+{/* Active Routine Banner */}
+{activeRoutine && (
+  <div className="rounded-2xl p-4 mb-4 flex justify-between items-center"
+    style={{background: '#3D8B7A'}}>
+    <div>
+      <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: 'rgba(255,255,255,0.6)'}}>Active Routine</p>
+      <p className="font-bold text-white">{activeRoutine.name}</p>
+      <p className="text-xs mt-0.5" style={{color: 'rgba(255,255,255,0.7)'}}>
+        {activeRoutine.routine_machines?.length} machines
+      </p>
+    </div>
+    <div className="flex flex-col gap-2 items-end">
+      <button
+        onClick={() => {
+          localStorage.removeItem('active_routine')
+          setActiveRoutine(null)
+        }}
+        className="text-xs px-3 py-1.5 rounded-full font-semibold"
+        style={{background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', cursor: 'pointer'}}>
+        End Routine
+      </button>
+    </div>
+  </div>
+)}
         {/* Scan card */}
         <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
           <p className="text-xs font-bold tracking-widest uppercase mb-4" style={{color: '#6B5E55'}}>Ready to train?</p>
@@ -622,6 +660,65 @@ setIsChrome(chrome)
         ) }
 
 
+{/* My Routines */}
+{routines.length > 0 && (
+  <div className="rounded-2xl overflow-hidden mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
+    <div className="flex justify-between items-center p-5">
+      <button
+        onClick={() => setRoutinesOpen(prev => !prev)}
+        className="flex items-center gap-2"
+        style={{background: 'transparent', border: 'none', cursor: 'pointer'}}>
+        <h2 className="font-semibold text-white">My Routines</h2>
+        <span style={{color: '#3D8B7A', fontSize: '18px', transform: routinesOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', lineHeight: 1}}>▾</span>
+      </button>
+      <a href="/routines/create"
+        className="text-xs font-bold px-3 py-1.5 rounded-full"
+        style={{color: '#3D8B7A', background: 'rgba(61,139,122,0.1)', border: '1px solid rgba(61,139,122,0.3)'}}>
+        + Create
+      </a>
+    </div>
+    {routinesOpen && (
+      <div className="flex flex-col gap-2 px-5 pb-5">
+        {routines.map(routine => (
+          <div key={routine.id} className="flex justify-between items-center px-4 py-3 rounded-xl"
+            style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #3D8B7A'}}>
+            <div>
+              <p className="font-semibold text-sm text-white">{routine.name}</p>
+              <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
+                {routine.routine_machines?.slice(0,3).map((rm: any) => rm.machines?.name).join(' · ')}
+                {routine.routine_machines?.length > 3 ? ` +${routine.routine_machines.length - 3} more` : ''}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
+                const full = { ...routine, routine_machines: sorted }
+                localStorage.setItem('active_routine', JSON.stringify(full))
+                setActiveRoutine(full)
+              }}
+              className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+              style={{background: '#3D8B7A', border: 'none', cursor: 'pointer'}}>
+              Start
+            </button>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
+{/* Create first routine prompt */}
+{routines.length === 0 && (
+  <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
+    <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#3D8B7A'}}>My Routines</p>
+    <p className="text-sm mb-3" style={{color: '#6B5E55'}}>Save your go-to workouts and start them with one tap.</p>
+    <a href="/routines/create"
+      className="inline-block text-sm font-bold px-4 py-2 rounded-full"
+      style={{color: '#3D8B7A', background: 'rgba(61,139,122,0.1)', border: '1px solid rgba(61,139,122,0.3)'}}>
+      + Create your first routine
+    </a>
+  </div>
+)}
         {/* Frequently Used */}
         <h2 className="font-bold text-lg mb-3" style={{color: '#E8E0D8'}}>Frequently Used</h2>
 
