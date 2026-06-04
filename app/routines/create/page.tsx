@@ -82,9 +82,9 @@ export default function CreateRoutine() {
     m.name.toLowerCase().includes(search.toLowerCase())
   )
 
-  const TEAL = '#3D8B7A'
-  const TEAL_BG = 'rgba(61,139,122,0.1)'
-  const TEAL_BORDER = 'rgba(61,139,122,0.3)'
+  const TEAL = '#253D5B'
+  const TEAL_BG = 'rgba(37,61,91,0.15)'
+  const TEAL_BORDER = 'rgba(37,61,91,0.4)'
 
   return (
     <main className="min-h-screen p-6 pb-24" style={{background: '#080808'}}>

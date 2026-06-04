@@ -691,12 +691,12 @@ setIsChrome(chrome)
             </div>
             <button
               onClick={() => {
-            const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
-            const full = { ...routine, routine_machines: sorted }
-              localStorage.setItem('active_routine', JSON.stringify(full))
-                 setActiveRoutine(full)
-              router.push(`/routines/${routine.id}`)
-           }}
+  const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
+  const full = { ...routine, routine_machines: sorted }
+  localStorage.setItem('active_routine', JSON.stringify(full))
+  setActiveRoutine(full)
+  router.push(`/routines/${routine.id}`)
+}}
               className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
               style={{background: '#253D5B', border: 'none', cursor: 'pointer'}}>
               Start
