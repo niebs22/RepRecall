@@ -665,16 +665,26 @@ if (validSets.length === 0) {
         )}
         <p className="mb-8" style={{color: '#6B5E55'}}>Keep it up!</p>
         <div className="flex flex-col gap-3">
-          <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#E8440C'}}>
-            Scan Next Machine
-          </a>
-          <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #E8440C', color: '#E8440C'}}>
-            Back to {machine?.name}
-          </a>
-          <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#6B5E55'}}>
-            Back to Dashboard
-          </a>
-        </div>
+  {(() => {
+    const activeRoutine = typeof window !== 'undefined' ? localStorage.getItem('active_routine') : null
+    const routine = activeRoutine ? JSON.parse(activeRoutine) : null
+    return routine ? (
+      <a href={`/routines/${routine.id}`} className="py-3 px-8 rounded-full font-semibold text-white text-center"
+        style={{background: '#253D5B'}}>
+        ← Back to {routine.name}
+      </a>
+    ) : null
+  })()}
+  <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#E8440C'}}>
+    Scan Next Machine
+  </a>
+  <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #E8440C', color: '#E8440C'}}>
+    Back to {machine?.name}
+  </a>
+  <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#6B5E55'}}>
+    Back to Dashboard
+  </a>
+</div>
       </div>
     </main>
   )
