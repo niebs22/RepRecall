@@ -134,14 +134,20 @@ export default function RoutinePage() {
         {/* All done state */}
         {completed === total && total > 0 && (
           <div className="rounded-2xl p-6 mt-6 text-center" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${NAVY}`}}>
-            <p className="text-2xl mb-2">💪</p>
             <p className="font-bold text-white mb-1">Routine Complete!</p>
-            <p className="text-sm mb-4" style={{color: '#6B5E55'}}>You crushed {routine.name}.</p>
-            <button onClick={endRoutine}
-              className="py-3 px-8 rounded-full font-semibold text-white"
-              style={{background: '#E8440C', border: 'none', cursor: 'pointer'}}>
-              Back to Dashboard
-            </button>
+<p className="text-sm mb-4" style={{color: '#6B5E55'}}>You crushed {routine.name}.</p>
+<div className="flex flex-col gap-3">
+  <button onClick={() => setCompletedIds(new Set())}
+    className="py-3 px-8 rounded-full font-semibold text-white"
+    style={{background: '#253D5B', border: 'none', cursor: 'pointer'}}>
+    Restart Routine
+  </button>
+  <button onClick={endRoutine}
+    className="py-3 px-8 rounded-full font-semibold text-white"
+    style={{background: '#E8440C', border: 'none', cursor: 'pointer'}}>
+    Back to Dashboard
+  </button>
+</div>
           </div>
         )}
       </div>
