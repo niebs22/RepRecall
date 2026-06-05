@@ -9,6 +9,7 @@ function MachinePageInner() {
   const id = pathname?.split('/').pop()
   const searchParams = useSearchParams()
   const from = searchParams?.get('from')
+  const routineId = searchParams?.get('routineId')
   const exerciseParam = typeof window !== 'undefined' 
     ? new URLSearchParams(window.location.search).get('exercise')
     : searchParams?.get('exercise')
@@ -748,9 +749,9 @@ if (validSets.length === 0) {
   return (
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
-        <a href={from === 'history' ? '/history' : '/dashboard'} className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
-          {from === 'history' ? '← Back to History' : '← Back to Dashboard'}
-        </a>
+        <a href={from === 'history' ? '/history' : from === 'routine' && routineId ? `/routines/${routineId}` : '/dashboard'} className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
+  {from === 'history' ? '← Back to History' : from === 'routine' ? '← Back to Routine' : '← Back to Dashboard'}
+</a>
 
         <div className="flex items-center gap-3 mb-1">
   <h1 className="text-3xl font-bold text-white">{machine.name}</h1>

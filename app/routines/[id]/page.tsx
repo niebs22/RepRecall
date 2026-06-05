@@ -105,7 +105,7 @@ export default function RoutinePage() {
               
                 <a
                 key={rm.id}
-                href={`/machine/${rm.machine_id}`}
+                href={`/machine/${rm.machine_id}?from=routine&routineId=${id}`}
                 className="rounded-2xl p-4 flex items-center gap-4"
                 style={{
                   background: isDone ? 'rgba(37,61,91,0.15)' : 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)',

@@ -441,8 +441,9 @@ setIsChrome(chrome)
 
 {/* Active Routine Banner */}
 {activeRoutine && (
-  <div className="rounded-2xl p-4 mb-4 flex justify-between items-center"
-    style={{background: '#253D5B'}}>
+  <div className="rounded-2xl p-4 mb-4 flex justify-between items-center cursor-pointer"
+    style={{background: '#253D5B'}}
+    onClick={() => router.push(`/routines/${activeRoutine.id}`)}>
     <div>
       <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: 'rgba(255,255,255,0.6)'}}>Active Routine</p>
       <p className="font-bold text-white">{activeRoutine.name}</p>

@@ -81,7 +81,7 @@ export default function CreateRoutine() {
   const filtered = machines.filter(m =>
     m.name.toLowerCase().includes(search.toLowerCase())
   )
-
+  
   const TEAL = '#253D5B'
   const TEAL_BG = 'rgba(37,61,91,0.15)'
   const TEAL_BORDER = 'rgba(37,61,91,0.4)'
