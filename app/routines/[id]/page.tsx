@@ -38,10 +38,12 @@ const isViewMode = new URLSearchParams(window.location.search).get('view') === '
         .eq('id', id)
         .single()
       if (data) {
-        const sorted = { ...data, routine_machines: [...data.routine_machines].sort((a, b) => a.order_index - b.order_index) }
-        setRoutine(sorted)
-        localStorage.setItem('active_routine', JSON.stringify(sorted))
-      }
+  const sorted = { ...data, routine_machines: [...data.routine_machines].sort((a, b) => a.order_index - b.order_index) }
+  setRoutine(sorted)
+  if (!isViewMode) {
+    localStorage.setItem('active_routine', JSON.stringify(sorted))
+  }
+}
 
       // Only mark done if logged after routine was started
 const startedAt = localStorage.getItem('routine_started_at')
@@ -130,9 +132,26 @@ if (!isViewMode && startedAt) {
                     {machine?.type === 'cardio' ? 'Cardio' : machine?.type === 'functional' ? 'Functional' : 'Strength'}
                   </p>
                 </div>
-                {!isDone && (
-                  <span style={{color: '#E8440C', fontSize: '18px'}}>→</span>
-                )}
+                <div className="flex items-center gap-2">
+  {isViewOnly && (
+    <button
+      onClick={async (e) => {
+        e.preventDefault()
+        await supabase.from('routine_machines').delete().eq('id', rm.id)
+        setRoutine((prev: any) => ({
+          ...prev,
+          routine_machines: prev.routine_machines.filter((r: any) => r.id !== rm.id)
+        }))
+      }}
+      className="text-xs px-2 py-1 rounded"
+      style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)', border: 'none', cursor: 'pointer'}}>
+      ✕
+    </button>
+  )}
+  {!isDone && !isViewOnly && (
+    <span style={{color: '#E8440C', fontSize: '18px'}}>→</span>
+  )}
+</div>
               </a>
             )
           })}
