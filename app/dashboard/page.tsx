@@ -690,18 +690,26 @@ setIsChrome(chrome)
                 {routine.routine_machines?.length > 3 ? ` +${routine.routine_machines.length - 3} more` : ''}
               </p>
             </div>
-            <button
-              onClick={() => {
-  const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
-  const full = { ...routine, routine_machines: sorted }
-  localStorage.setItem('active_routine', JSON.stringify(full))
-  setActiveRoutine(full)
-  router.push(`/routines/${routine.id}`)
-}}
-              className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-              style={{background: '#253D5B', border: 'none', cursor: 'pointer'}}>
-              Start
-            </button>
+            <div className="flex gap-2">
+  <a href={`/routines/${routine.id}?view=true`}
+    className="text-xs font-bold px-3 py-1.5 rounded-full"
+    style={{color: '#253D5B', background: 'rgba(37,61,91,0.15)', border: '1px solid rgba(37,61,91,0.4)'}}>
+    View
+  </a>
+  <button
+    onClick={() => {
+      const sorted = [...routine.routine_machines].sort((a, b) => a.order_index - b.order_index)
+      const full = { ...routine, routine_machines: sorted }
+      localStorage.setItem('active_routine', JSON.stringify(full))
+      localStorage.setItem('routine_started_at', new Date().toISOString())
+      setActiveRoutine(full)
+      router.push(`/routines/${routine.id}`)
+    }}
+    className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+    style={{background: '#253D5B', border: 'none', cursor: 'pointer'}}>
+    Start
+  </button>
+</div>
           </div>
         ))}
       </div>

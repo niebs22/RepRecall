@@ -21,6 +21,7 @@ export default function RoutinePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
+const isViewMode = new URLSearchParams(window.location.search).get('view') === 'true'
 
       const { data: memberData } = await supabase
         .from('gym_members')
@@ -42,24 +43,27 @@ export default function RoutinePage() {
         localStorage.setItem('active_routine', JSON.stringify(sorted))
       }
 
-      // Check which machines already logged today
-      const today = new Date().toDateString()
-      const { data: todayWorkouts } = await supabase
-        .from('workouts')
-        .select('machine_id, created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', new Date(today).toISOString())
-      if (todayWorkouts) {
-        setCompletedIds(new Set(todayWorkouts.map(w => w.machine_id)))
-      }
+      // Only mark done if logged after routine was started
+const startedAt = localStorage.getItem('routine_started_at')
+if (!isViewMode && startedAt) {
+  const { data: routineWorkouts } = await supabase
+    .from('workouts')
+    .select('machine_id, created_at')
+    .eq('user_id', user.id)
+    .gte('created_at', startedAt)
+  if (routineWorkouts) {
+    setCompletedIds(new Set(routineWorkouts.map(w => w.machine_id)))
+  }
+}
     }
     load()
   }, [id])
 
   function endRoutine() {
-    localStorage.removeItem('active_routine')
-    router.push('/dashboard')
-  }
+  localStorage.removeItem('active_routine')
+  localStorage.removeItem('routine_started_at')
+  router.push('/dashboard')
+}
 
   if (!routine) return (
     <main className="min-h-screen flex items-center justify-center" style={{background: '#080808'}}>
@@ -69,6 +73,7 @@ export default function RoutinePage() {
 
   const total = routine.routine_machines.length
   const completed = routine.routine_machines.filter((rm: any) => completedIds.has(rm.machine_id)).length
+  const isViewOnly = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('view') === 'true'
 
   return (
     <main className="min-h-screen p-6 pb-24" style={{background: '#080808'}}>
@@ -88,12 +93,14 @@ export default function RoutinePage() {
         <div className="rounded-2xl p-5 mb-6" style={{background: NAVY, border: `1px solid ${NAVY}`}}>
           <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: 'rgba(255,255,255,0.6)'}}>Active Routine</p>
           <h1 className="text-2xl font-bold text-white mb-3">{routine.name}</h1>
-          <div className="flex items-center gap-3">
-            <div className="flex-1 rounded-full overflow-hidden" style={{height: '4px', background: 'rgba(255,255,255,0.2)'}}>
-              <div style={{width: `${total > 0 ? (completed / total) * 100 : 0}%`, height: '100%', background: 'white', borderRadius: '2px', transition: 'width 0.3s ease'}}/>
-            </div>
-            <p className="text-xs font-bold text-white">{completed} / {total}</p>
-          </div>
+          {!isViewOnly && (
+  <div className="flex items-center gap-3">
+    <div className="flex-1 rounded-full overflow-hidden" style={{height: '4px', background: 'rgba(255,255,255,0.2)'}}>
+      <div style={{width: `${total > 0 ? (completed / total) * 100 : 0}%`, height: '100%', background: 'white', borderRadius: '2px', transition: 'width 0.3s ease'}}/>
+    </div>
+    <p className="text-xs font-bold text-white">{completed} / {total}</p>
+  </div>
+)}
         </div>
 
         {/* Machine list */}
@@ -105,7 +112,7 @@ export default function RoutinePage() {
               
                 <a
                 key={rm.id}
-                href={`/machine/${rm.machine_id}?from=routine&routineId=${id}`}
+                href={`/machine/${rm.machine_id}?from=routine&routineId=${id}${rm.exercise_name ? '&exercise=' + encodeURIComponent(rm.exercise_name) : ''}`}
                 className="rounded-2xl p-4 flex items-center gap-4"
                 style={{
                   background: isDone ? 'rgba(37,61,91,0.15)' : 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)',
@@ -132,7 +139,7 @@ export default function RoutinePage() {
         </div>
 
         {/* All done state */}
-        {completed === total && total > 0 && (
+        {!isViewOnly && completed === total && total > 0 && (
           <div className="rounded-2xl p-6 mt-6 text-center" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${NAVY}`}}>
             <p className="font-bold text-white mb-1">Routine Complete!</p>
 <p className="text-sm mb-4" style={{color: '#6B5E55'}}>You crushed {routine.name}.</p>
