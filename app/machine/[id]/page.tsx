@@ -41,6 +41,9 @@ function MachinePageInner() {
   const [newQuickVariation, setNewQuickVariation] = useState('')
   const [showInlineAdd, setShowInlineAdd] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
+  const [showRoutinePicker, setShowRoutinePicker] = useState(false)
+  const [userRoutines, setUserRoutines] = useState<any[]>([])
+  const [routineAdded, setRoutineAdded] = useState(false)
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -328,6 +331,13 @@ if (existingMembership) {
         const { data: machinesData } = await supabase
           .from('machines').select('*').order('name', { ascending: true })
         if (machinesData) setAllMachines(machinesData)
+
+          const { data: routinesData } = await supabase
+  .from('routines')
+  .select('*, routine_machines(machine_id)')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
+if (routinesData) setUserRoutines(routinesData)
 
       } catch (err) {
         setError('Something went wrong. Please try again.')
@@ -1280,12 +1290,17 @@ if (validSets.length === 0) {
                  ⇄ Switch Machine
               </button>
               {machine.type === 'strength' && (
-                <button onClick={() => setShowSupersetPicker(true)}
-                  className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-                  style={{border: '1px solid #E8440C', color: '#E8440C'}}>
-                  + Superset
-                </button>
-              )}
+  <button onClick={() => setShowSupersetPicker(true)}
+    className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+    style={{border: '1px solid #E8440C', color: '#E8440C'}}>
+    + Superset
+  </button>
+)}
+<button onClick={() => setShowRoutinePicker(true)}
+  className="text-xs px-3 py-1.5 rounded-lg font-semibold"
+  style={{border: '1px solid #253D5B', color: '#253D5B'}}>
+  + Routine
+</button>
             </div>
           )}
         </div>
@@ -1332,6 +1347,63 @@ if (validSets.length === 0) {
             </div>
           </div>
         )}
+{/* Routine picker */}
+{showRoutinePicker && (
+  <div className="rounded-2xl p-4 mb-6" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #253D5B'}}>
+    <div className="flex justify-between items-center mb-3">
+      <p className="text-white text-sm font-semibold">Add to Routine</p>
+      <button onClick={() => { setShowRoutinePicker(false); setRoutineAdded(false) }}
+        className="text-xs" style={{color: '#6B5E55'}}>Close</button>
+    </div>
+    {routineAdded ? (
+      <p className="text-sm font-semibold text-center py-2" style={{color: '#253D5B'}}>✓ Added to routine</p>
+    ) : userRoutines.length === 0 ? (
+      <div className="text-center py-2">
+        <p className="text-sm mb-3" style={{color: '#6B5E55'}}>No routines yet.</p>
+        <a href="/routines/create"
+          className="text-sm font-bold px-4 py-2 rounded-full"
+          style={{color: '#253D5B', background: 'rgba(37,61,91,0.15)', border: '1px solid rgba(37,61,91,0.4)'}}>
+          + Create a Routine
+        </a>
+      </div>
+    ) : (
+      <div className="flex flex-col gap-2">
+        {userRoutines.map(routine => {
+          const alreadyIn = routine.routine_machines?.some((rm: any) => rm.machine_id === id)
+          return (
+            <button
+              key={routine.id}
+              disabled={alreadyIn}
+              onClick={async () => {
+                if (alreadyIn) return
+                const maxOrder = routine.routine_machines?.length || 0
+                await supabase.from('routine_machines').insert({
+                  routine_id: routine.id,
+                  machine_id: id,
+                  order_index: maxOrder,
+                  exercise_name: selectedExercise !== machine.name ? selectedExercise : null
+                })
+                setRoutineAdded(true)
+                setTimeout(() => setShowRoutinePicker(false), 1500)
+              }}
+              className="flex justify-between items-center px-4 py-3 rounded-xl w-full text-left"
+              style={{
+                background: '#080808',
+                border: '1px solid #222222',
+                cursor: alreadyIn ? 'default' : 'pointer',
+                opacity: alreadyIn ? 0.5 : 1
+              }}>
+              <p className="text-sm font-semibold text-white">{routine.name}</p>
+              <span className="text-xs font-bold" style={{color: alreadyIn ? '#6B5E55' : '#253D5B'}}>
+                {alreadyIn ? '✓ Already added' : '+ Add'}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    )}
+  </div>
+)}
 
         {/* Superset picker */}
         {showSupersetPicker && (
