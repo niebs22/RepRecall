@@ -217,7 +217,7 @@ function MachinePageInner() {
           className="w-full py-3 rounded-full font-semibold text-white"
           style={{background: '#E8440C'}}
         >
-          {saving ? 'Saving...' : 'Finish Workout'}
+          {saving ? 'Saving...' : 'Finish Set'}
         </button>
       </div>
     )
@@ -1686,7 +1686,7 @@ if (validSets.length === 0) {
 )}
 <button type="submit" className="py-3 rounded-full font-semibold text-white"
   style={{background: '#E8440C'}}>
-  Finish Workout
+  Finish Set
 </button>
           </form>
         )}
