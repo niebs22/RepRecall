@@ -44,18 +44,22 @@ export default function Admin() {
       let gym = null
 
        if (profile.role === 'super_admin') {
-        const { data: memberData } = await supabase
-          .from('gym_members').select('gym_id').eq('user_id', user.id).single()
-        if (memberData) {
-          const { data } = await supabase
-            .from('gyms').select('*').eq('id', memberData.gym_id).single()
-          gym = data
-        }
-      } else {
-        // Regular members don't get admin access
-        router.push('/dashboard')
-        return
-      }
+  const { data: memberData } = await supabase
+    .from('gym_members').select('gym_id').eq('user_id', user.id).single()
+  if (memberData) {
+    const { data } = await supabase
+      .from('gyms').select('*').eq('id', memberData.gym_id).single()
+    gym = data
+  }
+} else if (profile.role === 'gym_owner') {
+  const { data } = await supabase
+    .from('gyms').select('*').eq('owner_id', user.id).single()
+  gym = data
+} else {
+  // Regular members don't get admin access
+  router.push('/dashboard')
+  return
+}
 
       if (gym) {
         setGymId(gym.id)
