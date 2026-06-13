@@ -40,16 +40,9 @@ export default function Analytics() {
       let ownedGyms: any[] = []
 
       if (profile.role === 'super_admin') {
-        const { data: memberData } = await supabase
-          .from('gym_members')
-          .select('gym_id')
-          .eq('user_id', user.id)
-        if (memberData) {
-          const gymIds = memberData.map(m => m.gym_id)
-          const { data } = await supabase
-            .from('gyms').select('*').in('id', gymIds)
-          ownedGyms = data || []
-        }
+  const { data } = await supabase
+    .from('gyms').select('*').order('name', { ascending: true })
+  ownedGyms = data || []
       } else if (profile.role === 'gym_owner') {
         const { data } = await supabase
           .from('gyms').select('*').eq('owner_id', user.id)
