@@ -1614,14 +1614,36 @@ if (validSets.length === 0) {
                     <div className="col-span-1 text-center">
                       <p className="text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
                     </div>
-                    <input type="number" value={set.reps} onChange={e => updateSet(i, 'reps', e.target.value)}
-                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F0F0F', border: '1px solid #222222'}}/>
-                    <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
-                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F0F0F', border: '1px solid #222222'}}/>
+                    <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
+                      style={{border: '1px solid #222222', background: '#0F0F0F'}}>
+                      <button type="button"
+                        onClick={() => updateSet(i, 'reps', String(Math.max(0, (parseInt(set.reps) || 0) - 1)))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
+                      <input type="number" value={set.reps} onChange={e => updateSet(i, 'reps', e.target.value)}
+                        placeholder="0" className="text-white focus:outline-none text-center"
+                        style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
+                      <button type="button"
+                        onClick={() => updateSet(i, 'reps', String((parseInt(set.reps) || 0) + 1))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
+                    </div>
+                    <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
+                      style={{border: '1px solid #222222', background: '#0F0F0F'}}>
+                      <button type="button"
+                        onClick={() => updateSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
+                      <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
+                        placeholder="0" className="text-white focus:outline-none text-center"
+                        style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
+                      <button type="button"
+                        onClick={() => updateSet(i, 'weight', String((parseFloat(set.weight) || 0) + 5))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
+                    </div>
                     <button type="button" onClick={() => removeSet(i)} className="col-span-1 text-center text-lg"
-                      style={{color: sets.length === 1 ? '#222222' : '#6B5E55'}}>×</button>
+                      style={{color: sets.length === 1 ? '#222222' : '#6B5E55', background: 'transparent', border: 'none'}}>×</button>
                   </div>
                 ))}
                 <button type="button" onClick={addSet} className="py-3 rounded-xl font-semibold text-sm"
@@ -1674,14 +1696,36 @@ if (validSets.length === 0) {
                     <div className="col-span-1 text-center">
                       <p className="text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
                     </div>
-                    <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
-                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F0F0F', border: '1px solid #222222'}}/>
-                    <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
-                      placeholder="0" className="col-span-5 px-4 py-3 rounded-lg text-white focus:outline-none text-center"
-                      style={{background: '#0F0F0F', border: '1px solid #222222'}}/>
+                    <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
+                      style={{border: '1px solid #222222', background: '#0F0F0F'}}>
+                      <button type="button"
+                        onClick={() => updateSupersetSet(i, 'reps', String(Math.max(0, (parseInt(set.reps) || 0) - 1)))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
+                      <input type="number" value={set.reps} onChange={e => updateSupersetSet(i, 'reps', e.target.value)}
+                        placeholder="0" className="text-white focus:outline-none text-center"
+                        style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
+                      <button type="button"
+                        onClick={() => updateSupersetSet(i, 'reps', String((parseInt(set.reps) || 0) + 1))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
+                    </div>
+                    <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
+                      style={{border: '1px solid #222222', background: '#0F0F0F'}}>
+                      <button type="button"
+                        onClick={() => updateSupersetSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
+                      <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
+                        placeholder="0" className="text-white focus:outline-none text-center"
+                        style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
+                      <button type="button"
+                        onClick={() => updateSupersetSet(i, 'weight', String((parseFloat(set.weight) || 0) + 5))}
+                        className="px-2 py-3 text-lg font-bold"
+                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
+                    </div>
                     <button type="button" onClick={() => removeSupersetSet(i)} className="col-span-1 text-center text-lg"
-                      style={{color: supersetSets.length === 1 ? '#222222' : '#6B5E55'}}>×</button>
+                      style={{color: supersetSets.length === 1 ? '#222222' : '#6B5E55', background: 'transparent', border: 'none'}}>×</button>
                   </div>
                 ))}
                 <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
