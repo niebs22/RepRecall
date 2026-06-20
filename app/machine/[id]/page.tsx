@@ -1,8 +1,84 @@
 'use client'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { displayWeight } from '../../../lib/timezone'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+
+function RestTimer() {
+  const [secs, setSecs] = useState(90)
+  const [running, setRunning] = useState(false)
+  const [activePreset, setActivePreset] = useState(90)
+  const intervalRef = useRef<any>(null)
+
+  function fmt(s: number) {
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  }
+
+  function startCounting(duration: number) {
+    clearInterval(intervalRef.current)
+    setSecs(duration)
+    setRunning(true)
+    intervalRef.current = setInterval(() => {
+      setSecs(prev => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current)
+          setRunning(false)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
+  function toggleTimer() {
+    if (running) {
+      clearInterval(intervalRef.current)
+      setRunning(false)
+    } else {
+      startCounting(secs <= 0 ? activePreset : secs)
+    }
+  }
+
+  function setPreset(p: number) {
+    setActivePreset(p)
+    setSecs(p)
+    if (running) startCounting(p)
+  }
+
+  useEffect(() => () => clearInterval(intervalRef.current), [])
+
+  return (
+    <div className="flex items-center justify-between px-4 py-3 rounded-xl"
+      style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
+      <div className="flex items-center gap-2">
+        <span style={{color: '#6B5E55', fontSize: '15px'}}>⏱</span>
+        <span className="font-bold text-white" style={{fontVariantNumeric: 'tabular-nums', minWidth: '40px', fontSize: '16px'}}>
+          {secs === 0 ? 'Rest done' : fmt(secs)}
+        </span>
+      </div>
+      <div className="flex items-center gap-2">
+        {[60, 90, 120].map(p => (
+          <button key={p} type="button"
+            onClick={() => setPreset(p)}
+            className="text-xs px-2 py-1 rounded-full"
+            style={{
+              background: activePreset === p ? 'rgba(232,68,12,0.15)' : 'transparent',
+              border: `1px solid ${activePreset === p ? '#E8440C' : '#2A2A2A'}`,
+              color: activePreset === p ? '#E8440C' : '#6B5E55'
+            }}>
+            {p === 60 ? '1m' : p === 90 ? '1:30' : '2m'}
+          </button>
+        ))}
+        <button type="button"
+          onClick={toggleTimer}
+          className="text-xs px-3 py-1 rounded-full font-bold"
+          style={{border: '1px solid #E8440C', color: '#E8440C', background: 'transparent'}}>
+          {running ? 'Stop' : 'Start'}
+        </button>
+      </div>
+    </div>
+  )
+}
 
 function MachinePageInner() {
   const pathname = usePathname()
@@ -1669,6 +1745,9 @@ if (validSets.length === 0) {
                   style={{background: 'transparent', border: '1px dashed #E8440C', color: '#E8440C'}}>
                   + Add Set
                 </button>
+                {sets.some(s => s.reps || s.weight) && (
+                  <RestTimer />
+                )}
               </>
             )}
             <div>
