@@ -922,7 +922,26 @@ if (validSets.length === 0) {
                 onChange={e => {
                   if (e.target.value === '__add__') { setShowAddVariation(true) }
                   else if (e.target.value === '__manage__') { setShowManageVariations(true) }
-                  else { setSelectedExercise(e.target.value); setShowAddVariation(false); setHistoryOpen(false) }
+                  else {
+                    setSelectedExercise(e.target.value)
+                    setShowAddVariation(false)
+                    setHistoryOpen(false)
+                    const exerciseName = e.target.value
+                    const exerciseWorkouts = allWorkouts.filter(w =>
+                      (w.exercise_name || machine?.name) === exerciseName
+                    )
+                    if (exerciseWorkouts.length > 0) {
+                      const lastDate = new Date(exerciseWorkouts[0].created_at).toDateString()
+                      const lastSets = exerciseWorkouts.filter(w =>
+                        new Date(w.created_at).toDateString() === lastDate
+                      )
+                      const maxWeight = Math.max(...lastSets.map((s: any) => parseFloat(s.weight) || 0))
+                      if (maxWeight > 0) setSets([{reps: '', weight: String(maxWeight)}])
+                      else setSets([{reps: '', weight: ''}])
+                    } else {
+                      setSets([{reps: '', weight: ''}])
+                    }
+                  }
                 }}
                 className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
                 style={{background: '#0F0F0F', border: '1px solid #222222'}}
