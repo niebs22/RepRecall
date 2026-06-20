@@ -5,9 +5,10 @@ import { displayWeight } from '../../../lib/timezone'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
 function RestTimer() {
-  const [secs, setSecs] = useState(90)
+  const [secs, setSecs] = useState(60)
   const [running, setRunning] = useState(false)
-  const [activePreset, setActivePreset] = useState(90)
+  const [activePreset, setActivePreset] = useState<number | 'manual'>(60)
+  const [manualMins, setManualMins] = useState('')
   const intervalRef = useRef<any>(null)
 
   function fmt(s: number) {
@@ -35,7 +36,10 @@ function RestTimer() {
       clearInterval(intervalRef.current)
       setRunning(false)
     } else {
-      startCounting(secs <= 0 ? activePreset : secs)
+      const duration = activePreset === 'manual'
+        ? Math.round((parseFloat(manualMins) || 1) * 60)
+        : secs <= 0 ? activePreset : secs
+      startCounting(duration)
     }
   }
 
@@ -57,7 +61,7 @@ function RestTimer() {
         </span>
       </div>
       <div className="flex items-center gap-2">
-        {[60, 90, 120].map(p => (
+        {([60, 120] as number[]).map(p => (
           <button key={p} type="button"
             onClick={() => setPreset(p)}
             className="text-xs px-2 py-1 rounded-full"
@@ -66,9 +70,29 @@ function RestTimer() {
               border: `1px solid ${activePreset === p ? '#E8440C' : '#2A2A2A'}`,
               color: activePreset === p ? '#E8440C' : '#6B5E55'
             }}>
-            {p === 60 ? '1m' : p === 90 ? '1:30' : '2m'}
+            {p === 60 ? '1m' : '2m'}
           </button>
         ))}
+        <button type="button"
+          onClick={() => { setActivePreset('manual'); if (running) { clearInterval(intervalRef.current); setRunning(false) } }}
+          className="text-xs px-2 py-1 rounded-full"
+          style={{
+            background: activePreset === 'manual' ? 'rgba(232,68,12,0.15)' : 'transparent',
+            border: `1px solid ${activePreset === 'manual' ? '#E8440C' : '#2A2A2A'}`,
+            color: activePreset === 'manual' ? '#E8440C' : '#6B5E55'
+          }}>
+          Manual
+        </button>
+        {activePreset === 'manual' && (
+          <input
+            type="number"
+            value={manualMins}
+            onChange={e => { setManualMins(e.target.value); setSecs(Math.round((parseFloat(e.target.value) || 0) * 60)) }}
+            placeholder="min"
+            className="text-xs text-white text-center rounded-lg focus:outline-none"
+            style={{width: '44px', padding: '3px 6px', background: '#0F0F0F', border: '1px solid #E8440C'}}
+          />
+        )}
         <button type="button"
           onClick={toggleTimer}
           className="text-xs px-3 py-1 rounded-full font-bold"
