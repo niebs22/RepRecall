@@ -1404,7 +1404,6 @@ if (validSets.length === 0) {
           </div>
         )}
 
-              {true && (
 <div>
 <div className="flex justify-between items-center mb-4">
   <h2 className="font-semibold text-lg text-white">Log Today's Workout</h2>
@@ -1891,7 +1890,6 @@ if (validSets.length === 0) {
           </form>
         )}
 </div>
-)}
 
         {/* Rotation bar */}
         {rotationMachines.length > 1 && (
