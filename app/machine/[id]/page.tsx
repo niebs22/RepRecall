@@ -400,7 +400,6 @@ if (existingMembership) {
           .from('machines').select('*').eq('id', id).single()
         if (machineError) { setError('Machine not found'); return }
         setMachine(machineData)
-        setMachine(machineData)
 
         const draft = localStorage.getItem(`draft_${id}`)
         const draftExercise = draft ? JSON.parse(draft).selectedExercise : null
@@ -432,7 +431,7 @@ if (existingMembership) {
             (w.exercise_name || machineData.name) === (draftExercise || machineData.name) &&
             new Date(w.created_at).toDateString() === new Date(workoutData[0]?.created_at).toDateString()
           )
-          if (lastSets.length > 0 && !draft) {
+          if (lastSets.length > 0 && !draft && machineData.type !== 'cardio') {
             const maxWeight = Math.max(...lastSets.map((s: any) => parseFloat(s.weight) || 0))
             if (maxWeight > 0) setSets([{reps: '', weight: String(maxWeight)}])
           }
@@ -1351,8 +1350,6 @@ if (validSets.length === 0) {
               const trendY2 = chartH - ((slope * (n - 1) + intercept - minVal) / range) * (chartH - 10) - 5
 
               const lastPt = sessions[sessions.length - 1]
-              const lastX = chartW
-              const lastY = chartH - ((lastPt.value - minVal) / range) * (chartH - 10) - 5
 
               return (
                 <div className="rounded-2xl p-5 mt-3" style={{background: '#0D0D12', border: '1px solid #1E1A2E'}}>
