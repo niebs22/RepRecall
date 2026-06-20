@@ -426,7 +426,17 @@ if (existingMembership) {
           .from('workouts').select('*')
           .eq('user_id', user.id).eq('machine_id', id)
           .order('created_at', { ascending: false })
-        if (workoutData) setAllWorkouts(workoutData)
+        if (workoutData) {
+          setAllWorkouts(workoutData)
+          const lastSets = workoutData.filter(w =>
+            (w.exercise_name || machineData.name) === (draftExercise || machineData.name) &&
+            new Date(w.created_at).toDateString() === new Date(workoutData[0]?.created_at).toDateString()
+          )
+          if (lastSets.length > 0 && !draft) {
+            const maxWeight = Math.max(...lastSets.map((s: any) => parseFloat(s.weight) || 0))
+            if (maxWeight > 0) setSets([{reps: '', weight: String(maxWeight)}])
+          }
+        }
 
         const { data: machinesData } = await supabase
           .from('machines').select('*').order('name', { ascending: true })
@@ -1813,19 +1823,24 @@ if (validSets.length === 0) {
                         className="px-2 py-3 text-lg font-bold"
                         style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
                     </div>
-                    <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
-                      style={{border: '1px solid #222222', background: '#0F0F0F'}}>
-                      <button type="button"
-                        onClick={() => updateSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
-                        className="px-2 py-3 text-lg font-bold"
-                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
-                      <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
-                        placeholder="0" className="text-white focus:outline-none text-center"
-                        style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
-                      <button type="button"
-                        onClick={() => updateSet(i, 'weight', String((parseFloat(set.weight) || 0) + 5))}
-                        className="px-2 py-3 text-lg font-bold"
-                        style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
+                    <div className="col-span-5">
+                      <div className="flex items-center rounded-lg overflow-hidden"
+                        style={{border: '1px solid #222222', background: '#0F0F0F'}}>
+                        <button type="button"
+                          onClick={() => updateSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
+                          className="px-2 py-3 text-lg font-bold"
+                          style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
+                        <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
+                          placeholder="0" className="text-white focus:outline-none text-center"
+                          style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
+                        <button type="button"
+                          onClick={() => updateSet(i, 'weight', String((parseFloat(set.weight) || 0) + 5))}
+                          className="px-2 py-3 text-lg font-bold"
+                          style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
+                      </div>
+                      {i === 0 && lastSessionSets.length > 0 && set.weight === String(Math.max(...lastSessionSets.map((s: any) => parseFloat(s.weight) || 0))) && (
+                        <p className="text-xs mt-1 text-center" style={{color: '#6B5E55'}}>from last session</p>
+                      )}
                     </div>
                     <button type="button" onClick={() => removeSet(i)} className="col-span-1 text-center text-lg"
                       style={{color: sets.length === 1 ? '#222222' : '#6B5E55', background: 'transparent', border: 'none'}}>×</button>
