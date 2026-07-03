@@ -431,10 +431,7 @@ if (existingMembership) {
             (w.exercise_name || machineData.name) === (draftExercise || machineData.name) &&
             new Date(w.created_at).toDateString() === new Date(workoutData[0]?.created_at).toDateString()
           )
-          if (lastSets.length > 0 && !draft && machineData.type !== 'cardio') {
-            const maxWeight = Math.max(...lastSets.map((s: any) => parseFloat(s.weight) || 0))
-            if (maxWeight > 0) setSets([{reps: '', weight: String(maxWeight)}])
-          }
+          // auto-populate removed per user feedback
         }
 
         const { data: machinesData } = await supabase
@@ -926,20 +923,7 @@ if (validSets.length === 0) {
                     setShowAddVariation(false)
                     setHistoryOpen(false)
                     const exerciseName = e.target.value
-                    const exerciseWorkouts = allWorkouts.filter(w =>
-                      (w.exercise_name || machine?.name) === exerciseName
-                    )
-                    if (exerciseWorkouts.length > 0) {
-                      const lastDate = new Date(exerciseWorkouts[0].created_at).toDateString()
-                      const lastSets = exerciseWorkouts.filter(w =>
-                        new Date(w.created_at).toDateString() === lastDate
-                      )
-                      const maxWeight = Math.max(...lastSets.map((s: any) => parseFloat(s.weight) || 0))
-                      if (maxWeight > 0) setSets([{reps: '', weight: String(maxWeight)}])
-                      else setSets([{reps: '', weight: ''}])
-                    } else {
-                      setSets([{reps: '', weight: ''}])
-                    }
+                    setSets([{reps: '', weight: ''}])
                   }
                 }}
                 className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-2"
