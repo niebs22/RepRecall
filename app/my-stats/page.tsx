@@ -257,6 +257,37 @@ export default function MyStats() {
             <p className="text-xs mt-2" style={{color: '#6B5E55'}}>lbs all time</p>
           </div>
         </div>
+
+        {/* This Week ring */}
+        <div className="rounded-2xl p-5 mb-3 flex justify-between items-center" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>This Week</p>
+            <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>
+              {fourWeekTrend[3].days} of 4 session goal
+            </p>
+          </div>
+          <div className="relative" style={{width: '64px', height: '64px', flexShrink: 0}}>
+            {(() => {
+              const goal = 4
+              const current = fourWeekTrend[3].days
+              const pct = Math.min(current / goal, 1)
+              const r = 26
+              const c = 2 * Math.PI * r
+              const offset = c * (1 - pct)
+              return (
+                <svg viewBox="0 0 64 64" style={{width: '64px', height: '64px', transform: 'rotate(-90deg)'}}>
+                  <circle cx="32" cy="32" r={r} fill="none" stroke="#222222" strokeWidth="6" />
+                  <circle cx="32" cy="32" r={r} fill="none" stroke="#E8440C" strokeWidth="6"
+                    strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
+                </svg>
+              )
+            })()}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span style={{fontSize: '14px', fontWeight: 800, color: '#E8E0D8'}}>{fourWeekTrend[3].days}/4</span>
+            </div>
+          </div>
+        </div>
+
         <div className="rounded-2xl px-5 py-4 mb-4 flex justify-between items-center" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
           <div>
             <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>Consistency</p>
