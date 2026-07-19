@@ -534,57 +534,57 @@ setIsChrome(chrome)
   </div>
 </div>
 
-          {/* My Stats box with sparkline */}
+          {/* My Stats box */}
           <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
             style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderTop: '2px solid #E8440C'}}>
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>My Stats</p>
-              <p className="text-sm font-semibold" style={{color: '#E8E0D8'}}>PRs & trends</p>
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#6B5E55'}}>My Stats</p>
+                <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
+                  {totalThisWeek}
+                </p>
+                <p className="text-xs mt-1" style={{color: '#6B5E55'}}>sessions this week</p>
+              </div>
+              <div className="relative" style={{width: '44px', height: '44px', flexShrink: 0}}>
+                {(() => {
+                  const goal = 4
+                  const pct = Math.min(totalThisWeek / goal, 1)
+                  const r = 18
+                  const c = 2 * Math.PI * r
+                  const offset = c * (1 - pct)
+                  return (
+                    <svg viewBox="0 0 44 44" style={{width: '44px', height: '44px', transform: 'rotate(-90deg)'}}>
+                      <circle cx="22" cy="22" r={r} fill="none" stroke="#222222" strokeWidth="4" />
+                      <circle cx="22" cy="22" r={r} fill="none" stroke="#E8440C" strokeWidth="4"
+                        strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
+                    </svg>
+                  )
+                })()}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span style={{fontSize: '10px', fontWeight: 700, color: '#E8E0D8'}}>{totalThisWeek}/4</span>
+                </div>
+              </div>
             </div>
-            {/* Sparkline */}
-            <div className="mt-3">
+            <div className="mt-3 flex justify-between items-end">
+              <div>
+                <p style={{fontSize: '20px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-0.5px', lineHeight: 1}}>
+                  {totalSessions}
+                </p>
+                <p className="text-xs mt-1" style={{color: '#6B5E55'}}>total sessions</p>
+              </div>
               {(() => {
-                const max = Math.max(...fourWeekData, 1)
-                const w = 100
-                const h = 32
-                const points = fourWeekData.map((v, i) => {
-                  const x = (i / (fourWeekData.length - 1)) * w
-                  const y = h - (v / max) * (h - 4)
-                  return `${x},${y}`
-                }).join(' ')
+                const curr = fourWeekData[fourWeekData.length - 1] || 0
+                const prev = fourWeekData[fourWeekData.length - 2] || 0
+                const up = curr > prev
+                const down = curr < prev
+                const color = up ? '#9B6DFF' : '#6B5E55'
+                const arrow = up ? '↑' : down ? '↓' : '→'
                 return (
-                  <svg viewBox={`0 0 ${w} ${h}`} style={{width: '100%', height: '32px', overflow: 'visible'}}>
-                    <defs>
-                      <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#9B6DFF" stopOpacity="0.5"/>
-                        <stop offset="100%" stopColor="#9B6DFF" stopOpacity="0"/>
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d={`M ${fourWeekData.map((v, i) => {
-                        const x = (i / (fourWeekData.length - 1)) * w
-                        const y = h - (v / max) * (h - 4)
-                        return `${x},${y}`
-                      }).join(' L ')} L ${w},${h} L 0,${h} Z`}
-                      fill="url(#sparkGrad)"
-                    />
-                    <polyline
-                      points={points}
-                      fill="none"
-                      stroke="#9B6DFF"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    {fourWeekData.map((v, i) => {
-                      const x = (i / (fourWeekData.length - 1)) * w
-                      const y = h - (v / max) * (h - 4)
-                      return <circle key={i} cx={x} cy={y} r="2.5" fill="#9B6DFF" />
-                    })}
-                  </svg>
+                  <p className="text-xs font-semibold flex items-center gap-1" style={{color}}>
+                    <span style={{fontSize: '13px'}}>{arrow}</span> vs last wk
+                  </p>
                 )
               })()}
-              <p className="text-xs mt-1" style={{color: '#6B5E55'}}>4-week activity</p>
             </div>
           </a>
 
