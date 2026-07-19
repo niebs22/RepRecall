@@ -545,18 +545,29 @@ setIsChrome(chrome)
                 </p>
                 <p className="text-xs mt-1" style={{color: '#6B5E55'}}>sessions this week</p>
               </div>
-              <div className="relative" style={{width: '44px', height: '44px', flexShrink: 0}}>
+              <div className="relative" style={{width: '48px', height: '48px', flexShrink: 0}}>
                 {(() => {
                   const goal = 4
-                  const pct = Math.min(totalThisWeek / goal, 1)
-                  const r = 18
-                  const c = 2 * Math.PI * r
-                  const offset = c * (1 - pct)
+                  const goalPct = Math.min(totalThisWeek / goal, 1)
+                  const volumeMax = Math.max(...fourWeekData, 1)
+                  const volumePct = Math.min(totalThisWeek / volumeMax, 1)
+
+                  const rOuter = 22
+                  const cOuter = 2 * Math.PI * rOuter
+                  const offsetOuter = cOuter * (1 - volumePct)
+
+                  const rInner = 15
+                  const cInner = 2 * Math.PI * rInner
+                  const offsetInner = cInner * (1 - goalPct)
+
                   return (
-                    <svg viewBox="0 0 44 44" style={{width: '44px', height: '44px', transform: 'rotate(-90deg)'}}>
-                      <circle cx="22" cy="22" r={r} fill="none" stroke="#222222" strokeWidth="4" />
-                      <circle cx="22" cy="22" r={r} fill="none" stroke="#E8440C" strokeWidth="4"
-                        strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
+                    <svg viewBox="0 0 48 48" style={{width: '48px', height: '48px', transform: 'rotate(-90deg)'}}>
+                      <circle cx="24" cy="24" r={rOuter} fill="none" stroke="#222222" strokeWidth="3" />
+                      <circle cx="24" cy="24" r={rOuter} fill="none" stroke="#9B6DFF" strokeWidth="3"
+                        strokeDasharray={cOuter} strokeDashoffset={offsetOuter} strokeLinecap="round" />
+                      <circle cx="24" cy="24" r={rInner} fill="none" stroke="#222222" strokeWidth="4" />
+                      <circle cx="24" cy="24" r={rInner} fill="none" stroke="#E8440C" strokeWidth="4"
+                        strokeDasharray={cInner} strokeDashoffset={offsetInner} strokeLinecap="round" />
                     </svg>
                   )
                 })()}
