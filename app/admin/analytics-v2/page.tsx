@@ -21,6 +21,7 @@ export default function AnalyticsV2() {
   const [atRiskMembers, setAtRiskMembers] = useState<any[]>([])
   const [fourWeekTrend, setFourWeekTrend] = useState<{label: string, count: number}[]>([])
   const [champions, setChampions] = useState<any[]>([])
+  const [spotlight, setSpotlight] = useState<{name: string, count: number, distinctUsers: number} | null>(null)
   const [returnRate, setReturnRate] = useState<number | null>(null)
   const router = useRouter()
 
@@ -117,6 +118,18 @@ export default function AnalyticsV2() {
     setTotalWorkoutsThisWeek(weekWorkouts?.length || 0)
     setTotalWorkoutsAllTime(allWorkouts?.length || 0)
 
+    const spotlightMap: Record<string, { name: string, count: number, userIds: Set<string> }> = {}
+    weekWorkouts?.forEach((w: any) => {
+      const name = w.machines?.name || 'Unknown'
+      if (!spotlightMap[w.machine_id]) spotlightMap[w.machine_id] = { name, count: 0, userIds: new Set() }
+      spotlightMap[w.machine_id].count++
+      spotlightMap[w.machine_id].userIds.add(w.user_id)
+    })
+    const spotlightEntries = Object.values(spotlightMap).sort((a, b) => b.count - a.count)
+    setSpotlight(spotlightEntries[0]
+      ? { name: spotlightEntries[0].name, count: spotlightEntries[0].count, distinctUsers: spotlightEntries[0].userIds.size }
+      : null)
+
     const gymRecord = gyms.find(g => g.id === gymId)
     if (gymRecord?.created_at) {
       const diffMs = now.getTime() - new Date(gymRecord.created_at).getTime()
@@ -138,21 +151,26 @@ export default function AnalyticsV2() {
     })
     setFourWeekTrend(trendWeeks)
 
-    const usageMap: Record<string, { name: string, count: number, lastUsed: string | null }> = {}
+    const usageMap: Record<string, { name: string, count: number, lastUsed: string | null, userIds: Set<string> }> = {}
     machines?.forEach(m => {
-      usageMap[m.id] = { name: m.name, count: 0, lastUsed: null }
+      usageMap[m.id] = { name: m.name, count: 0, lastUsed: null, userIds: new Set() }
     })
     allWorkouts?.forEach(w => {
       if (usageMap[w.machine_id]) {
         usageMap[w.machine_id].count++
+        usageMap[w.machine_id].userIds.add(w.user_id)
         if (!usageMap[w.machine_id].lastUsed || w.created_at > usageMap[w.machine_id].lastUsed!) {
           usageMap[w.machine_id].lastUsed = w.created_at
         }
       }
     })
+    const totalMembersForUtilization = gymMembersData?.length || 0
     const stats = Object.entries(usageMap).map(([machineId, stat]) => {
       const machine = machines?.find(m => m.id === machineId)
-      return { ...stat, purchase_price: machine?.purchase_price || null }
+      const utilizationPct = totalMembersForUtilization > 0
+        ? Math.round((stat.userIds.size / totalMembersForUtilization) * 100)
+        : 0
+      return { name: stat.name, count: stat.count, lastUsed: stat.lastUsed, purchase_price: machine?.purchase_price || null, utilizationPct }
     }).sort((a, b) => b.count - a.count)
     setMachineStats(stats)
 
