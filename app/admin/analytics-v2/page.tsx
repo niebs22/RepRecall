@@ -373,6 +373,53 @@ export default function AnalyticsV2() {
               </div>
             </div>
 
+            {spotlight && (
+              <div className="rounded-2xl p-5 flex items-center justify-between" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
+                <div>
+                  <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: colors.muted}}>This Week's Spotlight</p>
+                  <p className="font-black" style={{fontSize: '20px'}}>{spotlight.name}</p>
+                  <p className="text-xs mt-1" style={{color: colors.secondary}}>
+                    Scanned by {spotlight.distinctUsers} different member{spotlight.distinctUsers === 1 ? '' : 's'} this week
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p style={{fontSize: '40px', fontWeight: 900, color: colors.ember, letterSpacing: '-2px', lineHeight: 1}}>{spotlight.count}</p>
+                  <p className="text-xs mt-1" style={{color: colors.muted}}>times this week</p>
+                </div>
+              </div>
+            )}
+
+            <div className="rounded-2xl p-5" style={{background: 'linear-gradient(180deg, #0A0E12 0%, #060A0F 100%)', border: '1px solid rgba(0,196,180,0.15)'}}>
+              <div className="flex justify-between items-center mb-3">
+                <p className="font-bold text-sm">Your Champions</p>
+                <span className="text-xs font-semibold" style={{color: colors.teal}}>Most Loyal Members</span>
+              </div>
+              {champions.length === 0 ? (
+                <p className="text-sm" style={{color: colors.muted}}>No sessions logged yet.</p>
+              ) : (
+                champions.slice(0, 3).map((c, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-xl p-3 mb-2" style={{background: 'rgba(0,196,180,0.04)', border: '1px solid rgba(0,196,180,0.08)'}}>
+                    <span className="text-xs font-black" style={{color: colors.teal, minWidth: '20px'}}>{String(i + 1).padStart(2, '0')}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold">{c.full_name}</p>
+                      <p className="text-xs mt-0.5" style={{color: colors.muted}}>{daysSince(c.lastDate)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold" style={{fontSize: '20px', color: colors.teal, lineHeight: 1}}>{c.count}</p>
+                      <p className="text-[9px] uppercase font-semibold" style={{color: colors.muted, letterSpacing: '1px'}}>Sessions</p>
+                    </div>
+                  </div>
+                ))
+              )}
+              {champions.length > 3 && (
+                <div className="text-center mt-2">
+                  <button onClick={() => setActiveTab('members')} className="text-xs font-bold" style={{color: colors.teal, background: 'none', border: 'none', cursor: 'pointer'}}>
+                    View all champions →
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="rounded-2xl p-5 relative overflow-hidden" style={{background: 'linear-gradient(180deg, #0E0E14 0%, #080810 100%)', border: '1px solid rgba(155,109,255,0.2)'}}>
               <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: colors.muted}}>Equipment Intelligence</p>
               {neverScanned.length > 0 && (
@@ -439,6 +486,30 @@ export default function AnalyticsV2() {
         {/* MEMBERS TAB */}
         {activeTab === 'members' && (
           <div className="flex flex-col gap-4">
+            <div className="rounded-2xl p-5" style={{background: 'linear-gradient(180deg, #0A0E12 0%, #060A0F 100%)', border: '1px solid rgba(0,196,180,0.15)'}}>
+              <div className="flex justify-between items-center mb-3">
+                <p className="font-bold text-sm">Your Champions</p>
+                <span className="text-xs font-semibold" style={{color: colors.teal}}>Most Loyal Members</span>
+              </div>
+              {champions.length === 0 ? (
+                <p className="text-sm" style={{color: colors.muted}}>No sessions logged yet.</p>
+              ) : (
+                champions.map((c, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-xl p-3 mb-2" style={{background: 'rgba(0,196,180,0.04)', border: '1px solid rgba(0,196,180,0.08)'}}>
+                    <span className="text-xs font-black" style={{color: colors.teal, minWidth: '20px'}}>{String(i + 1).padStart(2, '0')}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold">{c.full_name}</p>
+                      <p className="text-xs mt-0.5" style={{color: colors.muted}}>{daysSince(c.lastDate)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold" style={{fontSize: '20px', color: colors.teal, lineHeight: 1}}>{c.count}</p>
+                      <p className="text-[9px] uppercase font-semibold" style={{color: colors.muted, letterSpacing: '1px'}}>Sessions</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
             {returnRate !== null && (
               <div className="rounded-2xl p-5" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
                 <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: colors.muted}}>Member Return Rate</p>
