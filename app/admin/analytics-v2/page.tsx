@@ -19,6 +19,8 @@ export default function AnalyticsV2() {
   const [timeStats, setTimeStats] = useState({morning: 0, afternoon: 0, evening: 0})
   const [members, setMembers] = useState<any[]>([])
   const [atRiskMembers, setAtRiskMembers] = useState<any[]>([])
+  const [fourWeekTrend, setFourWeekTrend] = useState<{label: string, count: number}[]>([])
+  const [champions, setChampions] = useState<any[]>([])
   const [returnRate, setReturnRate] = useState<number | null>(null)
   const router = useRouter()
 
@@ -121,6 +123,21 @@ export default function AnalyticsV2() {
       setDaysLive(Math.floor(diffMs / (1000 * 60 * 60 * 24)))
     }
 
+    const trendWeeks = [3, 2, 1, 0].map(w => {
+      const start = new Date(monday)
+      start.setDate(monday.getDate() - w * 7)
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      end.setHours(23, 59, 59, 999)
+      const label = w === 0 ? 'This week' : w === 1 ? 'Last week' : `${w + 1} wks ago`
+      const count = allWorkouts?.filter(wo => {
+        const d = new Date(wo.created_at)
+        return d >= start && d <= end
+      }).length || 0
+      return { label, count }
+    })
+    setFourWeekTrend(trendWeeks)
+
     const usageMap: Record<string, { name: string, count: number, lastUsed: string | null }> = {}
     machines?.forEach(m => {
       usageMap[m.id] = { name: m.name, count: 0, lastUsed: null }
@@ -199,6 +216,18 @@ export default function AnalyticsV2() {
       const totalMembersCount = gymMembersData.length
       const returned = gymMembersData.filter(m => (sessionCountByUser[m.user_id] || 0) >= 2).length
       setReturnRate(totalMembersCount > 0 ? Math.round((returned / totalMembersCount) * 100) : null)
+
+      const championsList = gymMembersData
+        .map(m => ({
+          user_id: m.user_id,
+          full_name: profilesData?.find(p => p.id === m.user_id)?.full_name || 'Unknown',
+          count: sessionCountByUser[m.user_id] || 0,
+          lastDate: lastWorkoutByUser[m.user_id] || null
+        }))
+        .filter(c => c.count > 0)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+      setChampions(championsList)
     }
 
     setLoading(false)
@@ -282,6 +311,31 @@ export default function AnalyticsV2() {
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
           <div className="flex flex-col gap-4">
+            <div className="rounded-2xl p-5 relative overflow-hidden" style={{background: 'linear-gradient(180deg, #0E0E14 0%, #080810 100%)', border: `1px solid ${colors.border}`}}>
+              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: colors.muted, letterSpacing: '2px'}}>Gym Snapshot</p>
+              <p style={{fontSize: '15px', fontWeight: 700, color: colors.text}}>
+                {totalWorkoutsAllTime} workouts logged{daysLive > 0 ? ` in ${daysLive} days` : ''}
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                {fourWeekTrend.map((week, i) => {
+                  const max = Math.max(...fourWeekTrend.map(w => w.count), 1)
+                  const isCurrent = i === fourWeekTrend.length - 1
+                  return (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className="text-xs font-medium" style={{color: isCurrent ? colors.ember : colors.secondary, minWidth: '64px', fontWeight: isCurrent ? 700 : 500}}>{week.label}</span>
+                      <div className="flex-1 rounded-full h-2" style={{background: '#111'}}>
+                        <div className="h-2 rounded-full" style={{
+                          width: (week.count === 0 ? 2 : (week.count / max) * 100) + '%',
+                          background: isCurrent ? `linear-gradient(90deg, ${colors.ember}, ${colors.purple})` : colors.border
+                        }} />
+                      </div>
+                      <span className="text-xs font-bold" style={{color: isCurrent ? colors.ember : colors.secondary, minWidth: '28px', textAlign: 'right'}}>{week.count}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
             <div>
               <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: colors.muted, letterSpacing: '2.5px'}}>Key Numbers</p>
               <div className="grid grid-cols-2 gap-2">
