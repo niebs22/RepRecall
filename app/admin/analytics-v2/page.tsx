@@ -19,9 +19,11 @@ export default function AnalyticsV2() {
   const [timeStats, setTimeStats] = useState({morning: 0, afternoon: 0, evening: 0})
   const [members, setMembers] = useState<any[]>([])
   const [atRiskMembers, setAtRiskMembers] = useState<any[]>([])
-  const [fourWeekTrend, setFourWeekTrend] = useState<{label: string, count: number}[]>([])
+ const [fourWeekTrend, setFourWeekTrend] = useState<{label: string, count: number}[]>([])
   const [champions, setChampions] = useState<any[]>([])
   const [spotlight, setSpotlight] = useState<{name: string, count: number, distinctUsers: number} | null>(null)
+  const [newMemberGrowth, setNewMemberGrowth] = useState<{label: string, count: number}[]>([])
+  const [activationFunnel, setActivationFunnel] = useState<{label: string, count: number, color: string}[]>([])
   const [returnRate, setReturnRate] = useState<number | null>(null)
   const router = useRouter()
 
@@ -246,6 +248,35 @@ export default function AnalyticsV2() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 5)
       setChampions(championsList)
+
+      const championCount = gymMembersData.filter(m => (sessionCountByUser[m.user_id] || 0) >= 5).length
+      const returningCount = gymMembersData.filter(m => {
+        const c = sessionCountByUser[m.user_id] || 0
+        return c >= 2 && c < 5
+      }).length
+      const triedOnceCount = gymMembersData.filter(m => (sessionCountByUser[m.user_id] || 0) === 1).length
+      const readyCount = gymMembersData.filter(m => (sessionCountByUser[m.user_id] || 0) === 0).length
+      setActivationFunnel([
+        { label: 'Champions', count: championCount, color: colors.teal },
+        { label: 'Returning', count: returningCount, color: colors.purple },
+        { label: 'Tried Once', count: triedOnceCount, color: colors.ember },
+        { label: 'Ready to Start', count: readyCount, color: colors.muted },
+      ])
+
+      const growthWeeks = [3, 2, 1, 0].map(w => {
+        const start = new Date(monday)
+        start.setDate(monday.getDate() - w * 7)
+        const end = new Date(start)
+        end.setDate(start.getDate() + 6)
+        end.setHours(23, 59, 59, 999)
+        const label = w === 0 ? 'This week' : w === 1 ? 'Last week' : `${w + 1} wks ago`
+        const count = gymMembersData.filter(m => {
+          const d = new Date(m.created_at)
+          return d >= start && d <= end
+        }).length
+        return { label, count }
+      })
+      setNewMemberGrowth(growthWeeks)
     }
 
     setLoading(false)
@@ -509,6 +540,53 @@ export default function AnalyticsV2() {
                 ))
               )}
             </div>
+
+            {newMemberGrowth.some(w => w.count > 0) && (
+              <div className="rounded-2xl p-5" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
+                <p className="font-bold text-sm mb-4">New Member Growth</p>
+                <div className="flex gap-1.5 items-end justify-between" style={{height: '70px'}}>
+                  {newMemberGrowth.map((week, i) => {
+                    const max = Math.max(...newMemberGrowth.map(w => w.count), 1)
+                    const isCurrent = i === newMemberGrowth.length - 1
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+                        <p className="text-xs font-bold" style={{color: isCurrent ? colors.teal : colors.muted}}>{week.count}</p>
+                        <div className="w-full rounded" style={{
+                          height: week.count === 0 ? '4px' : Math.max(4, (week.count / max) * 40) + 'px',
+                          background: isCurrent ? colors.teal : colors.border
+                        }} />
+                        <p className="text-center" style={{color: isCurrent ? colors.teal : colors.muted, fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {activationFunnel.length > 0 && (
+              <div className="rounded-2xl p-5" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
+                <p className="font-bold text-sm mb-4">Member Activation</p>
+                <div className="flex flex-col gap-3">
+                  {activationFunnel.map((seg, i) => {
+                    const max = Math.max(...activationFunnel.map(s => s.count), 1)
+                    return (
+                      <div key={i}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-medium">{seg.label}</span>
+                          <p className="text-xs font-semibold" style={{color: seg.color}}>{seg.count} member{seg.count === 1 ? '' : 's'}</p>
+                        </div>
+                        <div className="w-full rounded-full h-1.5" style={{background: colors.bg}}>
+                          <div className="h-1.5 rounded-full" style={{
+                            width: (seg.count === 0 ? 2 : (seg.count / max) * 100) + '%',
+                            background: seg.color
+                          }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {returnRate !== null && (
               <div className="rounded-2xl p-5" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
