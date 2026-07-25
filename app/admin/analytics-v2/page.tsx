@@ -511,6 +511,49 @@ export default function AnalyticsV2() {
                 </div>
               )}
             </div>
+
+            <div className="rounded-2xl p-5" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
+              <p className="font-bold text-sm mb-4">Busiest Days</p>
+              <div className="flex gap-1.5 items-end justify-between" style={{height: '80px'}}>
+                {dayLabels.map((day, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
+                    <p className="text-xs" style={{color: colors.muted}}>{dayStats[i]}</p>
+                    <div className="w-full rounded" style={{
+                      height: dayStats[i] === 0 ? '4px' : Math.max(4, (dayStats[i] / maxDayCount) * 56) + 'px',
+                      background: (i === todayIndex || dayStats[i] === Math.max(...dayStats)) ? colors.ember : colors.border
+                    }} />
+                    <p className="text-xs" style={{color: i === todayIndex ? colors.ember : colors.muted}}>{day}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-2xl p-5" style={{background: colors.card, border: `1px solid ${colors.border}`}}>
+              <p className="font-bold text-sm mb-4">When Members Train</p>
+              <div className="flex flex-col gap-3">
+                {[
+                  { label: 'Morning', sub: '5am – 11am', count: timeStats.morning, color: colors.ember },
+                  { label: 'Afternoon', sub: '11am – 5pm', count: timeStats.afternoon, color: colors.purple },
+                  { label: 'Evening', sub: '5pm – 10pm', count: timeStats.evening, color: colors.teal }
+                ].map((slot, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-1">
+                      <div>
+                        <span className="text-sm font-medium">{slot.label}</span>
+                        <span className="text-xs ml-2" style={{color: colors.muted}}>{slot.sub}</span>
+                      </div>
+                      <p className="text-xs font-semibold" style={{color: slot.color}}>{slot.count} sessions</p>
+                    </div>
+                    <div className="w-full rounded-full h-1.5" style={{background: colors.bg}}>
+                      <div className="h-1.5 rounded-full" style={{
+                        width: (slot.count === 0 ? 2 : (slot.count / maxTimeCount) * 100) + '%',
+                        background: slot.color
+                      }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
