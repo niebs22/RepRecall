@@ -25,6 +25,7 @@ export default function AnalyticsV2() {
   const [newMemberGrowth, setNewMemberGrowth] = useState<{label: string, count: number}[]>([])
   const [activationFunnel, setActivationFunnel] = useState<{label: string, count: number, color: string}[]>([])
   const [returnRate, setReturnRate] = useState<number | null>(null)
+  const [neverScannedOpen, setNeverScannedOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -696,12 +697,33 @@ export default function AnalyticsV2() {
             <div className="rounded-2xl p-5" style={{background: 'linear-gradient(180deg, #0E0E14 0%, #080810 100%)', border: '1px solid rgba(155,109,255,0.2)'}}>
               <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: colors.muted}}>Equipment Intelligence</p>
               {neverScanned.length > 0 && (
-                <div className="flex justify-between items-center rounded-xl p-3 mb-3" style={{background: 'rgba(232,68,12,0.08)', border: '1px solid rgba(232,68,12,0.2)'}}>
-                  <div>
-                    <p style={{fontSize: '28px', fontWeight: 900, color: colors.ember, lineHeight: 1}}>{neverScanned.length}</p>
-                    <p className="text-xs mt-1" style={{color: colors.secondary}}>machines never scanned</p>
-                  </div>
-                  <p className="text-xs font-semibold text-right" style={{color: colors.ember, maxWidth: '140px'}}>Consider signage or promoting these to members.</p>
+                <div className="rounded-xl mb-3 overflow-hidden" style={{background: 'rgba(232,68,12,0.08)', border: '1px solid rgba(232,68,12,0.2)'}}>
+                  <button
+                    onClick={() => setNeverScannedOpen(prev => !prev)}
+                    className="w-full flex justify-between items-center p-3"
+                    style={{background: 'transparent', border: 'none', cursor: 'pointer'}}
+                  >
+                    <div className="text-left">
+                      <p style={{fontSize: '28px', fontWeight: 900, color: colors.ember, lineHeight: 1}}>{neverScanned.length}</p>
+                      <p className="text-xs mt-1" style={{color: colors.secondary}}>machines never scanned</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-semibold text-right" style={{color: colors.ember, maxWidth: '120px'}}>Consider signage or promoting these to members.</p>
+                      <span style={{color: colors.ember, fontSize: '16px', transform: neverScannedOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block', flexShrink: 0}}>▾</span>
+                    </div>
+                  </button>
+                  {neverScannedOpen && (
+                    <div className="flex flex-col gap-2 px-3 pb-3">
+                      {neverScanned.map((m, i) => (
+                        <div key={i} className="flex justify-between items-center rounded-lg p-2.5" style={{background: '#0A0A0C', border: '1px solid rgba(232,68,12,0.15)'}}>
+                          <p className="text-sm font-semibold">{m.name}</p>
+                          <p className="text-xs" style={{color: colors.secondary}}>
+                            {m.purchase_price ? `$${m.purchase_price.toLocaleString()} sitting idle` : 'No purchase price on file'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex flex-col gap-2">
