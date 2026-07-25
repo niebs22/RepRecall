@@ -569,15 +569,6 @@ setIsChrome(chrome)
                   <p className="text-xs mt-1" style={{color: '#6B5E55'}}>sessions this week</p>
                 </div>
               </div>
-              <p className="text-xs font-semibold mt-2" style={{color: '#E8440C'}}>
-                {(() => {
-                  const goal = 4
-                  const remaining = goal - totalThisWeek
-                  return remaining <= 0
-                    ? 'Weekly goal crushed!'
-                    : `${remaining} more to hit your goal`
-                })()}
-              </p>
             </div>
             <p className="text-xs mt-3" style={{color: '#6B5E55'}}>
               <span style={{color: '#E8440C', fontWeight: 700}}>{totalSessions.toLocaleString()}</span> lifetime sessions
