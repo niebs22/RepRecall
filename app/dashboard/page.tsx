@@ -535,40 +535,51 @@ setIsChrome(chrome)
 </div>
 
           {/* My Stats box */}
-          <a href="/my-stats" className="rounded-2xl p-4 flex flex-col"
+          <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
             style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderTop: '2px solid #E8440C'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>My Stats</p>
-            <div className="flex items-center gap-3 flex-1">
-              <div className="relative" style={{width: '52px', height: '52px', flexShrink: 0}}>
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>My Stats</p>
+              <div className="flex items-center gap-3">
+                <div className="relative" style={{width: '56px', height: '56px', flexShrink: 0}}>
+                  {(() => {
+                    const goal = 4
+                    const goalMet = totalThisWeek >= goal
+                    const pct = Math.min(totalThisWeek / goal, 1)
+                    const r = 24
+                    const c = 2 * Math.PI * r
+                    const offset = c * (1 - pct)
+                    return (
+                      <svg viewBox="0 0 56 56" style={{width: '56px', height: '56px', transform: 'rotate(-90deg)', filter: goalMet ? 'drop-shadow(0 0 6px rgba(232,68,12,0.6))' : 'none'}}>
+                        <circle cx="28" cy="28" r={r} fill="none" stroke="#222222" strokeWidth="5" />
+                        <circle cx="28" cy="28" r={r} fill="none" stroke="#E8440C" strokeWidth="5"
+                          strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
+                      </svg>
+                    )
+                  })()}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span style={{fontSize: '11px', fontWeight: 800, color: '#E8E0D8'}}>{totalThisWeek}/4</span>
+                  </div>
+                </div>
+                <div>
+                  <p style={{fontSize: '32px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-2px', lineHeight: 1}}>
+                    {totalThisWeek}
+                  </p>
+                  <p className="text-xs mt-1" style={{color: '#6B5E55'}}>sessions this week</p>
+                </div>
+              </div>
+              <p className="text-xs font-semibold mt-2" style={{color: '#E8440C'}}>
                 {(() => {
                   const goal = 4
-                  const pct = Math.min(totalThisWeek / goal, 1)
-                  const r = 22
-                  const c = 2 * Math.PI * r
-                  const offset = c * (1 - pct)
-                  return (
-                    <svg viewBox="0 0 52 52" style={{width: '52px', height: '52px', transform: 'rotate(-90deg)'}}>
-                      <circle cx="26" cy="26" r={r} fill="none" stroke="#222222" strokeWidth="5" />
-                      <circle cx="26" cy="26" r={r} fill="none" stroke="#E8440C" strokeWidth="5"
-                        strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
-                    </svg>
-                  )
+                  const remaining = goal - totalThisWeek
+                  return remaining <= 0
+                    ? 'Weekly goal crushed!'
+                    : `${remaining} more to hit your goal`
                 })()}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span style={{fontSize: '11px', fontWeight: 800, color: '#E8E0D8'}}>{totalThisWeek}/4</span>
-                </div>
-              </div>
-              <div className="flex-1 flex flex-col gap-2.5">
-                <div className="flex items-baseline gap-1.5">
-                  <p style={{fontSize: '18px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-0.5px', lineHeight: 1}}>{totalThisWeek}</p>
-                  <p className="text-xs" style={{color: '#6B5E55'}}>this week</p>
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <p style={{fontSize: '18px', fontWeight: 800, color: '#E8E0D8', letterSpacing: '-0.5px', lineHeight: 1}}>{totalSessions}</p>
-                  <p className="text-xs" style={{color: '#6B5E55'}}>lifetime</p>
-                </div>
-              </div>
+              </p>
             </div>
+            <p className="text-xs mt-3" style={{color: '#6B5E55'}}>
+              <span style={{color: '#E8440C', fontWeight: 700}}>{totalSessions.toLocaleString()}</span> lifetime sessions
+            </p>
           </a>
 
         </div>
