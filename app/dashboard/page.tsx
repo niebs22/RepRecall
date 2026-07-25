@@ -548,10 +548,12 @@ setIsChrome(chrome)
                     const r = 24
                     const c = 2 * Math.PI * r
                     const offset = c * (1 - pct)
+                    const ringColor = goalMet ? '#E8440C' : '#9B6DFF'
+                    const glow = goalMet ? '0 0 8px rgba(232,68,12,0.7)' : '0 0 6px rgba(155,109,255,0.4)'
                     return (
-                      <svg viewBox="0 0 56 56" style={{width: '56px', height: '56px', transform: 'rotate(-90deg)', filter: goalMet ? 'drop-shadow(0 0 6px rgba(232,68,12,0.6))' : 'none'}}>
+                      <svg viewBox="0 0 56 56" style={{width: '56px', height: '56px', transform: 'rotate(-90deg)', filter: `drop-shadow(${glow})`}}>
                         <circle cx="28" cy="28" r={r} fill="none" stroke="#222222" strokeWidth="5" />
-                        <circle cx="28" cy="28" r={r} fill="none" stroke="#E8440C" strokeWidth="5"
+                        <circle cx="28" cy="28" r={r} fill="none" stroke={ringColor} strokeWidth="5"
                           strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
                       </svg>
                     )
