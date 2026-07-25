@@ -337,6 +337,11 @@ async function bulkAddMachines(e: any) {
             <p className="font-bold text-white text-sm">Analytics</p>
             <p className="text-xs" style={{color: '#6B5E55'}}>Member activity, equipment usage</p>
           </a>
+          <a href="/admin/analytics-v2" className="rounded-2xl p-5 flex flex-col gap-2" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #9B6DFF'}}>
+            <p style={{fontSize: '24px'}}>✨</p>
+            <p className="font-bold text-white text-sm">Analytics (New)</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>Try the redesigned tabbed view — feedback welcome</p>
+          </a>
           <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}
             onClick={() => document.getElementById('export-btn')?.click()}>
             <p style={{fontSize: '24px'}}>🖨️</p>
