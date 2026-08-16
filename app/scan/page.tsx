@@ -9,6 +9,7 @@ export default function ScanPage() {
   const [cameraReady, setCameraReady] = useState(false)
   const [showFallback, setShowFallback] = useState(false)
   const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchBranding() {
@@ -16,13 +17,14 @@ export default function ScanPage() {
       if (!user) return
       const { data } = await supabase
         .from('gym_members')
-        .select('gyms(gym_branding(primary_color))')
+        .select('gyms(gym_branding(primary_color, logo_url))')
         .eq('user_id', user.id)
         .single()
       if (data?.gyms) {
         const branding = (data.gyms as any).gym_branding
         const brandingRow = Array.isArray(branding) ? branding[0] : branding
         if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+        if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
       }
     }
     fetchBranding()
@@ -97,7 +99,11 @@ export default function ScanPage() {
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
+          {logoUrl ? (
+            <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+          ) : (
+            <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
+          )}
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>
             Back
           </a>
