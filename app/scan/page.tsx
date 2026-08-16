@@ -1,12 +1,32 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabase'
 
 export default function ScanPage() {
   const router = useRouter()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [cameraReady, setCameraReady] = useState(false)
   const [showFallback, setShowFallback] = useState(false)
+  const [brandColor, setBrandColor] = useState('#E8440C')
+
+  useEffect(() => {
+    async function fetchBranding() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('gym_members')
+        .select('gyms(gym_branding(primary_color))')
+        .eq('user_id', user.id)
+        .single()
+      if (data?.gyms) {
+        const branding = (data.gyms as any).gym_branding
+        const brandingRow = Array.isArray(branding) ? branding[0] : branding
+        if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+      }
+    }
+    fetchBranding()
+  }, [])
 
   useEffect(() => {
     let stream: MediaStream | null = null
@@ -103,7 +123,7 @@ export default function ScanPage() {
             <p className="text-sm mb-4" style={{color: '#6B5E55'}}>
               No problem — just open your phone camera app and point it at the QR code on any machine. It works exactly the same way.
             </p>
-            <p className="text-sm py-2 font-semibold" style={{color: '#E8440C'}}>
+            <p className="text-sm py-2 font-semibold" style={{color: brandColor}}>
               Swipe out of this app and open your Camera app
             </p>
             <a href="/dashboard" className="block mt-3 py-3 rounded-full font-semibold text-center" style={{border: '1px solid #222222', color: '#6B5E55'}}>
