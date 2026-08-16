@@ -368,7 +368,7 @@ setIsChrome(chrome)
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           {logoUrl ? (
-            <img src={logoUrl} alt={gymName || 'Gym logo'} style={{height: '56px', maxWidth: '220px', objectFit: 'contain'}} />
+            <img src={logoUrl} alt={gymName || 'Gym logo'} style={{height: '80px', maxWidth: '280px', objectFit: 'contain', border: 'none'}} />
           ) : (
             <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
               scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
