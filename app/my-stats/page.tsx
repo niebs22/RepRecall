@@ -13,9 +13,19 @@ export default function MyStats() {
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [challengePool, setChallengePool] = useState<any[]>([])
   const [gymTimezone, setGymTimezone] = useState('America/New_York')
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [progressMachineId, setProgressMachineId] = useState('')
   const [progressExercise, setProgressExercise] = useState('')
   const router = useRouter()
+
+  function hexToRgba(hex: string, alpha: number) {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
 
   useEffect(() => {
     async function load() {
@@ -24,11 +34,15 @@ export default function MyStats() {
       setUser(user)
       const { data: memberData } = await supabase
         .from('gym_members')
-        .select('gym_id, gyms(timezone)')
+        .select('gym_id, gyms(timezone, gym_branding(primary_color, logo_url))')
         .eq('user_id', user.id)
         .single()
       if (memberData?.gyms) {
         setGymTimezone((memberData.gyms as any).timezone || 'America/New_York')
+        const branding = (memberData.gyms as any).gym_branding
+        const brandingRow = Array.isArray(branding) ? branding[0] : branding
+        if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+        if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
       }
 
       const { data } = await supabase
@@ -242,7 +256,6 @@ export default function MyStats() {
         <h2 className="text-3xl font-bold mb-6" style={{color: '#E8E0D8', letterSpacing: '-0.5px'}}>My Stats</h2>
 
         {/* Summary row */}
-        {/* Summary row */}
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="rounded-2xl p-5" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
             <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>Sessions</p>
@@ -277,7 +290,7 @@ export default function MyStats() {
               return (
                 <svg viewBox="0 0 64 64" style={{width: '64px', height: '64px', transform: 'rotate(-90deg)'}}>
                   <circle cx="32" cy="32" r={r} fill="none" stroke="#222222" strokeWidth="6" />
-                  <circle cx="32" cy="32" r={r} fill="none" stroke="#E8440C" strokeWidth="6"
+                  <circle cx="32" cy="32" r={r} fill="none" stroke={brandColor} strokeWidth="6"
                     strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
                 </svg>
               )
@@ -297,7 +310,7 @@ export default function MyStats() {
             {Array.from({length: 8}, (_, i) => (
               <div key={i} style={{
                 width: '8px', height: '8px', borderRadius: '2px',
-                background: i < activeWeeks ? '#E8440C' : '#222222'
+                background: i < activeWeeks ? brandColor : '#222222'
               }}/>
             ))}
           </div>
@@ -311,11 +324,11 @@ export default function MyStats() {
               const height = Math.max((week.days / maxDays) * 64, week.days > 0 ? 12 : 6)
               return (
                 <div key={i} className="flex flex-col items-center gap-2 flex-1">
-                  <p className="text-xs font-bold" style={{color: '#E8440C'}}>{week.days > 0 ? week.days : ''}</p>
+                  <p className="text-xs font-bold" style={{color: brandColor}}>{week.days > 0 ? week.days : ''}</p>
                    <div className="w-full rounded" style={{
                     height: `${height}px`,
                     background: week.days > 0
-                      ? i === 3 ? '#E8440C' : '#6B2510'
+                      ? i === 3 ? brandColor : hexToRgba(brandColor, 0.35)
                       : '#222222'
                   }}/>
                   <p className="text-center" style={{color: '#6B5E55', fontSize: '9px', lineHeight: 1.2}}>{week.label}</p>
@@ -332,11 +345,11 @@ export default function MyStats() {
             {topEquipment.map((eq, i) => (
               <div key={i} className="flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold w-4" style={{color: '#E8440C'}}>#{i + 1}</span>
+                  <span className="text-xs font-bold w-4" style={{color: brandColor}}>#{i + 1}</span>
                   <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{eq.name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-bold" style={{color: '#E8440C'}}>{eq.count} sessions</p>
+                  <p className="text-xs font-bold" style={{color: brandColor}}>{eq.count} sessions</p>
                   <p className="text-xs" style={{color: '#6B5E55'}}>{daysSince(eq.lastDate)}</p>
                 </div>
               </div>
@@ -350,7 +363,7 @@ export default function MyStats() {
         {/* Looking for a Challenge */}
         {challengeExercises.length === 0 ? (
           <div className="rounded-2xl mb-4 p-5" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: brandColor}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
@@ -363,7 +376,7 @@ export default function MyStats() {
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
+                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: brandColor}}>Looking for a Challenge?</p>
                     {challengePool.length > 4 && (
                       <button
                         onClick={e => { e.stopPropagation(); shuffleChallenges() }}
@@ -392,7 +405,7 @@ export default function MyStats() {
                   <a key={i}
                     href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
                     className="flex justify-between items-center p-4 rounded-xl"
-                    style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
+                    style={{background: '#080808', border: '1px solid #222222', borderLeft: `2px solid ${brandColor}`}}>
                     <div>
                       <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
                       <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -401,7 +414,7 @@ export default function MyStats() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold" style={{color: '#E8440C'}}>
+                      <p className="text-xs font-semibold" style={{color: brandColor}}>
                         {(() => {
                           const days = Math.round((new Date().getTime() - new Date(ex.lastDate).getTime()) / (1000 * 60 * 60 * 24))
                           return days === 1 ? 'Yesterday' : `${days}d ago`
