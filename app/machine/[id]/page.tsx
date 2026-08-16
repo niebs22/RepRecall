@@ -4,7 +4,7 @@ import { supabase } from '../../../lib/supabase'
 import { displayWeight } from '../../../lib/timezone'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
-function RestTimer() {
+function RestTimer({ brandColor, hexToRgba }: any) {
   const [secs, setSecs] = useState(60)
   const [running, setRunning] = useState(false)
   const [activePreset, setActivePreset] = useState<number | 'manual'>(60)
@@ -66,9 +66,9 @@ function RestTimer() {
             onClick={() => setPreset(p)}
             className="text-xs px-2 py-1 rounded-full"
             style={{
-              background: activePreset === p ? 'rgba(232,68,12,0.15)' : 'transparent',
-              border: `1px solid ${activePreset === p ? '#E8440C' : '#2A2A2A'}`,
-              color: activePreset === p ? '#E8440C' : '#6B5E55'
+              background: activePreset === p ? hexToRgba(brandColor, 0.15) : 'transparent',
+              border: `1px solid ${activePreset === p ? brandColor : '#2A2A2A'}`,
+              color: activePreset === p ? brandColor : '#6B5E55'
             }}>
             {p === 60 ? '1m' : '2m'}
           </button>
@@ -77,9 +77,9 @@ function RestTimer() {
           onClick={() => { setActivePreset('manual'); if (running) { clearInterval(intervalRef.current); setRunning(false) } }}
           className="text-xs px-2 py-1 rounded-full"
           style={{
-            background: activePreset === 'manual' ? 'rgba(232,68,12,0.15)' : 'transparent',
-            border: `1px solid ${activePreset === 'manual' ? '#E8440C' : '#2A2A2A'}`,
-            color: activePreset === 'manual' ? '#E8440C' : '#6B5E55'
+            background: activePreset === 'manual' ? hexToRgba(brandColor, 0.15) : 'transparent',
+            border: `1px solid ${activePreset === 'manual' ? brandColor : '#2A2A2A'}`,
+            color: activePreset === 'manual' ? brandColor : '#6B5E55'
           }}>
           Manual
         </button>
@@ -90,13 +90,13 @@ function RestTimer() {
             onChange={e => { setManualMins(e.target.value); setSecs(Math.round((parseFloat(e.target.value) || 0) * 60)) }}
             placeholder="min"
             className="text-xs text-white text-center rounded-lg focus:outline-none"
-            style={{width: '44px', padding: '3px 6px', background: '#0F0F0F', border: '1px solid #E8440C'}}
+            style={{width: '44px', padding: '3px 6px', background: '#0F0F0F', border: `1px solid ${brandColor}`}}
           />
         )}
         <button type="button"
           onClick={toggleTimer}
           className="text-xs px-3 py-1 rounded-full font-bold"
-          style={{border: '1px solid #E8440C', color: '#E8440C', background: 'transparent'}}>
+          style={{border: `1px solid ${brandColor}`, color: brandColor, background: 'transparent'}}>
           {running ? 'Stop' : 'Start'}
         </button>
       </div>
@@ -120,6 +120,8 @@ function MachinePageInner() {
   const [user, setUser] = useState<any>(null)
   const [weightUnit, setWeightUnit] = useState<'lbs' | 'kg'>('lbs')
   const [gymTimezone, setGymTimezone] = useState('America/New_York')
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [selectedExercise, setSelectedExercise] = useState('')
   const [showAddVariation, setShowAddVariation] = useState(false)
   const [showManageVariations, setShowManageVariations] = useState(false)
@@ -159,6 +161,14 @@ function MachinePageInner() {
   const [rotationMachines, setRotationMachines] = useState<any[]>([])
 
   const router = useRouter()
+
+  function hexToRgba(hex: string, alpha: number) {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
 
   // Load rotation and draft from localStorage on mount
   useEffect(() => {
@@ -255,10 +265,10 @@ function MachinePageInner() {
       <div>
         {/* Last session */}
         {lastSession && (
-          <div className="rounded-2xl p-5 mb-8" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', borderLeft: '3px solid #E8440C'}}>
+          <div className="rounded-2xl p-5 mb-8" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', borderLeft: `3px solid ${brandColor}`}}>
             <div className="flex justify-between items-center mb-3">
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
-              <p className="text-xs" style={{color: '#E8440C'}}>{daysSince(lastSessionDate)}</p>
+              <p className="text-xs" style={{color: brandColor}}>{daysSince(lastSessionDate)}</p>
             </div>
             {lastActivity !== 'Functional Training' && (
               <p className="font-bold text-white text-lg mb-1">{lastActivity}</p>
@@ -315,7 +325,7 @@ function MachinePageInner() {
           onClick={handleFinish}
           disabled={saving}
           className="w-full py-3 rounded-full font-semibold text-white"
-          style={{background: '#E8440C'}}
+          style={{background: brandColor}}
         >
           {saving ? 'Saving...' : 'Finish Set'}
         </button>
@@ -353,11 +363,15 @@ function MachinePageInner() {
 
         const { data: existingMembership } = await supabase
           .from('gym_members')
-          .select('gym_id, gyms(timezone)')
+          .select('gym_id, gyms(timezone, gym_branding(primary_color, logo_url))')
           .eq('user_id', user.id)
           .single()
         if (existingMembership?.gyms) {
           setGymTimezone((existingMembership.gyms as any).timezone || 'America/New_York')
+          const branding = (existingMembership.gyms as any).gym_branding
+          const brandingRow = Array.isArray(branding) ? branding[0] : branding
+          if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+          if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
         }
 if (existingMembership) {
   const { data: machineCheck } = await supabase
@@ -748,7 +762,7 @@ if (validSets.length === 0) {
       {rotationMachines.length > 1 && (
         <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
           <div className="max-w-lg mx-auto">
-            <div className="rounded-2xl px-4 py-4 flex items-center gap-2" style={{background: '#E8440C'}}>
+            <div className="rounded-2xl px-4 py-4 flex items-center gap-2" style={{background: brandColor}}>
               <p className="text-xs font-bold tracking-widest uppercase mr-1" style={{color: 'rgba(255,255,255,0.7)'}}>Up next</p>
               <div className="flex gap-2 flex-1 overflow-x-auto">
                 {rotationMachines.filter((m: any) => m.id !== id).map((m: any) => (
@@ -769,13 +783,13 @@ if (validSets.length === 0) {
       )}
 
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#E8440C'}}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: brandColor}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">Workout Saved</h2>
         {supersetMachine && (
           <span className="text-xs px-3 py-1 rounded-full inline-block mb-3"
-            style={{background: 'rgba(194,59,10,0.12)', color: '#E8440C'}}>
+            style={{background: hexToRgba(brandColor, 0.12), color: brandColor}}>
             SS — Superset logged
           </span>
         )}
@@ -791,10 +805,10 @@ if (validSets.length === 0) {
       </a>
     ) : null
   })()}
-  <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: '#E8440C'}}>
+  <a href="/scan" className="py-3 px-8 rounded-full font-semibold text-white text-center" style={{background: brandColor}}>
     Scan Next Machine
   </a>
-  <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: '1px solid #E8440C', color: '#E8440C'}}>
+  <a href={'/machine/' + id} className="py-3 px-8 rounded-full font-semibold text-center" style={{border: `1px solid ${brandColor}`, color: brandColor}}>
     Back to {machine?.name}
   </a>
   <a href="/dashboard" className="py-3 px-8 rounded-full font-semibold text-center" style={{color: '#6B5E55'}}>
@@ -819,7 +833,7 @@ if (validSets.length === 0) {
             </a>
             <div className="flex items-center gap-3 mb-6">
               <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: 'rgba(194,59,10,0.1)', color: '#E8440C'}}>Functional</span>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{background: hexToRgba(brandColor, 0.1), color: brandColor}}>Functional</span>
             </div>
            <FunctionalLogger
               machineId={id!}
@@ -856,7 +870,7 @@ if (validSets.length === 0) {
                       <div key={i} style={{borderBottom: i < allWorkouts.length - 1 ? '1px solid #222222' : 'none', paddingBottom: i < allWorkouts.length - 1 ? '12px' : '0'}}>
                         <div className="flex justify-between items-center mb-1">
                           <p className="text-sm font-semibold text-white">{w.exercise_name}</p>
-                          <p className="text-xs" style={{color: '#E8440C'}}>{daysSince(w.created_at)}</p>
+                          <p className="text-xs" style={{color: brandColor}}>{daysSince(w.created_at)}</p>
                         </div>
                         {w.duration && <p className="text-xs" style={{color: '#6B5E55'}}>{w.duration} min</p>}
                         {w.notes && <p className="text-xs italic mt-1" style={{color: '#6B5E55'}}>"{w.notes}"</p>}
@@ -882,8 +896,8 @@ if (validSets.length === 0) {
         <div className="flex items-center gap-3 mb-1">
   <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
   <span className="text-xs px-2 py-0.5 rounded-full" style={{
-    background: 'rgba(194,59,10,0.1)',
-    color: '#E8440C'
+    background: hexToRgba(brandColor, 0.1),
+    color: brandColor
   }}>
     {machine.type === 'cardio' ? 'Cardio' : machine.type === 'functional' ? 'Functional' : 'Strength'}
   </span>
@@ -900,15 +914,15 @@ if (validSets.length === 0) {
             {rotationMachines.length <= 1 && variations.length === 0 ? (
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div className="rounded-xl py-4 px-3 text-center"
-                  style={{background: '#E8440C'}}>
+                  style={{background: brandColor}}>
                   <p className="text-sm font-bold text-white">{machine.name}</p>
                   <p className="text-xs mt-1" style={{color: 'rgba(255,255,255,0.6)'}}>default</p>
                 </div>
                 <button
                   onClick={() => setShowInlineAdd(true)}
                   className="rounded-xl py-4 px-3 text-center"
-                  style={{background: 'transparent', border: '1px solid #E8440C', cursor: 'pointer'}}>
-                  <p className="text-sm font-bold" style={{color: '#E8440C'}}>+ Add variation</p>
+                  style={{background: 'transparent', border: `1px solid ${brandColor}`, cursor: 'pointer'}}>
+                  <p className="text-sm font-bold" style={{color: brandColor}}>+ Add variation</p>
                   <p className="text-xs mt-1" style={{color: '#6B5E55'}}>e.g. Incline Press</p>
                 </button>
               </div>
@@ -955,7 +969,7 @@ if (validSets.length === 0) {
                   onChange={e => setNewQuickVariation(e.target.value)}
                   placeholder={`e.g. Bicep Curls`}
                   className="flex-1 px-3 py-2 rounded-lg text-white focus:outline-none text-sm"
-                  style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #E8440C'}}
+                  style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: `1px solid ${brandColor}`}}
                   autoFocus
                 />
                 <button
@@ -972,7 +986,7 @@ if (validSets.length === 0) {
                     setShowInlineAdd(false)
                   }}
                   className="px-3 py-2 rounded-lg text-white text-sm font-semibold"
-                  style={{background: '#E8440C'}}>
+                  style={{background: brandColor}}>
                   Save
                 </button>
                 <button
@@ -985,7 +999,7 @@ if (validSets.length === 0) {
             )}
 
             {showAddVariation && (
-              <div className="rounded-xl p-4 mb-2" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #E8440C'}}>
+              <div className="rounded-xl p-4 mb-2" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: `1px solid ${brandColor}`}}>
                 <p className="text-white text-sm font-semibold mb-3">Add a variation</p>
                 <input type="text" value={newVariation} onChange={e => setNewVariation(e.target.value)}
                   placeholder="e.g. Close Grip Bench Press"
@@ -993,7 +1007,7 @@ if (validSets.length === 0) {
                   style={{background: '#080808', border: '1px solid #222222'}}/>
                 <div className="flex gap-2">
                   <button onClick={handleAddVariation} className="flex-1 py-3 rounded-full font-semibold text-white"
-                    style={{background: '#E8440C'}}>Save Variation</button>
+                    style={{background: brandColor}}>Save Variation</button>
                   <button onClick={() => { setShowAddVariation(false); setNewVariation('') }}
                     className="flex-1 py-3 rounded-full font-semibold"
                     style={{background: '#080808', border: '1px solid #222222', color: '#6B5E55'}}>Cancel</button>
@@ -1016,10 +1030,10 @@ if (validSets.length === 0) {
                           <input type="text" value={editingVariationName}
                             onChange={e => setEditingVariationName(e.target.value)}
                             className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
-                            style={{background: '#080808', border: '1px solid #E8440C'}}/>
+                            style={{background: '#080808', border: `1px solid ${brandColor}`}}/>
                           <button onClick={() => handleRenameVariation(v)}
                             className="px-3 py-2 rounded-lg text-white text-sm font-semibold"
-                            style={{background: '#E8440C'}}>Save</button>
+                            style={{background: brandColor}}>Save</button>
                           <button onClick={() => { setEditingVariation(null); setEditingVariationName('') }}
                             className="px-3 py-2 rounded-lg text-sm"
                             style={{background: '#080808', border: '1px solid #222222', color: '#6B5E55'}}>✕</button>
@@ -1031,7 +1045,7 @@ if (validSets.length === 0) {
                           <div className="flex gap-2">
                             <button onClick={() => { setEditingVariation(v); setEditingVariationName(v.name) }}
                               className="text-xs px-2 py-1 rounded"
-                              style={{color: '#E8440C', background: 'rgba(194,59,10,0.1)'}}>Rename</button>
+                              style={{color: brandColor, background: hexToRgba(brandColor, 0.1)}}>Rename</button>
                             <button onClick={() => handleDeleteVariation(v)}
                               className="text-xs px-2 py-1 rounded"
                               style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)'}}>Delete</button>
@@ -1059,18 +1073,18 @@ if (validSets.length === 0) {
         )}
 
         {lastSessionSets.length > 0 ? (
-          <div className="rounded-2xl p-5 mb-8" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', borderLeft: '3px solid #E8440C'}}>
+          <div className="rounded-2xl p-5 mb-8" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', borderLeft: `3px solid ${brandColor}`}}>
             <div className="flex justify-between items-center mb-4">
               <p className="text-xs font-semibold tracking-widest uppercase" style={{color: '#6B5E55'}}>Last Session</p>
               <div className="flex gap-3 items-center">
                 <div className="flex gap-2 items-center">
-                  <p className="text-xs" style={{color: '#E8440C'}}>{daysSince(lastSessionDate)}</p>
+                  <p className="text-xs" style={{color: brandColor}}>{daysSince(lastSessionDate)}</p>
                   <p className="text-xs" style={{color: '#6B5E55'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
                 {!editingSession && (
                   <button onClick={() => startEditingSession(lastSessionSets)}
                     className="text-xs px-2 py-1 rounded"
-                    style={{color: '#E8440C', background: 'rgba(194,59,10,0.1)'}}>Edit</button>
+                    style={{color: brandColor, background: hexToRgba(brandColor, 0.1)}}>Edit</button>
                 )}
               </div>
             </div>
@@ -1084,7 +1098,7 @@ if (validSets.length === 0) {
                       <input type="number" value={editableSets[0]?.duration || ''}
                         onChange={e => updateEditableSet(0, 'duration', e.target.value)}
                         className="w-full px-4 py-2 rounded-lg text-white focus:outline-none text-center"
-                        style={{background: '#080808', border: '1px solid #E8440C'}}/>
+                        style={{background: '#080808', border: `1px solid ${brandColor}`}}/>
                     </div>
                     <div>
                       <label className="text-xs mb-1 block" style={{color: '#6B5E55'}}>Distance (miles)</label>
@@ -1104,15 +1118,15 @@ if (validSets.length === 0) {
                     </div>
                     {editableSets.filter(s => !s._deleted).map((s, i) => (
                       <div key={s.id || i} className="grid grid-cols-12 gap-2 items-center">
-                        <p className="col-span-1 text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
+                        <p className="col-span-1 text-xs font-bold" style={{color: brandColor}}>{i + 1}</p>
                         <input type="number" value={s.reps}
                           onChange={e => updateEditableSet(editableSets.indexOf(s), 'reps', e.target.value)}
                           className="col-span-4 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
-                          style={{background: '#080808', border: '1px solid #E8440C'}}/>
+                          style={{background: '#080808', border: `1px solid ${brandColor}`}}/>
                         <input type="number" value={s.weight}
                           onChange={e => updateEditableSet(editableSets.indexOf(s), 'weight', e.target.value)}
                           className="col-span-5 px-3 py-2 rounded-lg text-white focus:outline-none text-center"
-                          style={{background: '#080808', border: '1px solid #E8440C'}}/>
+                          style={{background: '#080808', border: `1px solid ${brandColor}`}}/>
                         <button type="button"
                           onClick={() => {
                             const actualIndex = editableSets.indexOf(s)
@@ -1132,7 +1146,7 @@ if (validSets.length === 0) {
                       type="button"
                       onClick={() => setEditableSets(prev => [...prev, {reps: '', weight: '', _new: true}])}
                       className="w-full py-2 rounded-xl text-sm font-semibold mt-1"
-                      style={{background: 'transparent', border: '1px dashed #E8440C', color: '#E8440C'}}>
+                      style={{background: 'transparent', border: `1px dashed ${brandColor}`, color: brandColor}}>
                       + Add Set
                     </button>
                   </div>
@@ -1148,7 +1162,7 @@ if (validSets.length === 0) {
                 <div className="flex gap-2">
                   <button onClick={saveEditedSession}
                     className="flex-1 py-2 rounded-full font-semibold text-white text-sm"
-                    style={{background: '#E8440C'}}>Save Changes</button>
+                    style={{background: brandColor}}>Save Changes</button>
                   <button onClick={() => setEditingSession(false)}
                     className="flex-1 py-2 rounded-full text-sm font-semibold"
                     style={{background: '#080808', border: '1px solid #222222', color: '#6B5E55'}}>Cancel</button>
@@ -1184,13 +1198,13 @@ if (validSets.length === 0) {
                     </div>
                     {lastSessionSets.map((s, i) => (
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
-                        <p className="col-span-1 text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
+                        <p className="col-span-1 text-xs font-bold" style={{color: brandColor}}>{i + 1}</p>
                         <p className="col-span-5 text-white font-semibold">{s.reps}</p>
                         <p className="col-span-6 text-white font-semibold">{displayWeight(s.weight, weightUnit)}</p>
                       </div>
                     ))}
                     {lastSessionSets[0]?.superset && (
-                      <p className="text-xs font-bold mt-2" style={{color: '#E8440C'}}>
+                      <p className="text-xs font-bold mt-2" style={{color: brandColor}}>
                         SS{lastSessionSets[0]?.superset_exercise_name ? ` · ${lastSessionSets[0].superset_exercise_name}` : ''}
                       </p>
                     )}
@@ -1242,7 +1256,7 @@ if (validSets.length === 0) {
                       <p className="text-white text-sm font-semibold">{group.label}</p>
                       <p className="text-xs" style={{color: '#6B5E55'}}>({group.ago})</p>
                       {group.workouts[0]?.superset && (
-                        <span className="text-xs font-bold" style={{color: '#E8440C'}}>
+                        <span className="text-xs font-bold" style={{color: brandColor}}>
                           SS{group.workouts[0]?.superset_exercise_name ? ` · ${group.workouts[0].superset_exercise_name}` : ''}
                         </span>
                       )}
@@ -1270,7 +1284,7 @@ if (validSets.length === 0) {
                       <div className="flex flex-col gap-1">
                         {group.workouts.map((w, j) => (
                           <div key={j} className="flex gap-3 items-center">
-                            <p className="text-xs font-bold w-4" style={{color: '#E8440C'}}>{j + 1}</p>
+                            <p className="text-xs font-bold w-4" style={{color: brandColor}}>{j + 1}</p>
                             <p className="text-sm text-white">{w.reps} reps</p>
                             <p className="text-sm text-white">·</p>
                             <p className="text-sm text-white">{displayWeight(w.weight, weightUnit)}</p>
@@ -1401,7 +1415,7 @@ if (validSets.length === 0) {
               {machine.type === 'strength' && (
   <button onClick={() => setShowSupersetPicker(true)}
     className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-    style={{border: '1px solid #E8440C', color: '#E8440C'}}>
+    style={{border: `1px solid ${brandColor}`, color: brandColor}}>
     + Superset
   </button>
 )}
@@ -1429,7 +1443,7 @@ if (validSets.length === 0) {
               href="/scan"
               onClick={saveDraft}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-white mb-3"
-              style={{background: '#E8440C'}}>
+              style={{background: brandColor}}>
               Scan Next Machine
             </a>
             <input type="text" value={switchSearch} onChange={e => setSwitchSearch(e.target.value)}
@@ -1516,7 +1530,7 @@ if (validSets.length === 0) {
 
         {/* Superset picker */}
         {showSupersetPicker && (
-          <div className="rounded-2xl p-4 mb-6" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #E8440C'}}>
+          <div className="rounded-2xl p-4 mb-6" style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: `1px solid ${brandColor}`}}>
             <div className="flex justify-between items-center mb-3">
               <p className="text-white text-sm font-semibold">Pair with machine</p>
               <button onClick={() => { setShowSupersetPicker(false); setSupersetSearch('') }}
@@ -1546,7 +1560,7 @@ if (validSets.length === 0) {
                   className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
                   style={{background: '#080808'}}>
                   <p className="text-white text-sm">{m.name}{m.id === id ? ' (same)' : ''}</p>
-                  <p className="text-xs" style={{color: '#E8440C'}}>Pair</p>
+                  <p className="text-xs" style={{color: brandColor}}>Pair</p>
                 </button>
               ))}
             </div>
@@ -1561,7 +1575,7 @@ if (validSets.length === 0) {
                 onClick={() => setActiveTab('A')}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm"
                 style={{
-                  background: activeTab === 'A' ? '#E8440C' : 'linear-gradient(180deg, #222222 0%, #111111 100%)',
+                  background: activeTab === 'A' ? brandColor : 'linear-gradient(180deg, #222222 0%, #111111 100%)',
                   color: activeTab === 'A' ? '#fff' : '#6B5E55',
                   border: activeTab === 'A' ? 'none' : '1px solid #222222'
                 }}
@@ -1578,7 +1592,7 @@ if (validSets.length === 0) {
                 onClick={() => setActiveTab('B')}
                 className="flex-1 py-3 rounded-xl font-semibold text-sm"
                 style={{
-                  background: activeTab === 'B' ? '#E8440C' : 'linear-gradient(180deg, #222222 0%, #111111 100%)',
+                  background: activeTab === 'B' ? brandColor : 'linear-gradient(180deg, #222222 0%, #111111 100%)',
                   color: activeTab === 'B' ? '#fff' : '#6B5E55',
                   border: activeTab === 'B' ? 'none' : '1px solid #222222'
                 }}
@@ -1603,7 +1617,7 @@ if (validSets.length === 0) {
                       value={selectedExercise}
                       onChange={e => setSelectedExercise(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                      style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #E8440C'}}
+                      style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: `1px solid ${brandColor}`}}
                     >
                       <option value={machine.name}>{machine.name} (default)</option>
                       {variations.map(v => (
@@ -1621,7 +1635,7 @@ if (validSets.length === 0) {
                 {sets.map((set, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
+                      <p className="text-xs font-bold" style={{color: brandColor}}>{i + 1}</p>
                     </div>
                     <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
                       style={{border: '1px solid #222222', background: '#0F0F0F'}}>
@@ -1656,7 +1670,7 @@ if (validSets.length === 0) {
                   </div>
                 ))}
                 <button type="button" onClick={addSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #E8440C', color: '#E8440C'}}>
+                  style={{background: 'transparent', border: `1px dashed ${brandColor}`, color: brandColor}}>
                   + Add Set
                 </button>
                 <div>
@@ -1668,7 +1682,7 @@ if (validSets.length === 0) {
                 </div>
                 <button onClick={() => setActiveTab('B')}
                   className="py-3 rounded-full font-semibold text-white"
-                  style={{background: '#E8440C'}}>
+                  style={{background: brandColor}}>
                   Switch to B: {supersetExercise || supersetMachine.name}
                 </button>
               </div>
@@ -1684,7 +1698,7 @@ if (validSets.length === 0) {
                       value={supersetExercise}
                       onChange={e => setSupersetExercise(e.target.value)}
                       className="w-full px-4 py-3 rounded-lg text-white focus:outline-none"
-                      style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #E8440C'}}
+                      style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: `1px solid ${brandColor}`}}
                     >
                       <option value={supersetMachine.name}>{supersetMachine.name} (default)</option>
                       {supersetMachine.id === id
@@ -1703,7 +1717,7 @@ if (validSets.length === 0) {
                 {supersetSets.map((set, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
+                      <p className="text-xs font-bold" style={{color: brandColor}}>{i + 1}</p>
                     </div>
                     <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
                       style={{border: '1px solid #222222', background: '#0F0F0F'}}>
@@ -1738,7 +1752,7 @@ if (validSets.length === 0) {
                   </div>
                 ))}
                 <button type="button" onClick={addSupersetSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #E8440C', color: '#E8440C'}}>
+                  style={{background: 'transparent', border: `1px dashed ${brandColor}`, color: brandColor}}>
                   + Add Set
                 </button>
                 <div>
@@ -1750,7 +1764,7 @@ if (validSets.length === 0) {
                 </div>
                 <button onClick={() => setActiveTab('A')}
                   className="py-3 rounded-full font-semibold text-white"
-                  style={{background: '#E8440C'}}>
+                  style={{background: brandColor}}>
                   Switch to A: {selectedExercise}
                 </button>
               </div>
@@ -1759,7 +1773,7 @@ if (validSets.length === 0) {
             <div className="flex flex-col gap-3 mt-2">
               <button onClick={handleFinishSuperset}
                 className="py-3 rounded-full font-semibold text-white"
-                style={{background: '#E8440C'}}>
+                style={{background: brandColor}}>
                 Finish Superset
               </button>
               <button onClick={() => { setSupersetMachine(null); setActiveTab('A'); setSupersetSets([{reps: '', weight: ''}]) }}
@@ -1806,7 +1820,7 @@ if (validSets.length === 0) {
                 {sets.map((set, i) => (
                   <div key={i} className="grid grid-cols-12 gap-2 items-center">
                     <div className="col-span-1 text-center">
-                      <p className="text-xs font-bold" style={{color: '#E8440C'}}>{i + 1}</p>
+                      <p className="text-xs font-bold" style={{color: brandColor}}>{i + 1}</p>
                     </div>
                     <div className="col-span-5 flex items-center rounded-lg overflow-hidden"
                       style={{border: '1px solid #222222', background: '#0F0F0F'}}>
@@ -1846,11 +1860,11 @@ if (validSets.length === 0) {
                   </div>
                 ))}
                 <button type="button" onClick={addSet} className="py-3 rounded-xl font-semibold text-sm"
-                  style={{background: 'transparent', border: '1px dashed #E8440C', color: '#E8440C'}}>
+                  style={{background: 'transparent', border: `1px dashed ${brandColor}`, color: brandColor}}>
                   + Add Set
                 </button>
                 {sets.some(s => s.reps || s.weight) && (
-                  <RestTimer />
+                  <RestTimer brandColor={brandColor} hexToRgba={hexToRgba} />
                 )}
               </>
             )}
@@ -1868,7 +1882,7 @@ if (validSets.length === 0) {
   </div>
 )}
 <button type="submit" className="py-3 rounded-full font-semibold text-white"
-  style={{background: '#E8440C'}}>
+  style={{background: brandColor}}>
   Finish Set
 </button>
           </form>
@@ -1888,7 +1902,7 @@ if (validSets.length === 0) {
                     return (
                       <div key={m.id} className="flex items-center gap-1 rounded-lg"
                         style={{
-                          background: isCurrent ? '#E8440C' : isDone ? 'transparent' : '#222222',
+                          background: isCurrent ? brandColor : isDone ? 'transparent' : '#222222',
                           border: isDone ? '1px solid #2A2A2A' : 'none',
                           flexShrink: 0
                         }}>
