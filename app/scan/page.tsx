@@ -100,7 +100,7 @@ export default function ScanPage() {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-6">
           {logoUrl ? (
-            <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+            <img src={logoUrl} alt="Gym logo" style={{height: '56px', maxWidth: '200px', objectFit: 'contain', border: 'none'}} />
           ) : (
             <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
           )}

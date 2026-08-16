@@ -248,14 +248,14 @@ export default function MyStats() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           {logoUrl ? (
-            <img src={logoUrl} alt="Gym logo" style={{height: '36px', maxWidth: '160px', objectFit: 'contain'}} />
+            <img src={logoUrl} alt="Gym logo" style={{height: '64px', maxWidth: '240px', objectFit: 'contain', border: 'none'}} />
           ) : (
             <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
               scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
             </h1>
           )}
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>← Dashboard</a>
-        </div>
+        </div> 
 
         <h2 className="text-3xl font-bold mb-6" style={{color: '#E8E0D8', letterSpacing: '-0.5px'}}>My Stats</h2>
 
