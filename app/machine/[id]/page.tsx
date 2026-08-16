@@ -758,6 +758,12 @@ if (validSets.length === 0) {
   if (saved) return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 pb-36" style={{background: '#080808'}}>
 
+      {logoUrl && (
+        <div className="fixed top-6 left-6">
+          <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+        </div>
+      )}
+
       {/* Rotation bar on saved screen */}
       {rotationMachines.length > 1 && (
         <div className="fixed bottom-6 left-0 right-0 z-40 px-4">
@@ -828,6 +834,13 @@ if (validSets.length === 0) {
       <>
         <main className="min-h-screen p-6" style={{background: '#080808'}}>
           <div className="max-w-lg mx-auto">
+            <div className="flex justify-between items-center mb-4">
+              {logoUrl ? (
+                <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+              ) : (
+                <h1 className="text-xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
+              )}
+            </div>
             <a href="/dashboard" className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
               ← Back to Dashboard
             </a>
@@ -889,6 +902,13 @@ if (validSets.length === 0) {
   return (
     <main className="min-h-screen p-6" style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+          ) : (
+            <h1 className="text-xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
+          )}
+        </div>
         <a href={from === 'history' ? '/history' : from === 'routine' && routineId ? `/routines/${routineId}` : '/dashboard'} className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
   {from === 'history' ? '← Back to History' : from === 'routine' ? '← Back to Routine' : '← Back to Dashboard'}
 </a>
