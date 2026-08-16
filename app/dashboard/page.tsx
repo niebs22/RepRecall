@@ -9,6 +9,8 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [gymName, setGymName] = useState('')
   const [gymTimezone, setGymTimezone] = useState('America/New_York')
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
@@ -76,6 +78,14 @@ setIsChrome(chrome)
     return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
+  function hexToRgba(hex: string, alpha: number) {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+
   async function checkPendingGym(userId: string) {
     let pendingCode = localStorage.getItem('pending_gym_code')
     if (!pendingCode) {
@@ -109,12 +119,16 @@ setIsChrome(chrome)
   async function fetchUserGym(userId: string) {
     const { data } = await supabase
       .from('gym_members')
-      .select('gym_id, gyms(name, timezone)')
+      .select('gym_id, gyms(name, timezone, gym_branding(primary_color, logo_url))')
       .eq('user_id', userId)
       .single()
     if (data?.gyms) {
       setGymName((data.gyms as any).name)
       setGymTimezone((data.gyms as any).timezone || 'America/New_York')
+      const branding = (data.gyms as any).gym_branding
+      const brandingRow = Array.isArray(branding) ? branding[0] : branding
+      if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+      if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
     }
   }
 
@@ -372,8 +386,8 @@ setIsChrome(chrome)
           </h2>
           {gymName && (
             <p className="text-xs font-bold tracking-widest mt-1 mb-1 flex items-center gap-1.5"
-              style={{color: '#E8440C', textTransform: 'uppercase', letterSpacing: '2px'}}>
-              <span style={{width: '5px', height: '5px', borderRadius: '50%', background: '#E8440C', display: 'inline-block'}}></span>
+              style={{color: brandColor, textTransform: 'uppercase', letterSpacing: '2px'}}>
+              <span style={{width: '5px', height: '5px', borderRadius: '50%', background: brandColor, display: 'inline-block'}}></span>
               {gymName}
             </p>
           )}
@@ -402,16 +416,16 @@ setIsChrome(chrome)
 ) : isChrome ? (
   <div className="flex flex-col gap-2">
     <div className="flex items-start gap-2">
-      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
-      <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>⋮ menu</span> in the top right of Chrome</p>
+      <span className="text-xs font-bold" style={{color: brandColor, minWidth: '16px'}}>1</span>
+      <p className="text-xs text-white">Tap the <span style={{color: brandColor}}>⋮ menu</span> in the top right of Chrome</p>
     </div>
     <div className="flex items-start gap-2">
-      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
-      <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span></p>
+      <span className="text-xs font-bold" style={{color: brandColor, minWidth: '16px'}}>2</span>
+      <p className="text-xs text-white">Tap <span style={{color: brandColor}}>"Add to Home Screen"</span></p>
     </div>
     <div className="flex items-start gap-2">
-      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
-      <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
+      <span className="text-xs font-bold" style={{color: brandColor, minWidth: '16px'}}>3</span>
+      <p className="text-xs text-white">Tap <span style={{color: brandColor}}>"Add"</span></p>
     </div>
     <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
       Already installed — dismiss
@@ -420,16 +434,16 @@ setIsChrome(chrome)
 ) : (
   <div className="flex flex-col gap-2">
     <div className="flex items-start gap-2">
-      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>1</span>
-      <p className="text-xs text-white">Tap the <span style={{color: '#E8440C'}}>Share</span> button at the bottom of Safari</p>
+      <span className="text-xs font-bold" style={{color: brandColor, minWidth: '16px'}}>1</span>
+      <p className="text-xs text-white">Tap the <span style={{color: brandColor}}>Share</span> button at the bottom of Safari</p>
     </div>
     <div className="flex items-start gap-2">
-      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>2</span>
-      <p className="text-xs text-white">Scroll down and tap <span style={{color: '#E8440C'}}>"Add to Home Screen"</span> — you may need to tap <span style={{color: '#E8440C'}}>"View More"</span> to find it</p>
+      <span className="text-xs font-bold" style={{color: brandColor, minWidth: '16px'}}>2</span>
+      <p className="text-xs text-white">Scroll down and tap <span style={{color: brandColor}}>"Add to Home Screen"</span> — you may need to tap <span style={{color: brandColor}}>"View More"</span> to find it</p>
     </div>
     <div className="flex items-start gap-2">
-      <span className="text-xs font-bold" style={{color: '#E8440C', minWidth: '16px'}}>3</span>
-      <p className="text-xs text-white">Tap <span style={{color: '#E8440C'}}>"Add"</span></p>
+      <span className="text-xs font-bold" style={{color: brandColor, minWidth: '16px'}}>3</span>
+      <p className="text-xs text-white">Tap <span style={{color: brandColor}}>"Add"</span></p>
     </div>
     <button onClick={dismissBanner} className="text-xs mt-1" style={{color: '#6B5E55', background: 'none', border: 'none', cursor: 'pointer'}}>
       Already installed — dismiss
@@ -471,7 +485,7 @@ setIsChrome(chrome)
             <a
             href="/scan"
             className="flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-lg w-full text-center mb-3"
-            style={{background: '#E8440C', color: '#ffffff', boxShadow: '0 6px 20px rgba(232,68,12,0.15)'}}>
+            style={{background: brandColor, color: '#ffffff', boxShadow: `0 6px 20px ${hexToRgba(brandColor, 0.15)}`}}>
             <span style={{fontSize: '20px'}}></span> Scan QR Code
           </a>
           <div className="relative">
@@ -508,7 +522,7 @@ setIsChrome(chrome)
       {totalWeightLifted.toLocaleString()}
     </p>
     <p className="text-xs mt-1 mb-2" style={{color: '#6B5E55'}}>lbs lifted</p>
-    <p className="text-xs font-semibold" style={{color: '#E8440C'}}>
+    <p className="text-xs font-semibold" style={{color: brandColor}}>
       🐘 {(totalWeightLifted / 9000).toFixed(1)} elephants
     </p>
   </div>
@@ -523,10 +537,10 @@ setIsChrome(chrome)
   return (
     <>
       <div className="w-full rounded-full overflow-hidden" style={{height: '3px', background: '#222222'}}>
-        <div style={{width: `${progress}%`, height: '100%', background: '#E8440C', borderRadius: '2px'}}></div>
+        <div style={{width: `${progress}%`, height: '100%', background: brandColor, borderRadius: '2px'}}></div>
       </div>
       <p className="text-xs mt-1.5" style={{color: '#6B5E55'}}>
-        Next: <span style={{color: '#E8440C', fontWeight: 700}}>{nextMilestone.toLocaleString()} lbs</span>
+        Next: <span style={{color: brandColor, fontWeight: 700}}>{nextMilestone.toLocaleString()} lbs</span>
       </p>
     </>
   )
@@ -536,7 +550,7 @@ setIsChrome(chrome)
 
           {/* My Stats box */}
           <a href="/my-stats" className="rounded-2xl p-4 flex flex-col justify-between"
-            style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderTop: '2px solid #E8440C'}}>
+            style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderTop: `2px solid ${brandColor}`}}>
             <div>
               <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{color: '#6B5E55'}}>My Stats</p>
               <div className="flex items-center gap-3">
@@ -548,8 +562,8 @@ setIsChrome(chrome)
                     const r = 24
                     const c = 2 * Math.PI * r
                     const offset = c * (1 - pct)
-                    const ringColor = goalMet ? '#E8440C' : '#9B6DFF'
-                    const glow = goalMet ? '0 0 8px rgba(232,68,12,0.7)' : '0 0 6px rgba(155,109,255,0.4)'
+                    const ringColor = goalMet ? brandColor : '#9B6DFF'
+                    const glow = goalMet ? `0 0 8px ${hexToRgba(brandColor, 0.7)}` : '0 0 6px rgba(155,109,255,0.4)'
                     return (
                       <svg viewBox="0 0 56 56" style={{width: '56px', height: '56px', transform: 'rotate(-90deg)', filter: `drop-shadow(${glow})`}}>
                         <circle cx="28" cy="28" r={r} fill="none" stroke="#222222" strokeWidth="5" />
@@ -571,7 +585,7 @@ setIsChrome(chrome)
               </div>
             </div>
             <p className="text-xs mt-3" style={{color: '#6B5E55'}}>
-              <span style={{color: '#E8440C', fontWeight: 700}}>{totalSessions.toLocaleString()}</span> lifetime sessions
+              <span style={{color: brandColor, fontWeight: 700}}>{totalSessions.toLocaleString()}</span> lifetime sessions
             </p>
           </a>
 
@@ -580,7 +594,7 @@ setIsChrome(chrome)
         {/* Challenge box */}
         {challengeExercises.length === 0 ? (
           <div className="rounded-2xl mb-4 p-5" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
-            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
+            <p className="text-xs font-bold tracking-widest uppercase mb-1" style={{color: brandColor}}>Looking for a Challenge?</p>
             <p className="text-sm" style={{color: '#6B5E55'}}>Keep logging sessions — once you've built some history we'll start suggesting exercises to revisit.</p>
           </div>
         ) : (
@@ -593,7 +607,7 @@ setIsChrome(chrome)
               <div className="flex justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#E8440C'}}>Looking for a Challenge?</p>
+                    <p className="text-xs font-bold tracking-widest uppercase" style={{color: brandColor}}>Looking for a Challenge?</p>
                     {challengePool.length > 4 && (
                       <button
                         onClick={e => { e.stopPropagation(); shuffleChallenges() }}
@@ -623,7 +637,7 @@ setIsChrome(chrome)
                   <a key={i}
                     href={`/machine/${ex.machineId}?exercise=${encodeURIComponent(ex.name)}`}
                     className="flex justify-between items-center p-4 rounded-xl"
-                    style={{background: '#080808', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
+                    style={{background: '#080808', border: '1px solid #222222', borderLeft: `2px solid ${brandColor}`}}>
                     <div>
                       <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>{ex.name}</p>
                       <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
@@ -632,7 +646,7 @@ setIsChrome(chrome)
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold" style={{color: '#E8440C'}}>
+                      <p className="text-xs font-semibold" style={{color: brandColor}}>
                         {(() => {
                           const days = Math.round((new Date().getTime() - new Date(ex.lastDate).getTime()) / (1000 * 60 * 60 * 24))
                           return days === 1 ? 'Yesterday' : `${days}d ago`
@@ -729,13 +743,13 @@ setIsChrome(chrome)
                 key={workout.machine_id}
                 href={'/machine/' + workout.machine_id}
                 className="rounded-xl p-4 flex justify-between items-center"
-                style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
+                style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderLeft: `2px solid ${brandColor}`}}>
                 <div>
                   <p className="font-semibold" style={{color: '#E8E0D8'}}>{workout.exercise_name || workout.machines?.name}</p>
                   <p className="text-sm mt-1" style={{color: '#6B5E55'}}>{formatWorkoutSummary(workout)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-semibold" style={{color: '#E8440C'}}>{daysSince(workout.created_at)}</p>
+                  <p className="text-xs font-semibold" style={{color: brandColor}}>{daysSince(workout.created_at)}</p>
                   <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
               </a>
