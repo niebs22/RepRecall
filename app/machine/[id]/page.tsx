@@ -760,7 +760,7 @@ if (validSets.length === 0) {
 
       {logoUrl && (
         <div className="fixed top-6 left-6">
-          <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+          <img src={logoUrl} alt="Gym logo" style={{maxWidth: '140px', maxHeight: '64px', width: 'auto', height: 'auto', objectFit: 'contain'}} />
         </div>
       )}
 
@@ -836,7 +836,7 @@ if (validSets.length === 0) {
           <div className="max-w-lg mx-auto">
             <div className="flex justify-between items-center mb-4">
               {logoUrl ? (
-                <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+                <img src={logoUrl} alt="Gym logo" style={{maxWidth: '140px', maxHeight: '64px', width: 'auto', height: 'auto', objectFit: 'contain'}} />
               ) : (
                 <h1 className="text-xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
               )}
@@ -904,7 +904,7 @@ if (validSets.length === 0) {
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-4">
           {logoUrl ? (
-            <img src={logoUrl} alt="Gym logo" style={{height: '32px', maxWidth: '140px', objectFit: 'contain'}} />
+            <img src={logoUrl} alt="Gym logo" style={{maxWidth: '140px', maxHeight: '64px', width: 'auto', height: 'auto', objectFit: 'contain'}} />
           ) : (
             <h1 className="text-xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
           )}
