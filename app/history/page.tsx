@@ -8,6 +8,8 @@ export default function History() {
   const [workouts, setWorkouts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [timezone, setTimezone] = useState('America/New_York')
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -17,12 +19,16 @@ export default function History() {
 
       const { data: memberData } = await supabase
         .from('gym_members')
-        .select('gym_id, gyms(timezone)')
+        .select('gym_id, gyms(timezone, gym_branding(primary_color, logo_url))')
         .eq('user_id', user.id)
         .single()
       if (memberData?.gyms) {
         const tz = (memberData.gyms as any).timezone || 'America/New_York'
         setTimezone(tz)
+        const branding = (memberData.gyms as any).gym_branding
+        const brandingRow = Array.isArray(branding) ? branding[0] : branding
+        if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+        if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
       } else {
       }
 
@@ -133,9 +139,13 @@ export default function History() {
       <div className="max-w-lg mx-auto">
 
         <div className="flex justify-between items-center mb-8">
-  <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
-    scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
-  </h1>
+  {logoUrl ? (
+    <img src={logoUrl} alt="Gym logo" style={{maxWidth: '160px', maxHeight: '72px', width: 'auto', height: 'auto', objectFit: 'contain'}} />
+  ) : (
+    <h1 className="text-2xl" style={{fontWeight: 300, color: '#E8E0D8'}}>
+      scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span>
+    </h1>
+  )}
   <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>Back to Dashboard</a>
 </div>
 
@@ -148,14 +158,14 @@ export default function History() {
             {grouped.map((group, gi) => (
               <div key={gi}>
                 <p className="text-xs font-bold tracking-widest uppercase mb-3"
-                  style={{color: gi === 0 ? '#E8440C' : '#6B5E55'}}>
+                  style={{color: gi === 0 ? brandColor : '#6B5E55'}}>
                   {formatDayLabel(group.date)}
                 </p>
                 <div className="flex flex-col gap-2">
                   {groupSets(group.items).map((w, wi) => (
                     <a key={wi} href={'/machine/' + w.machine_id + '?from=history' + (w.exercise_name ? '&exercise=' + encodeURIComponent(w.exercise_name) : '')}
                       className="rounded-xl p-4 flex justify-between items-center"
-                      style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderLeft: '2px solid #E8440C'}}>
+                      style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222', borderLeft: `2px solid ${brandColor}`}}>
                       <div>
                         <p className="font-semibold text-sm" style={{color: '#E8E0D8'}}>
                           {w.exercise_name || w.machines?.name}
@@ -163,7 +173,7 @@ export default function History() {
                         <p className="text-xs mt-1" style={{color: '#6B5E55'}}>{formatSummary(w)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-semibold" style={{color: '#E8440C'}}>{formatTime(w.created_at, timezone)}</p>
+                        <p className="text-xs font-semibold" style={{color: brandColor}}>{formatTime(w.created_at, timezone)}</p>
                       </div>
                     </a>
                   ))}

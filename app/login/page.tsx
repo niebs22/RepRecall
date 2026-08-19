@@ -1,5 +1,5 @@
 'use client'
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -7,10 +7,30 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const gymCode = searchParams.get('gym')
   const nextUrl = searchParams.get('next')
+
+  useEffect(() => {
+    async function fetchGymBranding() {
+      if (!gymCode) return
+      const { data } = await supabase
+        .from('gyms')
+        .select('gym_branding(primary_color, logo_url)')
+        .eq('code', gymCode)
+        .single()
+      if (data) {
+        const branding = (data as any).gym_branding
+        const brandingRow = Array.isArray(branding) ? branding[0] : branding
+        if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+        if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
+      }
+    }
+    fetchGymBranding()
+  }, [gymCode])
 
   async function handleLogin(e: any) {
     e.preventDefault()
@@ -37,10 +57,14 @@ function LoginForm() {
     <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-1">
-            <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
-          </h1>
-          <p className="text-sm tracking-widest uppercase" style={{color: '#E8440C'}}>Welcome Back</p>
+          {logoUrl ? (
+            <img src={logoUrl} alt="Gym logo" className="mx-auto mb-2" style={{maxWidth: '200px', maxHeight: '90px', width: 'auto', height: 'auto', objectFit: 'contain'}} />
+          ) : (
+            <h1 className="text-4xl font-bold text-white mb-1">
+              <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
+            </h1>
+          )}
+          <p className="text-sm tracking-widest uppercase" style={{color: brandColor}}>Welcome Back</p>
         </div>
         <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <input
@@ -60,15 +84,15 @@ function LoginForm() {
             style={{background: 'linear-gradient(180deg, #222222 0%, #111111 100%)', border: '1px solid #222222'}}
           />
           {gymCode && (
-            <div className="rounded-lg px-4 py-3" style={{background: '#0F0F0F', border: '1px solid #E8440C'}}>
-              <p className="text-xs" style={{color: '#E8440C'}}>✓ You'll be joined to your gym after logging in</p>
+            <div className="rounded-lg px-4 py-3" style={{background: '#0F0F0F', border: `1px solid ${brandColor}`}}>
+              <p className="text-xs" style={{color: brandColor}}>✓ You'll be joined to your gym after logging in</p>
             </div>
           )}
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
             type="submit"
             className="py-3 rounded-full font-semibold text-white"
-            style={{background: '#E8440C'}}
+            style={{background: brandColor}}
           >
             Log In
           </button>
@@ -78,7 +102,7 @@ function LoginForm() {
 </p>
 <p className="text-center mt-3" style={{color: '#6B5E55'}}>
   No account?{' '}
-  <a href="/signup" style={{color: '#E8440C'}}>Sign Up</a>
+  <a href="/signup" style={{color: brandColor}}>Sign Up</a>
 </p>
       </div>
     </main>

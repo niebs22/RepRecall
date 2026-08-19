@@ -8,6 +8,8 @@ export default function JoinGym() {
   const code = pathname?.split('/').pop()
   const [gym, setGym] = useState<any>(null)
   const [status, setStatus] = useState<'loading' | 'join' | 'done' | 'error' | 'wrong_gym'>('loading')
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -15,10 +17,14 @@ export default function JoinGym() {
       if (!code) { setStatus('error'); return }
 
       const { data: gymData } = await supabase
-        .from('gyms').select('*').eq('code', code).single()
+        .from('gyms').select('*, gym_branding(primary_color, logo_url)').eq('code', code).single()
 
       if (!gymData) { setStatus('error'); return }
       setGym(gymData)
+      const branding = (gymData as any).gym_branding
+      const brandingRow = Array.isArray(branding) ? branding[0] : branding
+      if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+      if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
 
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -88,7 +94,7 @@ if (status === 'wrong_gym') return (
   if (status === 'done') return (
     <main className="min-h-screen flex items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="text-center">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: '#E8440C'}}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background: brandColor}}>
           <span className="text-2xl text-white">✓</span>
         </div>
         <h2 className="text-2xl font-bold text-white mb-2">You're in!</h2>
@@ -100,10 +106,16 @@ if (status === 'wrong_gym') return (
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6" style={{background: '#080808'}}>
       <div className="w-full max-w-sm text-center">
-        <h1 className="text-4xl font-bold text-white mb-1">
-          <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
-        </h1>
-        <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#E8440C'}}>Scan. Log. Repeat.</p>
+        {logoUrl ? (
+          <img src={logoUrl} alt={gym?.name || 'Gym logo'} className="mx-auto mb-3" style={{maxWidth: '220px', maxHeight: '100px', width: 'auto', height: 'auto', objectFit: 'contain'}} />
+        ) : (
+          <>
+            <h1 className="text-4xl font-bold text-white mb-1">
+              <span style={{fontWeight: 300}}>scan</span><span style={{color: '#E8440C', fontWeight: 900}}>set</span>
+            </h1>
+            <p className="text-sm tracking-widest uppercase mb-8" style={{color: '#E8440C'}}>Scan. Log. Repeat.</p>
+          </>
+        )}
 
         <div className="rounded-2xl p-6 mb-6" style={{background: '#0F0F0F'}}>
           <p className="text-xs uppercase tracking-widest mb-2" style={{color: '#6B5E55'}}>You've been invited to join</p>
@@ -116,14 +128,14 @@ if (status === 'wrong_gym') return (
             <a
             href={`/signup?gym=${code}${typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('next') ? '&next=' + encodeURIComponent(new URLSearchParams(window.location.search).get('next')!) : ''}`}
             className="py-3 rounded-full font-semibold text-white text-center"
-            style={{background: '#E8440C'}}>
+            style={{background: brandColor}}>
             Create Account
           </a>
           
             <a
             href={`/login?gym=${code}${typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('next') ? '&next=' + encodeURIComponent(new URLSearchParams(window.location.search).get('next')!) : ''}`}
             className="py-3 rounded-full font-semibold text-center"
-            style={{border: '1px solid #E8440C', color: '#E8440C'}}>
+            style={{border: `1px solid ${brandColor}`, color: brandColor}}>
             Log In
           </a>
         </div>
