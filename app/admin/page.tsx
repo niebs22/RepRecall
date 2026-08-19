@@ -25,6 +25,8 @@ export default function Admin() {
   const [bulkOpen, setBulkOpen] = useState(false)
   const [addOpen, setAddOpen] = useState(false)
   const [quantities, setQuantities] = useState<Record<string, number>>({})
+  const [brandColor, setBrandColor] = useState('#E8440C')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -48,12 +50,12 @@ export default function Admin() {
     .from('gym_members').select('gym_id').eq('user_id', user.id).single()
   if (memberData) {
     const { data } = await supabase
-      .from('gyms').select('*').eq('id', memberData.gym_id).single()
+      .from('gyms').select('*, gym_branding(primary_color, logo_url)').eq('id', memberData.gym_id).single()
     gym = data
   }
 } else if (profile.role === 'gym_owner') {
   const { data } = await supabase
-    .from('gyms').select('*').eq('owner_id', user.id).single()
+    .from('gyms').select('*, gym_branding(primary_color, logo_url)').eq('owner_id', user.id).single()
   gym = data
 } else {
   // Regular members don't get admin access
@@ -64,6 +66,10 @@ export default function Admin() {
       if (gym) {
         setGymId(gym.id)
         setGymName(gym.name)
+        const branding = (gym as any).gym_branding
+        const brandingRow = Array.isArray(branding) ? branding[0] : branding
+        if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
+        if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
         fetchMachines(gym.id)
       }
     }
@@ -126,18 +132,27 @@ async function bulkAddMachines(e: any) {
   setBulkLoading(false)
 }
 
+  function loadImageEl(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      img.src = src
+    })
+  }
+
   async function downloadQR(machineId: string, machineName: string) {
-  const QRCode = await import('qrcode')
+    const QRCode = await import('qrcode')
 
-  const qrDataUrl = await QRCode.toDataURL(
-    'https://rep-recall.vercel.app/machine/' + machineId,
-    { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
-  )
+    const qrDataUrl = await QRCode.toDataURL(
+      'https://scanset.app/machine/' + machineId,
+      { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
+    )
 
-  const qrImage = new Image()
-  qrImage.src = qrDataUrl
+    const qrImage = await loadImageEl(qrDataUrl)
+    const logoImage = logoUrl ? await loadImageEl(logoUrl).catch(() => null) : null
 
-  qrImage.onload = () => {
     const cardWidth = 300
     const cardHeight = 380
     const canvas = document.createElement('canvas')
@@ -145,42 +160,57 @@ async function bulkAddMachines(e: any) {
     canvas.height = cardHeight
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
 
     // Background
     ctx.fillStyle = '#080808'
     ctx.fillRect(0, 0, cardWidth, cardHeight)
 
-    // Wordmark centered
     const cx = cardWidth / 2
-    ctx.textBaseline = 'alphabetic'
-    ctx.font = '300 26px Helvetica'
-    ctx.fillStyle = '#ffffff'
-    const scanWidth = ctx.measureText('scan').width
-    ctx.font = '900 26px Helvetica'
-    const setWidth = ctx.measureText('set').width
-    const totalWidth = scanWidth + setWidth
-    const startX = cx - totalWidth / 2
 
-    ctx.font = '300 26px Helvetica'
-    ctx.fillStyle = '#ffffff'
-    ctx.textAlign = 'left'
-    ctx.fillText('scan', startX, 44)
-    ctx.font = '900 26px Helvetica'
-    ctx.fillStyle = '#E8440C'
-    ctx.fillText('set', startX + scanWidth, 44)
+    if (logoImage) {
+      const maxLogoW = 220
+      const maxLogoH = 60
+      const aspect = logoImage.width / logoImage.height
+      let logoW = maxLogoW
+      let logoH = logoW / aspect
+      if (logoH > maxLogoH) {
+        logoH = maxLogoH
+        logoW = logoH * aspect
+      }
+      ctx.drawImage(logoImage, cx - logoW / 2, 10, logoW, logoH)
+    } else {
+      ctx.textBaseline = 'alphabetic'
+      ctx.font = '300 26px Helvetica'
+      ctx.fillStyle = '#ffffff'
+      const scanWidth = ctx.measureText('scan').width
+      ctx.font = '900 26px Helvetica'
+      const setWidth = ctx.measureText('set').width
+      const totalWidth = scanWidth + setWidth
+      const startX = cx - totalWidth / 2
+
+      ctx.font = '300 26px Helvetica'
+      ctx.fillStyle = '#ffffff'
+      ctx.textAlign = 'left'
+      ctx.fillText('scan', startX, 44)
+      ctx.font = '900 26px Helvetica'
+      ctx.fillStyle = brandColor
+      ctx.fillText('set', startX + scanWidth, 44)
+    }
 
     // Divider
     ctx.strokeStyle = '#222222'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.moveTo(30, 58)
-    ctx.lineTo(cardWidth - 30, 58)
+    ctx.moveTo(30, 76)
+    ctx.lineTo(cardWidth - 30, 76)
     ctx.stroke()
 
     // QR code
-    const qrSize = 220
+    const qrSize = 200
     const qrX = (cardWidth - qrSize) / 2
-    ctx.drawImage(qrImage, qrX, 72, qrSize, qrSize)
+    ctx.drawImage(qrImage, qrX, 90, qrSize, qrSize)
 
     // Machine name
     ctx.font = '13px Helvetica'
@@ -198,7 +228,7 @@ async function bulkAddMachines(e: any) {
 
     // Tagline
     ctx.font = '10px Helvetica'
-    ctx.fillStyle = '#E8440C'
+    ctx.fillStyle = brandColor
     ctx.textAlign = 'center'
     ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 346)
 
@@ -208,7 +238,6 @@ async function bulkAddMachines(e: any) {
     a.href = url
     a.download = machineName + '-ScanSet-QR.png'
     a.click()
-  }
   }
 
   async function exportAllCards() {
@@ -227,6 +256,12 @@ async function bulkAddMachines(e: any) {
     const marginX = (8.5 - cols * cardW) / 2
     const marginY = (11 - rows * cardH) / 2
     const cropSize = 0.08
+
+    const logoImage = logoUrl ? await loadImageEl(logoUrl).catch(() => null) : null
+    const logoFormat = logoUrl && /\.(jpe?g)$/i.test(logoUrl) ? 'JPEG' : 'PNG'
+    const br = parseInt(brandColor.slice(1, 3), 16)
+    const bg2 = parseInt(brandColor.slice(3, 5), 16)
+    const bb2 = parseInt(brandColor.slice(5, 7), 16)
 
     const expandedMachines: any[] = []
     machines.forEach(machine => {
@@ -266,15 +301,28 @@ async function bulkAddMachines(e: any) {
       doc.line(x + cardW + 0.015, y + cardH, x + cardW + cropSize, y + cardH)
       doc.line(x + cardW, y + cardH + 0.015, x + cardW, y + cardH + cropSize)
 
-      // Wordmark — top left
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(232, 224, 216)
-      doc.text('scan', x + 0.14, y + 0.26)
-      const scanW = doc.getTextWidth('scan')
-      doc.setFont('helvetica', 'bold')
-      doc.setTextColor(194, 59, 10)
-      doc.text('set', x + 0.14 + scanW, y + 0.26)
+      // Logo or wordmark — top left
+      if (logoImage) {
+        const maxLogoW = 0.9
+        const maxLogoH = 0.22
+        const aspect = logoImage.width / logoImage.height
+        let logoW = maxLogoW
+        let logoH = logoW / aspect
+        if (logoH > maxLogoH) {
+          logoH = maxLogoH
+          logoW = logoH * aspect
+        }
+        doc.addImage(logoImage, logoFormat, x + 0.14, y + 0.08, logoW, logoH)
+      } else {
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(232, 224, 216)
+        doc.text('scan', x + 0.14, y + 0.26)
+        const scanW = doc.getTextWidth('scan')
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(br, bg2, bb2)
+        doc.text('set', x + 0.14 + scanW, y + 0.26)
+      }
 
       // QR code — centered
       const qrDataUrl = await QRCode.toDataURL(
@@ -294,7 +342,7 @@ async function bulkAddMachines(e: any) {
       // Tagline — bottom
       doc.setFontSize(6)
       doc.setFont('helvetica', 'bold')
-      doc.setTextColor(194, 59, 10)
+      doc.setTextColor(br, bg2, bb2)
       doc.text('SCAN. LOG. REPEAT.', x + cardW / 2, y + cardH - 0.1, { align: 'center' })
     }
 
