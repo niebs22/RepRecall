@@ -9,8 +9,9 @@ export default function Dashboard() {
   const [profile, setProfile] = useState<any>(null)
   const [gymName, setGymName] = useState('')
   const [gymTimezone, setGymTimezone] = useState('America/New_York')
-  const [brandColor, setBrandColor] = useState('#E8440C')
+ const [brandColor, setBrandColor] = useState('#E8440C')
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [brandingReady, setBrandingReady] = useState(false)
   const [machineWorkouts, setMachineWorkouts] = useState<any[]>([])
   const [allMachines, setAllMachines] = useState<any[]>([])
   const [weekActivity, setWeekActivity] = useState<boolean[]>([false, false, false, false, false, false, false])
@@ -130,6 +131,7 @@ setIsChrome(chrome)
       if (brandingRow?.primary_color) setBrandColor(brandingRow.primary_color)
       if (brandingRow?.logo_url) setLogoUrl(brandingRow.logo_url)
     }
+    setBrandingReady(true)
   }
 
   async function fetchMachineWorkouts(userId: string) {
@@ -359,6 +361,10 @@ setIsChrome(chrome)
 
   // Bar heights based on session volume per day would go here — for now proportional placeholder
   const barHeights = [40, 28, 48, 20, 36, 8, 8]
+
+  if (!brandingReady) return (
+    <main className="min-h-screen" style={{background: '#080808'}} />
+  )
 
   return (
     <>
