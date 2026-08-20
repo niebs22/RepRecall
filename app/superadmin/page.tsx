@@ -248,6 +248,12 @@ export default function SuperAdmin() {
     if (!gymMachines.length) return
     const QRCode = await import('qrcode')
     const selectedGym = gyms.find(g => g.id === selectedGymId)
+    const { brandColor, logoUrl } = getGymBranding(selectedGym)
+    const logoImage = logoUrl ? await loadImageEl(logoUrl).catch(() => null) : null
+    const logoFormat = logoUrl && /\.(jpe?g)$/i.test(logoUrl) ? 'JPEG' : 'PNG'
+    const br = parseInt(brandColor.slice(1, 3), 16)
+    const bg2 = parseInt(brandColor.slice(3, 5), 16)
+    const bb2 = parseInt(brandColor.slice(5, 7), 16)
     const doc = new jsPDF({ orientation: 'portrait', unit: 'in', format: 'letter' })
     const cardW = 2.5, cardH = 2.0, cols = 3, rows = 5
     const cardsPerPage = cols * rows
@@ -288,14 +294,27 @@ for (let i = 0; i < expandedMachines.length; i++) {
       doc.line(x + cardW + 0.015, y + cardH, x + cardW + cropSize, y + cardH)
       doc.line(x + cardW, y + cardH + 0.015, x + cardW, y + cardH + cropSize)
 
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(232, 224, 216)
-      doc.text('scan', x + 0.14, y + 0.26)
-      const scanW = doc.getTextWidth('scan')
-      doc.setFont('helvetica', 'bold')
-      doc.setTextColor(232, 68, 12)
-      doc.text('set', x + 0.14 + scanW, y + 0.26)
+      if (logoImage) {
+        const maxLogoW = 0.9
+        const maxLogoH = 0.22
+        const aspect = logoImage.width / logoImage.height
+        let logoW = maxLogoW
+        let logoH = logoW / aspect
+        if (logoH > maxLogoH) {
+          logoH = maxLogoH
+          logoW = logoH * aspect
+        }
+        doc.addImage(logoImage, logoFormat, x + 0.14, y + 0.08, logoW, logoH)
+      } else {
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(232, 224, 216)
+        doc.text('scan', x + 0.14, y + 0.26)
+        const scanW = doc.getTextWidth('scan')
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(br, bg2, bb2)
+        doc.text('set', x + 0.14 + scanW, y + 0.26)
+      }
 
       const qrDataUrl = await QRCode.toDataURL(
         'https://scanset.app/machine/' + machine.id,
@@ -312,7 +331,7 @@ for (let i = 0; i < expandedMachines.length; i++) {
 
       doc.setFontSize(6)
       doc.setFont('helvetica', 'bold')
-      doc.setTextColor(232, 68, 12)
+      doc.setTextColor(br, bg2, bb2)
       doc.text('SCAN. LOG. REPEAT.', x + cardW / 2, y + cardH - 0.1, { align: 'center' })
     }
 
@@ -580,18 +599,81 @@ for (let i = 0; i < expandedMachines.length; i++) {
       <p className="text-xs" style={{color: '#6B5E55'}}>Scan to join {gym.name}</p>
       <button
         onClick={async () => {
+          const { brandColor: joinBrandColor, logoUrl: joinLogoUrl } = getGymBranding(gym)
           const QRCode = await import('qrcode')
-          const url = await QRCode.toDataURL(
+          const qrDataUrl = await QRCode.toDataURL(
             `https://scanset.app/join/${gym.code}`,
-            { width: 1200, margin: 2, color: { dark: '#000000', light: '#ffffff' } }
+            { width: 500, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
           )
+          const qrImage = await loadImageEl(qrDataUrl)
+          const logoImage = joinLogoUrl ? await loadImageEl(joinLogoUrl).catch(() => null) : null
+
+          const cardWidth = 500
+          const cardHeight = 640
+          const canvas = document.createElement('canvas')
+          canvas.width = cardWidth
+          canvas.height = cardHeight
+          const ctx = canvas.getContext('2d')
+          if (!ctx) return
+          ctx.imageSmoothingEnabled = true
+          ctx.imageSmoothingQuality = 'high'
+
+          ctx.fillStyle = '#080808'
+          ctx.fillRect(0, 0, cardWidth, cardHeight)
+
+          const cx = cardWidth / 2
+
+          if (logoImage) {
+            const maxLogoW = 340
+            const maxLogoH = 130
+            const aspect = logoImage.width / logoImage.height
+            let logoW = maxLogoW
+            let logoH = logoW / aspect
+            if (logoH > maxLogoH) {
+              logoH = maxLogoH
+              logoW = logoH * aspect
+            }
+            ctx.drawImage(logoImage, cx - logoW / 2, 30, logoW, logoH)
+          } else {
+            ctx.textBaseline = 'alphabetic'
+            ctx.font = '300 44px Helvetica'
+            ctx.fillStyle = '#ffffff'
+            const scanWidth = ctx.measureText('scan').width
+            ctx.font = '900 44px Helvetica'
+            const setWidth = ctx.measureText('set').width
+            const totalWidth = scanWidth + setWidth
+            const startX = cx - totalWidth / 2
+            ctx.font = '300 44px Helvetica'
+            ctx.fillStyle = '#ffffff'
+            ctx.textAlign = 'left'
+            ctx.fillText('scan', startX, 90)
+            ctx.font = '900 44px Helvetica'
+            ctx.fillStyle = joinBrandColor
+            ctx.fillText('set', startX + scanWidth, 90)
+          }
+
+          ctx.font = 'bold 20px Helvetica'
+          ctx.fillStyle = '#E8E0D8'
+          ctx.textAlign = 'center'
+          ctx.fillText('Scan to join ' + gym.name, cx, 175)
+
+          const qrSize = 400
+          const qrX = (cardWidth - qrSize) / 2
+          ctx.drawImage(qrImage, qrX, 200, qrSize, qrSize)
+
+          ctx.font = 'bold 14px Helvetica'
+          ctx.fillStyle = joinBrandColor
+          ctx.textAlign = 'center'
+          ctx.fillText('SCAN. LOG. REPEAT.', cx, cardHeight - 30)
+
+          const url = canvas.toDataURL('image/png')
           const a = document.createElement('a')
           a.href = url
           a.download = gym.name + '-Join-QR.png'
           a.click()
         }}
         className="text-xs px-3 py-2 rounded-lg font-semibold text-white text-center"
-        style={{background: '#E8440C'}}>
+        style={{background: getGymBranding(gym).brandColor}}>
         Download QR (High Res)
       </button>
     </div>
