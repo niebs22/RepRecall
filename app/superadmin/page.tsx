@@ -49,8 +49,127 @@ export default function SuperAdmin() {
   }, [selectedGymId])
 
   async function fetchGyms() {
-    const { data } = await supabase.from('gyms').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase.from('gyms').select('*, gym_branding(primary_color, logo_url)').order('created_at', { ascending: false })
     if (data) setGyms(data)
+  }
+
+  function getGymBranding(gym: any) {
+    const branding = gym?.gym_branding
+    const row = Array.isArray(branding) ? branding[0] : branding
+    return {
+      brandColor: row?.primary_color || '#E8440C',
+      logoUrl: row?.logo_url || null
+    }
+  }
+
+  function hexToRgba(hex: string, alpha: number) {
+    const clean = hex.replace('#', '')
+    const r = parseInt(clean.substring(0, 2), 16)
+    const g = parseInt(clean.substring(2, 4), 16)
+    const b = parseInt(clean.substring(4, 6), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+
+  function loadImageEl(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => resolve(img)
+      img.onerror = reject
+      img.src = src
+    })
+  }
+
+  async function downloadMachineQR(machine: any) {
+    const gym = gyms.find(g => g.id === selectedGymId)
+    const { brandColor, logoUrl } = getGymBranding(gym)
+
+    const QRCode = await import('qrcode')
+    const qrDataUrl = await QRCode.toDataURL(
+      'https://scanset.app/machine/' + machine.id,
+      { width: 300, margin: 1, color: { dark: '#000000', light: '#ffffff' } }
+    )
+
+    const qrImage = await loadImageEl(qrDataUrl)
+    const logoImage = logoUrl ? await loadImageEl(logoUrl).catch(() => null) : null
+
+    const cardWidth = 300
+    const cardHeight = 380
+    const canvas = document.createElement('canvas')
+    canvas.width = cardWidth
+    canvas.height = cardHeight
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+
+    ctx.fillStyle = '#080808'
+    ctx.fillRect(0, 0, cardWidth, cardHeight)
+
+    const cx = cardWidth / 2
+
+    if (logoImage) {
+      const maxLogoW = 220
+      const maxLogoH = 60
+      const aspect = logoImage.width / logoImage.height
+      let logoW = maxLogoW
+      let logoH = logoW / aspect
+      if (logoH > maxLogoH) {
+        logoH = maxLogoH
+        logoW = logoH * aspect
+      }
+      ctx.drawImage(logoImage, cx - logoW / 2, 10, logoW, logoH)
+    } else {
+      ctx.textBaseline = 'alphabetic'
+      ctx.font = '300 26px Helvetica'
+      ctx.fillStyle = '#ffffff'
+      const scanWidth = ctx.measureText('scan').width
+      ctx.font = '900 26px Helvetica'
+      const setWidth = ctx.measureText('set').width
+      const totalWidth = scanWidth + setWidth
+      const startX = cx - totalWidth / 2
+      ctx.font = '300 26px Helvetica'
+      ctx.fillStyle = '#ffffff'
+      ctx.textAlign = 'left'
+      ctx.fillText('scan', startX, 44)
+      ctx.font = '900 26px Helvetica'
+      ctx.fillStyle = brandColor
+      ctx.fillText('set', startX + scanWidth, 44)
+    }
+
+    ctx.strokeStyle = '#222222'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(30, 76)
+    ctx.lineTo(cardWidth - 30, 76)
+    ctx.stroke()
+
+    const qrSize = 200
+    const qrX = (cardWidth - qrSize) / 2
+    ctx.drawImage(qrImage, qrX, 90, qrSize, qrSize)
+
+    ctx.font = '13px Helvetica'
+    ctx.fillStyle = '#6B5E55'
+    ctx.textAlign = 'center'
+    ctx.fillText(machine.name, cardWidth / 2, 314)
+
+    ctx.strokeStyle = '#222222'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(30, 326)
+    ctx.lineTo(cardWidth - 30, 326)
+    ctx.stroke()
+
+    ctx.font = '10px Helvetica'
+    ctx.fillStyle = brandColor
+    ctx.textAlign = 'center'
+    ctx.fillText('SCAN. LOG. REPEAT.', cardWidth / 2, 346)
+
+    const url = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = machine.name + '-ScanSet-QR.png'
+    a.click()
   }
 
   async function fetchGymMachines(gymId: string) {
@@ -385,6 +504,11 @@ for (let i = 0; i < expandedMachines.length; i++) {
               </div>
               <div className="flex flex-col gap-2 flex-1">
                 <p className="text-xs" style={{color: '#6B5E55'}}>ID: {machine.id.slice(0, 8)}...</p>
+                <button onClick={() => downloadMachineQR(machine)}
+                  className="py-2 rounded-full text-sm font-semibold text-white"
+                  style={{background: getGymBranding(gyms.find(g => g.id === selectedGymId)).brandColor}}>
+                  Download QR
+                </button>
                 <button onClick={() => deleteMachine(machine.id)}
                   className="py-2 rounded-full text-sm font-semibold"
                   style={{background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444'}}>
