@@ -841,9 +841,18 @@ if (validSets.length === 0) {
                 <h1 className="text-xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
               )}
             </div>
-            <a href="/dashboard" className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
-              ← Back to Dashboard
-            </a>
+                        <div className="flex justify-between items-center mb-6">
+              <a href="/dashboard" className="text-sm inline-block" style={{color: '#6B5E55'}}>
+                ← Back to Dashboard
+              </a>
+              <a href="/feedback" className="text-sm flex items-center gap-1" style={{color: '#6B5E55'}}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 11.5C21 16.19 16.97 20 12 20C10.5 20 9.09 19.64 7.86 19L3 20L4.3 15.8C3.48 14.57 3 13.09 3 11.5C3 6.81 7.03 3 12 3C16.97 3 21 6.81 21 11.5Z"
+                    stroke="#6B5E55" strokeWidth="2" strokeLinejoin="round"/>
+                </svg>
+                Feedback
+              </a>
+            </div>
             <div className="flex items-center gap-3 mb-6">
               <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
               <span className="text-xs px-2 py-0.5 rounded-full" style={{background: hexToRgba(brandColor, 0.1), color: brandColor}}>Functional</span>
@@ -909,9 +918,18 @@ if (validSets.length === 0) {
             <h1 className="text-xl" style={{fontWeight: 300, color: '#E8E0D8'}}>scan<span style={{fontWeight: 900, color: '#E8440C'}}>set</span></h1>
           )}
         </div>
-        <a href={from === 'history' ? '/history' : from === 'routine' && routineId ? `/routines/${routineId}` : '/dashboard'} className="text-sm mb-6 inline-block" style={{color: '#6B5E55'}}>
-  {from === 'history' ? '← Back to History' : from === 'routine' ? '← Back to Routine' : '← Back to Dashboard'}
-</a>
+                <div className="flex justify-between items-center mb-6">
+          <a href={from === 'history' ? '/history' : from === 'routine' && routineId ? `/routines/${routineId}` : '/dashboard'} className="text-sm inline-block" style={{color: '#6B5E55'}}>
+            {from === 'history' ? '← Back to History' : from === 'routine' ? '← Back to Routine' : '← Back to Dashboard'}
+          </a>
+          <a href="/feedback" className="text-sm flex items-center gap-1" style={{color: '#6B5E55'}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M21 11.5C21 16.19 16.97 20 12 20C10.5 20 9.09 19.64 7.86 19L3 20L4.3 15.8C3.48 14.57 3 13.09 3 11.5C3 6.81 7.03 3 12 3C16.97 3 21 6.81 21 11.5Z"
+                stroke="#6B5E55" strokeWidth="2" strokeLinejoin="round"/>
+            </svg>
+            Feedback
+          </a>
+        </div>
 
         <div className="flex items-center gap-3 mb-1">
   <h1 className="text-3xl font-bold text-white">{machine.name}</h1>
