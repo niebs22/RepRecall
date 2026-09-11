@@ -1281,7 +1281,7 @@ if (validSets.length === 0) {
                         </span>
                       )}
                     </div>
-                    {group.workouts[0]?.duration ? (
+                                        {group.workouts[0]?.duration ? (
                       <div className="flex gap-4">
                         <div>
                           <p className="text-white font-semibold">{group.workouts[0].duration}</p>
@@ -1311,6 +1311,11 @@ if (validSets.length === 0) {
                           </div>
                         ))}
                       </div>
+                    )}
+                    {group.workouts.find(w => w.notes)?.notes && (
+                      <p className="text-xs italic mt-2" style={{color: '#6B5E55'}}>
+                        "{group.workouts.find(w => w.notes)?.notes}"
+                      </p>
                     )}
                     {i < getHistoryGrouped().length - 1 && (
                       <div className="mt-3" style={{borderBottom: '1px solid #222222'}}/>
