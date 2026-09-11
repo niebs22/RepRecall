@@ -45,7 +45,7 @@ export default function BottomNav() {
             style={{color: '#E8440C', letterSpacing: '0.5px'}}>Scan</span>
         </a>
 
-        {/* History */}
+                {/* History */}
         <a href="/history" className="flex flex-col items-center gap-1 flex-1">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
             <rect x="5" y="3" width="14" height="18" rx="2"
@@ -57,7 +57,16 @@ export default function BottomNav() {
           <span className="text-xs font-semibold" style={{color: active('/history')}}>History</span>
         </a>
 
-          </div>
+        {/* Feedback */}
+        <a href="/feedback" className="flex flex-col items-center gap-1 flex-1">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M21 11.5C21 16.19 16.97 20 12 20C10.5 20 9.09 19.64 7.86 19L3 20L4.3 15.8C3.48 14.57 3 13.09 3 11.5C3 6.81 7.03 3 12 3C16.97 3 21 6.81 21 11.5Z"
+              stroke={active('/feedback')} strokeWidth="2" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-xs font-semibold" style={{color: active('/feedback')}}>Feedback</span>
+        </a>
+
+      </div>
     </nav>
   )
 }
