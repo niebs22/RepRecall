@@ -388,7 +388,12 @@ async function bulkAddMachines(e: any) {
           <a href="/admin/analytics-v2" className="rounded-2xl p-5 flex flex-col gap-2" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #9B6DFF'}}>
             <p style={{fontSize: '24px'}}>✨</p>
             <p className="font-bold text-white text-sm">Analytics (New)</p>
-            <p className="text-xs" style={{color: '#6B5E55'}}>Try the redesigned tabbed view — feedback welcome</p>
+                        <p className="text-xs" style={{color: '#6B5E55'}}>Try the redesigned tabbed view — feedback welcome</p>
+          </a>
+          <a href="/admin/tv" className="rounded-2xl p-5 flex flex-col gap-2" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={brandColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            <p className="font-bold text-white text-sm">TV Studio</p>
+            <p className="text-xs" style={{color: '#6B5E55'}}>Put member PRs, progress and shout-outs on the gym TV</p>
           </a>
           <div className="rounded-2xl p-5 flex flex-col gap-2 cursor-pointer" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}
             onClick={() => document.getElementById('export-btn')?.click()}>
