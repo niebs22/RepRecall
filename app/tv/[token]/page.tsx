@@ -25,8 +25,8 @@ function ProgressChart({ series, color }: { series: { d: string; w: number }[]; 
   const ws = series.map(s => Number(s.w))
   const minW = Math.min(...ws), maxW = Math.max(...ws)
   const spread = maxW - minW || 1
-  const lo = Math.max(0, minW - spread * 0.15)
-  const hi = maxW + spread * 0.15
+  const lo = Math.floor(Math.max(0, minW - spread * 0.15) / 5) * 5
+  const hi = Math.ceil((maxW + spread * 0.15) / 5) * 5
   const x = (t: number) => padL + ((t - t0) / (t1 - t0 || 1)) * (W - padL - padR)
   const y = (w: number) => padT + (1 - (w - lo) / (hi - lo)) * (H - padT - padB)
   const pts = series.map((s, i) => ({ x: x(times[i]), y: y(Number(s.w)) }))
@@ -34,7 +34,7 @@ function ProgressChart({ series, color }: { series: { d: string; w: number }[]; 
   const area = `${line} L${pts[pts.length - 1].x.toFixed(1)},${H - padB} L${pts[0].x.toFixed(1)},${H - padB} Z`
   const last = pts[pts.length - 1]
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', maxHeight: '55vh' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 'auto', maxHeight: '60vh' }}>
       <defs>
         <linearGradient id="tvarea" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.35" />
@@ -66,7 +66,8 @@ function CardSlide({ card, brand }: { card: any; brand: string }) {
   const latest = series.length ? Number(series[series.length - 1].w) : 0
 
   return (
-    <div style={{ width: '100%', padding: '4vw 5vw', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2vh' }}>
+    <div style={{ width: '100%', padding: '3vw 5vw', display: 'flex', flexDirection: card.type === 'progress' ? 'row' : 'column', alignItems: card.type === 'progress' ? 'center' : 'stretch', justifyContent: 'center', gap: card.type === 'progress' ? '4vw' : '2vh' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2vh', flex: card.type === 'progress' ? '0 0 32%' : 'none' }}>
       <p style={{ color: brand, fontSize: 'clamp(16px, 1.8vw, 30px)', fontWeight: 800, letterSpacing: '0.25em', textTransform: 'uppercase' }}>{label}</p>
       {card.member && (
         <h1 style={{ color: '#F0EBE6', fontSize: 'clamp(40px, 7vw, 120px)', fontWeight: 900, lineHeight: 1.05 }}>{card.member}</h1>
@@ -77,9 +78,10 @@ function CardSlide({ card, brand }: { card: any; brand: string }) {
       {machineLine && card.type !== 'shoutout' && (
         <p style={{ color: '#B0A89F', fontSize: 'clamp(18px, 2.2vw, 36px)' }}>{machineLine}</p>
       )}
+      </div>
 
       {card.type === 'progress' && (
-        <div style={{ marginTop: '1vh' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           <ProgressChart series={series} color={brand} />
           {series.length >= 2 && (
             <p style={{ color: '#B0A89F', fontSize: 'clamp(18px, 2.2vw, 36px)', marginTop: '1vh' }}>
