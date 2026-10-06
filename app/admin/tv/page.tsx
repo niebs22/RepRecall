@@ -22,7 +22,8 @@ export default function TVStudio() {
   const [machines, setMachines] = useState<any[]>([])
   const [cards, setCards] = useState<any[]>([])
   const [candidates, setCandidates] = useState<any[]>([])
-  const [copied, setCopied] = useState(false)
+     const [copied, setCopied] = useState(false)
+   const [tvToken, setTvToken] = useState('')
   const [cardType, setCardType] = useState('pr')
   const [memberId, setMemberId] = useState('')
   const [machineId, setMachineId] = useState('')
@@ -72,7 +73,10 @@ export default function TVStudio() {
   }, [memberId, machineId, cardType])
 
   async function selectGym(g: any) {
-    setGym(g)
+           setGym(g)
+       setTvToken('')
+       supabase.from('gym_tv_tokens').select('token').eq('gym_id', g.id).limit(1)
+         .then(({ data }) => setTvToken(data?.[0]?.token || ''))
     const b = Array.isArray(g.gym_branding) ? g.gym_branding[0] : g.gym_branding
     setBrandColor(b?.primary_color || '#E8440C')
     setMemberId(''); setMachineId(''); setExercise(''); setExerciseOptions([]); setCaption('')
@@ -149,7 +153,7 @@ export default function TVStudio() {
   }
 
   async function copyLink() {
-    await navigator.clipboard.writeText(`https://scanset.app/tv/${gym.tv_token}`)
+    await navigator.clipboard.writeText(`https://scanset.app/tv/${tvToken}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -186,13 +190,13 @@ export default function TVStudio() {
               <p className="text-xs mb-3" style={{ color: '#6B5E55' }}>Open this on the gym TV once and leave it. New cards appear within a minute.</p>
               <div className="flex gap-2">
                 <p className="text-xs flex-1 px-3 py-2 rounded-lg truncate" style={{ background: '#080808', color: '#B0A89F' }}>
-                  scanset.app/tv/{gym.tv_token}
+                  scanset.app/tv/{tvToken}
                 </p>
                 <button onClick={copyLink} className="text-xs px-3 py-2 rounded-lg font-semibold"
                   style={{ background: copied ? '#1A1A1A' : brandColor, color: copied ? brandColor : '#fff', border: 'none', cursor: 'pointer' }}>
                   {copied ? 'Copied' : 'Copy'}
                 </button>
-                <a href={`/tv/${gym.tv_token}`} target="_blank" rel="noreferrer" className="text-xs px-3 py-2 rounded-lg font-semibold"
+                <a href={`/tv/${tvToken}`} target="_blank" rel="noreferrer" className="text-xs px-3 py-2 rounded-lg font-semibold"
                   style={{ background: '#080808', border: `1px solid ${brandColor}`, color: brandColor }}>Open</a>
               </div>
             </div>

@@ -20,17 +20,12 @@ function OwnerSetupForm() {
     async function loadInvite() {
       if (!t) { setStatus('error'); setErrorMsg('Invalid setup link.'); return }
 
-      const { data: inv } = await supabase
-        .from('gym_owner_invites')
-        .select('*, gyms(name)')
-        .eq('token', t)
-        .eq('used', false)
-        .single()
+            const { data: inv } = await supabase.rpc('get_owner_invite', { p_token: t })
 
       if (!inv) { setStatus('error'); setErrorMsg('This link is invalid or has already been used.'); return }
 
       setInvite(inv)
-      setGymName(inv.gyms?.name || '')
+            setGymName(inv.gym_name || '')
       setStatus('ready')
     }
     loadInvite()
@@ -56,20 +51,13 @@ function OwnerSetupForm() {
 
     const userId = authData.user.id
 
-    // 2. Set role to gym_owner
-    await supabase.from('profiles').update({ role: 'gym_owner', full_name: name }).eq('id', userId)
-
-    // 3. Link gym to owner
-    await supabase.from('gyms').update({ owner_id: userId }).eq('id', invite.gym_id)
-
-    // 4. Add as gym member
-    await supabase.from('gym_members').upsert(
-      { user_id: userId, gym_id: invite.gym_id },
-      { onConflict: 'user_id,gym_id' }
-    )
-
-    // 5. Mark invite as used
-    await supabase.from('gym_owner_invites').update({ used: true }).eq('token', token)
+        // 2-5. Claim ownership (role, gym link, membership, invite) in one secure call
+    const { error: claimError } = await supabase.rpc('claim_gym_owner', { p_token: token, p_name: name })
+    if (claimError) {
+      setErrorMsg(claimError.message || 'Setup failed.')
+      setStatus('ready')
+      return
+    }
 
     setStatus('done')
     setTimeout(() => router.push('/admin'), 2500)
