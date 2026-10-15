@@ -104,6 +104,10 @@ function RestTimer({ brandColor, hexToRgba }: any) {
   )
 }
 
+function isValidSet(s: any) {
+  return parseInt(s.reps) > 0 && parseFloat(s.weight) >= 0
+}
+
 function MachinePageInner() {
   const pathname = usePathname()
   const id = pathname?.split('/').pop()
@@ -146,6 +150,8 @@ function MachinePageInner() {
   const [showRoutinePicker, setShowRoutinePicker] = useState(false)
   const [userRoutines, setUserRoutines] = useState<any[]>([])
   const [routineAdded, setRoutineAdded] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef(false)
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -587,8 +593,20 @@ if (routinesData) setUserRoutines(routinesData)
     setEditingSession(false)
   }
 
-  async function handleFinishSuperset() {
-    const validSetsA = sets.filter(s => s.reps && s.weight)
+    async function handleFinishSuperset() {
+    if (submittingRef.current) return
+    submittingRef.current = true
+    setSubmitting(true)
+    try {
+      await doFinishSuperset()
+    } finally {
+      submittingRef.current = false
+      setSubmitting(false)
+    }
+  }
+
+  async function doFinishSuperset() {
+    const validSetsA = sets.filter(isValidSet)
     if (validSetsA.length > 0) {
       const insertsA = validSetsA.map((s, i) => ({
         user_id: user.id, machine_id: id,
@@ -602,7 +620,7 @@ if (routinesData) setUserRoutines(routinesData)
       await supabase.from('workouts').insert(insertsA)
     }
 
-    const validSetsB = supersetSets.filter(s => s.reps && s.weight)
+    const validSetsB = supersetSets.filter(isValidSet)
     if (validSetsB.length > 0) {
       const insertsB = validSetsB.map((s, i) => ({
         user_id: user.id, machine_id: supersetMachine.id,
@@ -620,8 +638,20 @@ if (routinesData) setUserRoutines(routinesData)
     setSaved(true)
   }
 
-  async function handleSave(e: any) {
+   async function handleSave(e: any) {
     e.preventDefault()
+    if (submittingRef.current) return
+    submittingRef.current = true
+    setSubmitting(true)
+    try {
+      await doSave()
+    } finally {
+      submittingRef.current = false
+      setSubmitting(false)
+    }
+  }
+
+  async function doSave() {
     if (machine.type === 'cardio') {
       if (!duration && !distance) return
       const { error } = await supabase.from('workouts').insert({
@@ -634,9 +664,9 @@ if (routinesData) setUserRoutines(routinesData)
       })
       if (!error) { clearDraft(); removeFromRotation(); setSaved(true) }
     } else {
-      const validSets = sets.filter(s => s.reps && s.weight)
+      const validSets = sets.filter(isValidSet)
 if (validSets.length === 0) {
-  setValidationError('Please enter reps and weight for at least one set.')
+  setValidationError('Enter reps and weight for at least one set. Use 0 for bodyweight.')
   return
 }
       const inserts = validSets.map((s, i) => ({
@@ -740,8 +770,8 @@ if (validSets.length === 0) {
     m.name.toLowerCase().includes(supersetSearch.toLowerCase())
   )
 
-  const validSetsACount = sets.filter(s => s.reps && s.weight).length
-  const validSetsBCount = supersetSets.filter(s => s.reps && s.weight).length
+  const validSetsACount = sets.filter(isValidSet).length
+  const validSetsBCount = supersetSets.filter(isValidSet).length
 
   if (error) return (
     <main className="min-h-screen flex items-center justify-center" style={{background: '#080808'}}>
@@ -1814,10 +1844,11 @@ if (validSets.length === 0) {
             )}
 
             <div className="flex flex-col gap-3 mt-2">
-              <button onClick={handleFinishSuperset}
+                            <button onClick={handleFinishSuperset}
+                disabled={submitting}
                 className="py-3 rounded-full font-semibold text-white"
-                style={{background: brandColor}}>
-                Finish Superset
+                style={{background: brandColor, opacity: submitting ? 0.6 : 1}}>
+                {submitting ? 'Saving...' : 'Finish Superset'}
               </button>
               <button onClick={() => { setSupersetMachine(null); setActiveTab('A'); setSupersetSets([{reps: '', weight: ''}]) }}
                 className="py-2 rounded-full text-sm font-semibold"
@@ -1924,9 +1955,9 @@ if (validSets.length === 0) {
     <button onClick={() => setValidationError('')} style={{color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
   </div>
 )}
-<button type="submit" className="py-3 rounded-full font-semibold text-white"
-  style={{background: brandColor}}>
-  Finish Set
+<button type="submit" disabled={submitting} className="py-3 rounded-full font-semibold text-white"
+  style={{background: brandColor, opacity: submitting ? 0.6 : 1}}>
+  {submitting ? 'Saving...' : 'Finish Set'}
 </button>
           </form>
         )}
