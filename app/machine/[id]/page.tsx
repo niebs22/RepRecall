@@ -1951,9 +1951,7 @@ if (validSets.length === 0) {
                           className="px-2 py-3 text-lg font-bold"
                           style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>+</button>
                       </div>
-                      {i === 0 && lastSessionSets.length > 0 && set.weight === String(Math.max(...lastSessionSets.map((s: any) => parseFloat(s.weight) || 0))) && (
-                        <p className="text-xs mt-1 text-center" style={{color: '#6B5E55'}}>from last session</p>
-                      )}
+                  
                     </div>
                     <button type="button" onClick={() => removeSet(i)} className="col-span-1 text-center text-lg"
                       style={{color: sets.length === 1 ? '#222222' : '#6B5E55', background: 'transparent', border: 'none'}}>×</button>
