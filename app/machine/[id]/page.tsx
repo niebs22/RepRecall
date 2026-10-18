@@ -105,7 +105,21 @@ function RestTimer({ brandColor, hexToRgba }: any) {
 }
 
 function isValidSet(s: any) {
-  return parseInt(s.reps) > 0 && parseFloat(s.weight) >= 0
+  return parseInt(s.reps) > 0 && (s.weight === '' || s.weight == null || parseFloat(s.weight) >= 0)
+}
+
+function toWeight(w: any) {
+  return w === '' || w == null || isNaN(parseFloat(w)) ? null : parseFloat(w)
+}
+
+function BwToggle({ on, onToggle, brandColor }: any) {
+  return (
+    <button type="button" onClick={onToggle}
+      className="text-xs px-2 py-0.5 rounded-full ml-2"
+      style={{border: `1px solid ${on ? brandColor : '#2A2A2A'}`, color: on ? brandColor : '#6B5E55', background: 'transparent'}}>
+      BW
+    </button>
+  )
 }
 
 function MachinePageInner() {
@@ -152,6 +166,8 @@ function MachinePageInner() {
   const [routineAdded, setRoutineAdded] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const submittingRef = useRef(false)
+  const [bodyweight, setBodyweight] = useState(false)
+  const [supersetBodyweight, setSupersetBodyweight] = useState(false)
 
   // Superset state
   const [supersetMachine, setSupersetMachine] = useState<any>(null)
@@ -174,6 +190,17 @@ function MachinePageInner() {
     const g = parseInt(clean.substring(2, 4), 16)
     const b = parseInt(clean.substring(4, 6), 16)
     return `rgba(${r}, ${g}, ${b}, ${alpha})`
+    }
+
+  function fmtWeight(row: any) {
+    if (row?.is_bodyweight) return 'BW'
+    if (row?.weight == null) return '—'
+    return displayWeight(row.weight, weightUnit)
+  }
+
+    function dayKey(date: string) {
+    const d = new Date(date.endsWith('Z') ? date : date + 'Z')
+    return d.toLocaleDateString('en-CA', { timeZone: gymTimezone })
   }
 
   // Load rotation and draft from localStorage on mount
@@ -449,13 +476,12 @@ if (existingMembership) {
           setAllWorkouts(workoutData)
           const lastSets = workoutData.filter(w =>
             (w.exercise_name || machineData.name) === (draftExercise || machineData.name) &&
-            new Date(w.created_at).toDateString() === new Date(workoutData[0]?.created_at).toDateString()
+            dayKey(w.created_at) === dayKey(workoutData[0]?.created_at)
           )
           // auto-populate removed per user feedback
         }
-
         const { data: machinesData } = await supabase
-          .from('machines').select('*').order('name', { ascending: true })
+            .from('machines').select('*').eq('gym_id', machineData.gym_id).order('name', { ascending: true })
         if (machinesData) setAllMachines(machinesData)
 
           const { data: routinesData } = await supabase
@@ -477,9 +503,9 @@ if (routinesData) setUserRoutines(routinesData)
       (w.exercise_name || machine?.name) === exerciseName
     )
     if (exerciseWorkouts.length === 0) return []
-    const lastDate = new Date(exerciseWorkouts[0].created_at).toDateString()
+    const lastDate = dayKey(exerciseWorkouts[0].created_at)
     return exerciseWorkouts.filter(w =>
-      new Date(w.created_at).toDateString() === lastDate
+      dayKey(w.created_at) === lastDate
     )
   }
 
@@ -557,7 +583,7 @@ if (routinesData) setUserRoutines(routinesData)
     for (const s of toUpdate) {
       await supabase.from('workouts').update({
         reps: parseInt(s.reps),
-        weight: parseFloat(s.weight),
+        weight: toWeight(s.weight),
         duration: s.duration ? parseFloat(s.duration) : null,
         distance: s.distance ? parseFloat(s.distance) : null,
         notes: s.notes || null,
@@ -572,7 +598,7 @@ if (routinesData) setUserRoutines(routinesData)
         exercise_name: ref?.exercise_name || selectedExercise,
         sets: editableSets.filter(s => !s._deleted).length,
         reps: parseInt(s.reps),
-        weight: parseFloat(s.weight),
+        weight: toWeight(s.weight),
         notes: null,
         duration: null,
         distance: null,
@@ -611,8 +637,8 @@ if (routinesData) setUserRoutines(routinesData)
       const insertsA = validSetsA.map((s, i) => ({
         user_id: user.id, machine_id: id,
         exercise_name: selectedExercise,
-        sets: validSetsA.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
-        notes: i === 0 ? notes : null, duration: null, distance: null,
+        sets: validSetsA.length, reps: parseInt(s.reps), weight: bodyweight ? null : toWeight(s.weight),
+        notes: i === 0 ? notes : null, duration: null, distance: null, is_bodyweight: bodyweight,
         superset: true,
         superset_machine_id: supersetMachine.id,
         superset_exercise_name: supersetExercise || supersetMachine.name
@@ -625,8 +651,8 @@ if (routinesData) setUserRoutines(routinesData)
       const insertsB = validSetsB.map((s, i) => ({
         user_id: user.id, machine_id: supersetMachine.id,
         exercise_name: supersetExercise || supersetMachine.name,
-        sets: validSetsB.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
-        notes: i === 0 ? supersetNotes : null, duration: null, distance: null,
+        sets: validSetsB.length, reps: parseInt(s.reps), weight: supersetBodyweight ? null : toWeight(s.weight),
+        notes: i === 0 ? supersetNotes : null, duration: null, distance: null, is_bodyweight: supersetBodyweight,
         superset: true,
         superset_machine_id: id,
         superset_exercise_name: selectedExercise
@@ -666,13 +692,13 @@ if (routinesData) setUserRoutines(routinesData)
     } else {
       const validSets = sets.filter(isValidSet)
 if (validSets.length === 0) {
-  setValidationError('Enter reps and weight for at least one set. Use 0 for bodyweight.')
+  setValidationError('Enter reps for at least one set.')
   return
 }
       const inserts = validSets.map((s, i) => ({
         user_id: user.id, machine_id: id, exercise_name: selectedExercise,
-        sets: validSets.length, reps: parseInt(s.reps), weight: parseFloat(s.weight),
-        notes: i === 0 ? notes : null, duration: null, distance: null,
+        sets: validSets.length, reps: parseInt(s.reps), weight: bodyweight ? null : toWeight(s.weight),
+        notes: i === 0 ? notes : null, duration: null, distance: null, is_bodyweight: bodyweight,
         superset: false
       }))
       const { error } = await supabase.from('workouts').insert(inserts)
@@ -715,7 +741,7 @@ if (validSets.length === 0) {
     )
     const grouped: Record<string, any[]> = {}
     exerciseWorkouts.forEach(w => {
-      const dateStr = new Date(w.created_at).toDateString()
+      const dateStr = dayKey(w.created_at)
       if (!grouped[dateStr]) grouped[dateStr] = []
       grouped[dateStr].push(w)
     })
@@ -736,7 +762,7 @@ if (validSets.length === 0) {
 
     const sessionMap: Record<string, number> = {}
     exerciseWorkouts.forEach(w => {
-      const dateStr = new Date(w.created_at).toDateString()
+      const dateStr = dayKey(w.created_at)
       const val = isCardio ? (w.duration || w.distance || 0) : (w.weight || 0)
       if (!sessionMap[dateStr] || val > sessionMap[dateStr]) {
         sessionMap[dateStr] = val
@@ -1147,7 +1173,7 @@ if (validSets.length === 0) {
               <div className="flex gap-3 items-center">
                 <div className="flex gap-2 items-center">
                   <p className="text-xs" style={{color: brandColor}}>{daysSince(lastSessionDate)}</p>
-                  <p className="text-xs" style={{color: '#6B5E55'}}>· {new Date(lastSessionDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                  <p className="text-xs" style={{color: '#6B5E55'}}>· {formatHistoryDate(lastSessionDate).label}</p>
                 </div>
                 {!editingSession && (
                   <button onClick={() => startEditingSession(lastSessionSets)}
@@ -1268,7 +1294,7 @@ if (validSets.length === 0) {
                       <div key={s.id} className="grid grid-cols-12 gap-2 items-center">
                         <p className="col-span-1 text-xs font-bold" style={{color: brandColor}}>{i + 1}</p>
                         <p className="col-span-5 text-white font-semibold">{s.reps}</p>
-                        <p className="col-span-6 text-white font-semibold">{displayWeight(s.weight, weightUnit)}</p>
+                        <p className="col-span-6 text-white font-semibold">{fmtWeight(s)}</p>
                       </div>
                     ))}
                     {lastSessionSets[0]?.superset && (
@@ -1355,7 +1381,7 @@ if (validSets.length === 0) {
                             <p className="text-xs font-bold w-4" style={{color: brandColor}}>{j + 1}</p>
                             <p className="text-sm text-white">{w.reps} reps</p>
                             <p className="text-sm text-white">·</p>
-                            <p className="text-sm text-white">{displayWeight(w.weight, weightUnit)}</p>
+                            <p className="text-sm text-white">{fmtWeight(w)}</p>
                           </div>
                         ))}
                       </div>
@@ -1702,7 +1728,7 @@ if (validSets.length === 0) {
                 <div className="grid grid-cols-12 gap-2 px-1">
                   <p className="col-span-1 text-xs" style={{color: '#6B5E55'}}></p>
                   <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p>
+                  <div className="col-span-5 flex items-center"><p className="text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p><BwToggle on={bodyweight} brandColor={brandColor} onToggle={() => { setBodyweight(!bodyweight); setSets(sets.map(s => ({...s, weight: ''}))) }} /></div>
                   <p className="col-span-1"></p>
                 </div>
                 {sets.map((set, i) => (
@@ -1730,7 +1756,7 @@ if (validSets.length === 0) {
                         onClick={() => updateSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
                         className="px-2 py-3 text-lg font-bold"
                         style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
-                      <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
+                      <input type={bodyweight ? 'text' : 'number'} value={bodyweight ? 'BW' : set.weight} readOnly={bodyweight} onChange={e => updateSet(i, 'weight', e.target.value)}
                         placeholder="0" className="text-white focus:outline-none text-center"
                         style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
                       <button type="button"
@@ -1784,7 +1810,7 @@ if (validSets.length === 0) {
                 <div className="grid grid-cols-12 gap-2 px-1">
                   <p className="col-span-1 text-xs" style={{color: '#6B5E55'}}></p>
                   <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p>
+                  <div className="col-span-5 flex items-center"><p className="text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p><BwToggle on={supersetBodyweight} brandColor={brandColor} onToggle={() => { setSupersetBodyweight(!supersetBodyweight); setSupersetSets(supersetSets.map(s => ({...s, weight: ''}))) }} /></div>
                   <p className="col-span-1"></p>
                 </div>
                 {supersetSets.map((set, i) => (
@@ -1812,7 +1838,7 @@ if (validSets.length === 0) {
                         onClick={() => updateSupersetSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
                         className="px-2 py-3 text-lg font-bold"
                         style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
-                      <input type="number" value={set.weight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
+                      <input type={supersetBodyweight ? 'text' : 'number'} value={supersetBodyweight ? 'BW' : set.weight} readOnly={supersetBodyweight} onChange={e => updateSupersetSet(i, 'weight', e.target.value)}
                         placeholder="0" className="text-white focus:outline-none text-center"
                         style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
                       <button type="button"
@@ -1888,7 +1914,7 @@ if (validSets.length === 0) {
                 <div className="grid grid-cols-12 gap-2 px-1">
                   <p className="col-span-1 text-xs" style={{color: '#6B5E55'}}></p>
                   <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Reps</p>
-                  <p className="col-span-5 text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p>
+                  <div className="col-span-5 flex items-center"><p className="text-xs" style={{color: '#6B5E55'}}>Weight (lbs)</p><BwToggle on={bodyweight} brandColor={brandColor} onToggle={() => { setBodyweight(!bodyweight); setSets(sets.map(s => ({...s, weight: ''}))) }} /></div>
                   <p className="col-span-1"></p>
                 </div>
                 {sets.map((set, i) => (
@@ -1917,7 +1943,7 @@ if (validSets.length === 0) {
                           onClick={() => updateSet(i, 'weight', String(Math.max(0, (parseFloat(set.weight) || 0) - 5)))}
                           className="px-2 py-3 text-lg font-bold"
                           style={{color: '#6B5E55', background: 'transparent', border: 'none', flexShrink: 0}}>−</button>
-                        <input type="number" value={set.weight} onChange={e => updateSet(i, 'weight', e.target.value)}
+                                                <input type={bodyweight ? 'text' : 'number'} value={bodyweight ? 'BW' : set.weight} readOnly={bodyweight} onChange={e => updateSet(i, 'weight', e.target.value)}
                           placeholder="0" className="text-white focus:outline-none text-center"
                           style={{background: 'transparent', border: 'none', width: '100%', padding: '12px 0'}}/>
                         <button type="button"
