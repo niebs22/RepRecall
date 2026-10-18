@@ -23,7 +23,7 @@ export function getHourInZone(utcDate: string, timezone: string): number {
     hour: 'numeric',
     hour12: false,
     timeZone: timezone
-  }))
+    })) % 24
 }
 
 export function getDayInZone(utcDate: string, timezone: string): number {
