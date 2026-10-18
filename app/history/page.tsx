@@ -37,7 +37,7 @@ export default function History() {
         .select('*, machines!workouts_machine_id_fkey(name, type)')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(100)
+        .limit(500)
       if (data) setWorkouts(data)
       setLoading(false)
     }
@@ -47,7 +47,7 @@ export default function History() {
   function groupByDay(workouts: any[]) {
     const groups: Record<string, any[]> = {}
     workouts.forEach(w => {
-      const dateStr = new Date(w.created_at).toLocaleDateString('en-US', {
+            const dateStr = new Date(w.created_at.endsWith('Z') ? w.created_at : w.created_at + 'Z').toLocaleDateString('en-US', {
         timeZone: timezone, year: 'numeric', month: '2-digit', day: '2-digit'
       })
       if (!groups[dateStr]) groups[dateStr] = []
@@ -94,9 +94,9 @@ export default function History() {
     })
     return Object.values(groups).map(sets => {
       const first = sets[0]
-      const weights = sets.map(s => s.weight).filter(Boolean)
-      const minW = Math.min(...weights)
-      const maxW = Math.max(...weights)
+      const weights = sets.map(s => s.weight).filter((x: any) => x != null && x > 0)
+      const minW = weights.length ? Math.min(...weights) : null
+      const maxW = weights.length ? Math.max(...weights) : null
       const totalSets = sets.length
       return { ...first, _groupedSets: totalSets, _minWeight: minW, _maxWeight: maxW, _allSets: sets }
     }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -112,7 +112,9 @@ export default function History() {
     const parts = []
     const sets = w._groupedSets || w.sets
     if (sets) parts.push(sets + (sets === 1 ? ' set' : ' sets'))
-    if (w._minWeight && w._maxWeight) {
+        if (w.is_bodyweight) {
+      parts.push('BW')
+    } else if (w._minWeight && w._maxWeight) {
       if (w._minWeight === w._maxWeight) {
         parts.push(w._minWeight + ' lbs')
       } else {
