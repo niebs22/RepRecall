@@ -14,6 +14,9 @@ export default function RoutinePage() {
   const [gymMachines, setGymMachines] = useState<any[]>([])
   const [showAdd, setShowAdd] = useState(false)
   const [addSearch, setAddSearch] = useState('')
+  const [pickingMachine, setPickingMachine] = useState<any>(null)
+  const [pickVariations, setPickVariations] = useState<any[]>([])
+  const [newExercise, setNewExercise] = useState('')
   const router = useRouter()
 
   const NAVY = '#253D5B'
@@ -62,25 +65,39 @@ const startedAt = localStorage.getItem('routine_started_at')
 if (!isViewMode && startedAt) {
   const { data: routineWorkouts } = await supabase
     .from('workouts')
-    .select('machine_id, created_at')
+    .select('machine_id, exercise_name, created_at')
     .eq('user_id', user.id)
     .gte('created_at', startedAt)
   if (routineWorkouts) {
-    setCompletedIds(new Set(routineWorkouts.map(w => w.machine_id)))
+    setCompletedIds(new Set(routineWorkouts.map(w => w.machine_id + '|' + w.exercise_name)))
   }
 }
     }
     load()
   }, [id])
 
-  async function addMachine(m: any) {
+  async function pickMachine(m: any) {
+    setPickingMachine(m)
+    setNewExercise('')
+    const { data } = await supabase.from('variations').select('*')
+      .eq('user_id', user.id).eq('machine_id', m.id)
+      .order('created_at', { ascending: true })
+    setPickVariations(data || [])
+  }
+
+  async function addMachine(m: any, exerciseName?: string) {
+    const name = exerciseName?.trim() || null
+    if (name && name !== m.name && !pickVariations.some(v => v.name === name)) {
+      await supabase.from('variations').insert({ user_id: user.id, machine_id: m.id, name })
+    }
     const nextIndex = routine.routine_machines.length
     const { data } = await supabase.from('routine_machines')
-      .insert({ routine_id: id, machine_id: m.id, order_index: nextIndex })
+      .insert({ routine_id: id, machine_id: m.id, order_index: nextIndex, exercise_name: name && name !== m.name ? name : null })
       .select('*, machines(*)').single()
     if (data) setRoutine((prev: any) => ({ ...prev, routine_machines: [...prev.routine_machines, data] }))
     setShowAdd(false)
     setAddSearch('')
+    setPickingMachine(null)
   }
 
   async function moveMachine(index: number, dir: -1 | 1) {
@@ -106,7 +123,7 @@ if (!isViewMode && startedAt) {
   )
 
   const total = routine.routine_machines.length
-  const completed = routine.routine_machines.filter((rm: any) => completedIds.has(rm.machine_id)).length
+  const completed = routine.routine_machines.filter((rm: any) => completedIds.has(rm.machine_id + '|' + (rm.exercise_name || rm.machines?.name))).length
   const isViewOnly = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('view') === 'true'
 
   return (
@@ -148,7 +165,7 @@ if (!isViewMode && startedAt) {
         <div className="flex flex-col gap-3">
           {routine.routine_machines.map((rm: any, i: number) => {
             const machine = rm.machines
-            const isDone = completedIds.has(rm.machine_id)
+            const isDone = completedIds.has(rm.machine_id + '|' + (rm.exercise_name || machine?.name))
             return (
               
                 <a
@@ -167,9 +184,9 @@ if (!isViewMode && startedAt) {
                   {isDone ? '✓' : i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm" style={{color: isDone ? '#6B5E55' : '#E8E0D8'}}>{machine?.name}</p>
+                  <p className="font-semibold text-sm" style={{color: isDone ? '#6B5E55' : '#E8E0D8'}}>{rm.exercise_name || machine?.name}</p>
                   <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>
-                    {machine?.type === 'cardio' ? 'Cardio' : machine?.type === 'functional' ? 'Functional' : 'Strength'}
+                    {rm.exercise_name ? machine?.name : machine?.type === 'cardio' ? 'Cardio' : machine?.type === 'functional' ? 'Functional' : 'Strength'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -217,18 +234,52 @@ if (!isViewMode && startedAt) {
               <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${NAVY}`}}>
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-white text-sm font-semibold">Add a machine</p>
-                  <button onClick={() => { setShowAdd(false); setAddSearch('') }}
+                  <button onClick={() => { setShowAdd(false); setAddSearch(''); setPickingMachine(null) }}
                     className="text-xs" style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer'}}>Cancel</button>
                 </div>
+                {pickingMachine && (
+                  <div className="mb-3">
+                    <p className="text-xs mb-2" style={{color: '#B0A89F'}}>Exercise on {pickingMachine.name}</p>
+                    <div className="flex flex-col gap-2 mb-2">
+                      <button onClick={() => addMachine(pickingMachine)}
+                        className="px-3 py-2 rounded-lg text-left text-sm text-white"
+                        style={{background: '#080808', border: '1px solid #222222', cursor: 'pointer'}}>
+                        {pickingMachine.name} (default)
+                      </button>
+                      {pickVariations.map(v => (
+                        <button key={v.id} onClick={() => addMachine(pickingMachine, v.name)}
+                          className="px-3 py-2 rounded-lg text-left text-sm text-white"
+                          style={{background: '#080808', border: '1px solid #222222', cursor: 'pointer'}}>
+                          {v.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input type="text" value={newExercise} onChange={e => setNewExercise(e.target.value)}
+                        placeholder="New exercise, e.g. Lateral Raise"
+                        className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
+                        style={{background: '#080808', border: '1px solid #222222'}}/>
+                      <button onClick={() => newExercise.trim() && addMachine(pickingMachine, newExercise)}
+                        className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
+                        style={{background: NAVY, border: 'none', cursor: 'pointer'}}>
+                        Add
+                      </button>
+                    </div>
+                    <button onClick={() => setPickingMachine(null)}
+                      className="text-xs mt-2" style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer'}}>
+                      ← Back to machines
+                    </button>
+                  </div>
+                )}
                 <input type="text" value={addSearch} onChange={e => setAddSearch(e.target.value)}
                   placeholder="Search machines..."
                   className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
                   style={{background: '#080808', border: '1px solid #222222'}}/>
                 <div className="flex flex-col gap-2" style={{maxHeight: '260px', overflowY: 'auto'}}>
                   {gymMachines
-                    .filter(m => m.name.toLowerCase().includes(addSearch.toLowerCase()))
+                    .filter(m => !pickingMachine && m.name.toLowerCase().includes(addSearch.toLowerCase()))
                     .map(m => (
-                      <button key={m.id} onClick={() => addMachine(m)}
+                     <button key={m.id} onClick={() => pickMachine(m)}
                         className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
                         style={{background: '#080808', border: 'none', cursor: 'pointer'}}>
                         <p className="text-white text-sm">{m.name}</p>
