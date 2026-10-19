@@ -965,7 +965,7 @@ if (validSets.length === 0) {
   }
 
   return (
-    <main className="min-h-screen p-6" style={{background: '#080808'}}>
+    <main className={`min-h-screen p-6 ${rotationMachines.length > 1 ? 'pb-48' : 'pb-10'}`} style={{background: '#080808'}}>
       <div className="max-w-lg mx-auto">
         <div className="flex justify-between items-center mb-4">
           {logoUrl ? (
@@ -2057,9 +2057,10 @@ if (validSets.length === 0) {
   )
 }
 export default function MachinePage() {
+  const pathname = usePathname()
   return (
     <Suspense>
-      <MachinePageInner />
+      <MachinePageInner key={pathname} />
     </Suspense>
   )
 }
