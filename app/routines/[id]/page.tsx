@@ -9,7 +9,11 @@ export default function RoutinePage() {
   const [routine, setRoutine] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
-  const [gymTimezone, setGymTimezone] = useState('America/New_York')
+    const [gymTimezone, setGymTimezone] = useState('America/New_York')
+  const [editing, setEditing] = useState(false)
+  const [gymMachines, setGymMachines] = useState<any[]>([])
+  const [showAdd, setShowAdd] = useState(false)
+  const [addSearch, setAddSearch] = useState('')
   const router = useRouter()
 
   const NAVY = '#253D5B'
@@ -28,9 +32,17 @@ const isViewMode = new URLSearchParams(window.location.search).get('view') === '
         .select('gym_id, gyms(timezone)')
         .eq('user_id', user.id)
         .single()
-      if (memberData?.gyms) {
+            if (memberData?.gyms) {
         setGymTimezone((memberData.gyms as any).timezone || 'America/New_York')
       }
+      if (memberData?.gym_id) {
+        const { data: gm } = await supabase
+          .from('machines').select('id, name, type')
+          .eq('gym_id', memberData.gym_id)
+          .order('name', { ascending: true })
+        if (gm) setGymMachines(gm)
+      }
+      if (isViewMode) setEditing(true)
 
       const { data } = await supabase
         .from('routines')
@@ -61,6 +73,26 @@ if (!isViewMode && startedAt) {
     load()
   }, [id])
 
+  async function addMachine(m: any) {
+    const nextIndex = routine.routine_machines.length
+    const { data } = await supabase.from('routine_machines')
+      .insert({ routine_id: id, machine_id: m.id, order_index: nextIndex })
+      .select('*, machines(*)').single()
+    if (data) setRoutine((prev: any) => ({ ...prev, routine_machines: [...prev.routine_machines, data] }))
+    setShowAdd(false)
+    setAddSearch('')
+  }
+
+  async function moveMachine(index: number, dir: -1 | 1) {
+    const list = [...routine.routine_machines]
+    const j = index + dir
+    if (j < 0 || j >= list.length) return
+    ;[list[index], list[j]] = [list[j], list[index]]
+    setRoutine((prev: any) => ({ ...prev, routine_machines: list }))
+    await Promise.all(list.map((rm: any, i: number) =>
+      supabase.from('routine_machines').update({ order_index: i }).eq('id', rm.id)))
+  }
+
   function endRoutine() {
   localStorage.removeItem('active_routine')
   localStorage.removeItem('routine_started_at')
@@ -84,11 +116,18 @@ if (!isViewMode && startedAt) {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <a href="/dashboard" className="text-sm" style={{color: '#6B5E55'}}>← Dashboard</a>
+          <div className="flex gap-2">
+          <button onClick={() => { setEditing(!editing); setShowAdd(false) }}
+            className="text-sm px-3 py-1.5 rounded-full font-semibold"
+            style={{background: editing ? NAVY : 'transparent', color: editing ? 'white' : '#B0A89F', border: `1px solid ${editing ? NAVY : '#333333'}`, cursor: 'pointer'}}>
+            {editing ? 'Done' : 'Edit'}
+          </button>
           <button onClick={endRoutine}
             className="text-sm px-3 py-1.5 rounded-full font-semibold"
             style={{background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: 'none', cursor: 'pointer'}}>
             End Routine
           </button>
+          </div>
         </div>
 
         {/* Routine header */}
@@ -115,6 +154,7 @@ if (!isViewMode && startedAt) {
                 <a
                 key={rm.id}
                 href={`/machine/${rm.machine_id}?from=routine&routineId=${id}${rm.exercise_name ? '&exercise=' + encodeURIComponent(rm.exercise_name) : ''}`}
+                onClick={e => { if (editing) e.preventDefault() }}
                 className="rounded-2xl p-4 flex items-center gap-4"
                 style={{
                   background: isDone ? 'rgba(37,61,91,0.15)' : 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)',
@@ -133,7 +173,14 @@ if (!isViewMode && startedAt) {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-  {isViewOnly && (
+  {editing && (
+    <>
+    <button onClick={(e) => { e.preventDefault(); moveMachine(i, -1) }}
+      className="text-xs px-2 py-1 rounded"
+      style={{color: '#B0A89F', background: 'transparent', border: 'none', cursor: 'pointer', opacity: i === 0 ? 0.3 : 1}}>↑</button>
+    <button onClick={(e) => { e.preventDefault(); moveMachine(i, 1) }}
+      className="text-xs px-2 py-1 rounded"
+      style={{color: '#B0A89F', background: 'transparent', border: 'none', cursor: 'pointer', opacity: i === total - 1 ? 0.3 : 1}}>↓</button>
     <button
       onClick={async (e) => {
         e.preventDefault()
@@ -147,8 +194,9 @@ if (!isViewMode && startedAt) {
       style={{color: '#EF4444', background: 'rgba(239,68,68,0.1)', border: 'none', cursor: 'pointer'}}>
       ✕
     </button>
+    </>
   )}
-  {!isDone && !isViewOnly && (
+  {!isDone && !editing && (
     <span style={{color: '#E8440C', fontSize: '18px'}}>→</span>
   )}
 </div>
@@ -157,13 +205,49 @@ if (!isViewMode && startedAt) {
           })}
         </div>
 
+        {editing && (
+          <div className="mt-4">
+            {!showAdd ? (
+              <button onClick={() => setShowAdd(true)}
+                className="w-full py-3 rounded-xl font-semibold text-sm"
+                style={{background: 'transparent', border: `1px dashed ${NAVY_BORDER}`, color: '#B0A89F', cursor: 'pointer'}}>
+                + Add Machine
+              </button>
+            ) : (
+              <div className="rounded-2xl p-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${NAVY}`}}>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-white text-sm font-semibold">Add a machine</p>
+                  <button onClick={() => { setShowAdd(false); setAddSearch('') }}
+                    className="text-xs" style={{color: '#6B5E55', background: 'transparent', border: 'none', cursor: 'pointer'}}>Cancel</button>
+                </div>
+                <input type="text" value={addSearch} onChange={e => setAddSearch(e.target.value)}
+                  placeholder="Search machines..."
+                  className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
+                  style={{background: '#080808', border: '1px solid #222222'}}/>
+                <div className="flex flex-col gap-2" style={{maxHeight: '260px', overflowY: 'auto'}}>
+                  {gymMachines
+                    .filter(m => m.name.toLowerCase().includes(addSearch.toLowerCase()))
+                    .map(m => (
+                      <button key={m.id} onClick={() => addMachine(m)}
+                        className="flex justify-between items-center px-3 py-2 rounded-lg text-left w-full"
+                        style={{background: '#080808', border: 'none', cursor: 'pointer'}}>
+                        <p className="text-white text-sm">{m.name}</p>
+                        <p className="text-xs" style={{color: '#B0A89F'}}>+ Add</p>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* All done state */}
         {!isViewOnly && completed === total && total > 0 && (
           <div className="rounded-2xl p-6 mt-6 text-center" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${NAVY}`}}>
             <p className="font-bold text-white mb-1">Routine Complete!</p>
 <p className="text-sm mb-4" style={{color: '#6B5E55'}}>You crushed {routine.name}.</p>
 <div className="flex flex-col gap-3">
-  <button onClick={() => setCompletedIds(new Set())}
+  <button onClick={() => { localStorage.setItem('routine_started_at', new Date().toISOString()); setCompletedIds(new Set()) }}
     className="py-3 px-8 rounded-full font-semibold text-white"
     style={{background: '#253D5B', border: 'none', cursor: 'pointer'}}>
     Restart Routine
