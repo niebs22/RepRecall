@@ -110,6 +110,19 @@ if (!isViewMode && startedAt) {
       supabase.from('routine_machines').update({ order_index: i }).eq('id', rm.id)))
   }
 
+  async function deleteRoutine() {
+    if (!confirm(`Delete "${routine.name}"? This can't be undone.`)) return
+    await supabase.from('routine_machines').delete().eq('routine_id', id)
+    const { error } = await supabase.from('routines').delete().eq('id', id)
+    if (error) { alert('Could not delete routine. Try again.'); return }
+    const active = localStorage.getItem('active_routine')
+    if (active && JSON.parse(active).id === id) {
+      localStorage.removeItem('active_routine')
+      localStorage.removeItem('routine_started_at')
+    }
+    router.push('/dashboard')
+  }
+
   function endRoutine() {
   localStorage.removeItem('active_routine')
   localStorage.removeItem('routine_started_at')
@@ -254,15 +267,17 @@ if (!isViewMode && startedAt) {
                         </button>
                       ))}
                     </div>
+                    <p className="text-xs font-bold tracking-widest uppercase mt-4 mb-2" style={{color: '#B0A89F'}}>+ New exercise</p>
                     <div className="flex gap-2">
                       <input type="text" value={newExercise} onChange={e => setNewExercise(e.target.value)}
-                        placeholder="New exercise, e.g. Lateral Raise"
+                         placeholder="Type a name, e.g. Lateral Raise"
+                        onKeyDown={e => { if (e.key === 'Enter' && newExercise.trim()) addMachine(pickingMachine, newExercise) }}
                         className="flex-1 px-3 py-2 rounded-lg text-white text-sm focus:outline-none"
                         style={{background: '#080808', border: '1px solid #222222'}}/>
                       <button onClick={() => newExercise.trim() && addMachine(pickingMachine, newExercise)}
                         className="px-3 py-2 rounded-lg text-sm font-semibold text-white"
                         style={{background: NAVY, border: 'none', cursor: 'pointer'}}>
-                        Add
+                        + Add
                       </button>
                     </div>
                     <button onClick={() => setPickingMachine(null)}
@@ -271,7 +286,7 @@ if (!isViewMode && startedAt) {
                     </button>
                   </div>
                 )}
-                <input type="text" value={addSearch} onChange={e => setAddSearch(e.target.value)}
+                <input type="text" hidden={!!pickingMachine} value={addSearch} onChange={e => setAddSearch(e.target.value)}
                   placeholder="Search machines..."
                   className="w-full px-4 py-3 rounded-lg text-white focus:outline-none mb-3"
                   style={{background: '#080808', border: '1px solid #222222'}}/>
@@ -290,6 +305,14 @@ if (!isViewMode && startedAt) {
               </div>
             )}
           </div>
+        )}
+
+        {editing && (
+          <button onClick={deleteRoutine}
+            className="w-full py-3 rounded-full font-semibold text-sm mt-6"
+            style={{background: 'rgba(239,68,68,0.1)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)', cursor: 'pointer'}}>
+            Delete Routine
+          </button>
         )}
 
         {/* All done state */}
