@@ -636,14 +636,17 @@ setIsChrome(chrome)
         {(() => {
           const lastFull = weeklyVolume[6] || 0
           const prev = weeklyVolume[5] || 0
-          const weeksWithData = weeklyVolume.filter(v => v > 0).length
-          const pct = prev > 0 ? Math.round(((lastFull - prev) / prev) * 100) : null
-          const max = Math.max(...weeklyVolume, 1)
+          const firstIdx = weeklyVolume.findIndex(v => v >= 500)
+          const hasTrend = firstIdx !== -1 && firstIdx <= 6
+          const startIdx = hasTrend ? Math.min(firstIdx, 4) : 0
+          const shown = weeklyVolume.slice(startIdx)
+          const pct = prev >= 500 ? Math.round(((lastFull - prev) / prev) * 100) : null
+          const max = Math.max(...shown, 1)
           return (
             <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
               <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Weekly Volume</p>
-              {weeksWithData < 2 ? (
-                <p className="text-sm" style={{color: '#B0A89F'}}>Log a few more sessions to see your trend.</p>
+              {!hasTrend ? (
+                <p className="text-sm" style={{color: '#B0A89F'}}>Log a full week of training to see your trend.</p>
               ) : (
                 <>
                   <div className="flex justify-between items-baseline">
@@ -655,7 +658,8 @@ setIsChrome(chrome)
                     )}
                   </div>
                   <div className="flex items-end gap-2 mt-4" style={{height: '110px'}}>
-                    {weeklyVolume.map((v, i) => {
+                    {shown.map((v, j) => {
+                      const i = j + startIdx
                       const isCurrent = i === 7
                       const isLast = i === 6
                       const h = Math.max((v / max) * 80, v > 0 ? 4 : 2)
