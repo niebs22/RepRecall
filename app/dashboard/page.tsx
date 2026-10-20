@@ -24,6 +24,7 @@ export default function Dashboard() {
   const [fourWeekData, setFourWeekData] = useState<number[]>([0, 0, 0, 0])
   const [weeklyVolume, setWeeklyVolume] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0])
   const [weekLabels, setWeekLabels] = useState<string[]>([])
+  const [lastWeekPace, setLastWeekPace] = useState(0)
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [challengePool, setChallengePool] = useState<any[]>([])
@@ -242,12 +243,18 @@ setIsChrome(chrome)
       .eq('user_id', userId)
       .gte('created_at', start.toISOString())
     const weeks = new Array(8).fill(0)
+    const elapsed = now.getTime() - thisMonday.getTime()
+    const lastWeekStart = thisMonday.getTime() - 7 * 86400000
+    let pace = 0
     ;(data || []).forEach((w: any) => {
       if (w.is_bodyweight || !w.weight || !w.reps) return
-      const idx = Math.floor((toUTC(w.created_at).getTime() - start.getTime()) / (7 * 86400000))
+      const t = toUTC(w.created_at).getTime()
+      const idx = Math.floor((t - start.getTime()) / (7 * 86400000))
       if (idx >= 0 && idx < 8) weeks[idx] += w.weight * w.reps
+      if (t >= lastWeekStart && t < lastWeekStart + elapsed) pace += w.weight * w.reps
     })
     setWeeklyVolume(weeks.map(v => Math.round(v)))
+    setLastWeekPace(Math.round(pace))
     setWeekLabels(weeks.map((_, i) => {
       const d = new Date(start)
       d.setDate(start.getDate() + i * 7)
@@ -632,54 +639,71 @@ setIsChrome(chrome)
 
         </div>
 
-        {/* Weekly volume */}
+        {/* Beat last week */}
         {(() => {
-          const lastFull = weeklyVolume[6] || 0
-          const prev = weeklyVolume[5] || 0
+          const target = weeklyVolume[6] || 0
+          const current = weeklyVolume[7] || 0
+          const remaining = target - current
+          const behind = lastWeekPace - current
+          const hasTarget = target >= 500
+          const beat = hasTarget && current >= target
+          const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()]
+          const pct = hasTarget ? Math.min(current / target, 1) * 100 : 0
+          const ghostPct = hasTarget ? Math.min(lastWeekPace / target, 1) * 100 : 0
           const firstIdx = weeklyVolume.findIndex(v => v >= 500)
-          const hasTrend = firstIdx !== -1 && firstIdx <= 6
-          const startIdx = hasTrend ? Math.min(firstIdx, 4) : 0
-          const shown = weeklyVolume.slice(startIdx)
-          const pct = prev >= 500 ? Math.round(((lastFull - prev) / prev) * 100) : null
-          const max = Math.max(...shown, 1)
+          const strip = weeklyVolume.slice(firstIdx === -1 ? 4 : Math.min(firstIdx, 4))
+          const stripMax = Math.max(...strip, 1)
+          let status = ''
+          if (beat) status = 'You beat last week. Every set now is a bonus.'
+          else if (current === 0) status = 'New week. Your move.'
+          else if (behind > 0) status = `${behind.toLocaleString()} behind pace. One good session closes it.`
+          else status = `${Math.abs(behind).toLocaleString()} ahead of pace. Keep it rolling.`
           return (
-            <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
-              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Weekly Volume</p>
-              {!hasTrend ? (
-                <p className="text-sm" style={{color: '#B0A89F'}}>Log a full week of training to see your trend.</p>
+            <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${beat ? brandColor : '#222222'}`}}>
+              <div className="flex justify-between mb-2">
+                <p className="text-xs font-bold tracking-widest uppercase" style={{color: beat ? brandColor : '#B0A89F'}}>{beat ? 'Record week' : 'Beat last week'}</p>
+                <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>{day}</p>
+              </div>
+              {!hasTarget ? (
+                <>
+                  <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
+                    {current.toLocaleString()} <span className="text-xs font-normal" style={{color: '#B0A89F', letterSpacing: 0}}>lbs this week</span>
+                  </p>
+                  <p className="text-sm mt-2" style={{color: '#B0A89F'}}>Finish a full week and next week you'll have a target to beat.</p>
+                </>
               ) : (
                 <>
-                  <div className="flex justify-between items-baseline">
-                    <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-                      {lastFull.toLocaleString()} <span className="text-xs font-normal" style={{color: '#B0A89F', letterSpacing: 0}}>lbs last week</span>
-                    </p>
-                    {pct !== null && (
-                      <span className="text-xs font-bold" style={{color: pct >= 0 ? brandColor : '#B0A89F'}}>{pct >= 0 ? '+' : ''}{pct}%</span>
+                  <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
+                    {beat ? '+' + (current - target).toLocaleString() : remaining.toLocaleString()}{' '}
+                    <span className="text-xs font-normal" style={{color: '#B0A89F', letterSpacing: 0}}>
+                      {beat ? 'lbs ahead' : current === 0 ? 'lbs to beat' : 'lbs to go'}
+                    </span>
+                  </p>
+                  <p className="text-sm mt-2 mb-4" style={{color: current > 0 && !beat ? brandColor : '#B0A89F'}}>{status}</p>
+                  <div className="relative rounded-full" style={{height: '12px', background: '#222222'}}>
+                    <div className="rounded-full" style={{width: `${pct}%`, height: '100%', background: brandColor, transition: 'width 0.6s ease'}} />
+                    {!beat && lastWeekPace > 0 && (
+                      <div style={{position: 'absolute', top: '-5px', left: `calc(${ghostPct}% - 1px)`, width: '2px', height: '22px', background: '#F0EBE6', opacity: 0.55}} />
                     )}
                   </div>
-                  <div className="flex items-end gap-2 mt-4" style={{height: '110px'}}>
-                    {shown.map((v, j) => {
-                      const i = j + startIdx
-                      const isCurrent = i === 7
-                      const isLast = i === 6
-                      const h = Math.max((v / max) * 80, v > 0 ? 4 : 2)
-                      return (
-                        <div key={i} className="flex-1 flex flex-col items-center justify-end" style={{height: '100%'}}>
-                          {(isLast || isCurrent) && v > 0 && (
-                            <p style={{fontSize: '10px', color: isLast ? brandColor : '#B0A89F', marginBottom: '3px'}}>{(v / 1000).toFixed(1)}k</p>
-                          )}
-                          <div style={{
-                            width: '100%', height: `${h}px`, borderRadius: '4px',
-                            background: isCurrent ? 'transparent' : isLast ? brandColor : '#2A2A2A',
-                            border: isCurrent ? `1px dashed ${brandColor}` : 'none'
-                          }} />
-                          <p style={{fontSize: '10px', color: '#6B5E55', marginTop: '4px'}}>{isCurrent ? 'Now' : weekLabels[i]}</p>
-                        </div>
-                      )
-                    })}
+                  <div className="flex justify-between mt-1.5" style={{fontSize: '11px', color: '#6B5E55'}}>
+                    <span style={{color: beat ? brandColor : '#6B5E55'}}>{current.toLocaleString()} this week</span>
+                    <span>{target.toLocaleString()}</span>
                   </div>
                 </>
               )}
+              <div className="flex items-end gap-1.5 mt-4 pt-3" style={{height: '46px', borderTop: '1px solid #1E1E1E'}}>
+                {strip.map((v, j) => {
+                  const isCurrent = j === strip.length - 1
+                  return (
+                    <div key={j} style={{
+                      flex: 1, borderRadius: '3px', height: `${Math.max((v / stripMax) * 24, 2)}px`,
+                      background: isCurrent ? (v > 0 ? brandColor : 'transparent') : j === strip.length - 2 ? '#4A4A4A' : '#2A2A2A',
+                      border: isCurrent && v === 0 ? `1px dashed ${brandColor}` : 'none'
+                    }} />
+                  )
+                })}
+              </div>
             </div>
           )
         })()}
