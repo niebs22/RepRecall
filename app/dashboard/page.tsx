@@ -25,6 +25,8 @@ export default function Dashboard() {
   const [weeklyVolume, setWeeklyVolume] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0])
   const [weekLabels, setWeekLabels] = useState<string[]>([])
   const [lastWeekPace, setLastWeekPace] = useState(0)
+  const [thisWeekDaily, setThisWeekDaily] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
+  const [lastWeekDaily, setLastWeekDaily] = useState<number[]>([0, 0, 0, 0, 0, 0, 0])
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [challengePool, setChallengePool] = useState<any[]>([])
@@ -246,15 +248,22 @@ setIsChrome(chrome)
     const elapsed = now.getTime() - thisMonday.getTime()
     const lastWeekStart = thisMonday.getTime() - 7 * 86400000
     let pace = 0
+    const tw = new Array(7).fill(0)
+    const lw = new Array(7).fill(0)
     ;(data || []).forEach((w: any) => {
       if (w.is_bodyweight || !w.weight || !w.reps) return
       const t = toUTC(w.created_at).getTime()
       const idx = Math.floor((t - start.getTime()) / (7 * 86400000))
       if (idx >= 0 && idx < 8) weeks[idx] += w.weight * w.reps
       if (t >= lastWeekStart && t < lastWeekStart + elapsed) pace += w.weight * w.reps
+      const di = (new Date(t).getDay() + 6) % 7
+      if (t >= thisMonday.getTime()) tw[di] += w.weight * w.reps
+      else if (t >= lastWeekStart) lw[di] += w.weight * w.reps
     })
     setWeeklyVolume(weeks.map(v => Math.round(v)))
-    setLastWeekPace(Math.round(pace))
+      setLastWeekPace(Math.round(pace))
+    setThisWeekDaily(tw.map(v => Math.round(v)))
+    setLastWeekDaily(lw.map(v => Math.round(v)))
     setWeekLabels(weeks.map((_, i) => {
       const d = new Date(start)
       d.setDate(start.getDate() + i * 7)
@@ -639,71 +648,117 @@ setIsChrome(chrome)
 
         </div>
 
-        {/* Beat last week */}
+           {/* Race last week */}
         {(() => {
-          const target = weeklyVolume[6] || 0
-          const current = weeklyVolume[7] || 0
-          const remaining = target - current
+          const todayIdx = (new Date().getDay() + 6) % 7
+          const cumLast: number[] = []
+          let s1 = 0
+          lastWeekDaily.forEach(v => { s1 += v; cumLast.push(s1) })
+          const cumThis: number[] = []
+          let s2 = 0
+          thisWeekDaily.slice(0, todayIdx + 1).forEach(v => { s2 += v; cumThis.push(s2) })
+          const target = cumLast[6] || 0
+          const current = cumThis[cumThis.length - 1] || 0
           const behind = lastWeekPace - current
           const hasTarget = target >= 500
           const beat = hasTarget && current >= target
-          const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date().getDay()]
-          const pct = hasTarget ? Math.min(current / target, 1) * 100 : 0
-          const ghostPct = hasTarget ? Math.min(lastWeekPace / target, 1) * 100 : 0
-          const firstIdx = weeklyVolume.findIndex(v => v >= 500)
-          const strip = weeklyVolume.slice(firstIdx === -1 ? 4 : Math.min(firstIdx, 4))
-          const stripMax = Math.max(...strip, 1)
+          const dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][todayIdx]
+          const lastSessions = lastWeekDaily.filter(v => v > 0).length
+          const bestIdx = thisWeekDaily.indexOf(Math.max(...thisWeekDaily))
+          const max = Math.max(Math.ceil((Math.max(target, current, 1) * 1.12) / 2000) * 2000, 2000)
+          const k = (v: number) => v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k' : String(Math.round(v))
+          const X = (i: number) => 40 + i * 40
+          const Y = (v: number) => 110 - (v / max) * 96
+          const curve = (pts: number[][]) => pts.reduce((d, p, i) => {
+            if (i === 0) return `M${p[0]},${p[1]}`
+            const prev = pts[i - 1]
+            const cx = (prev[0] + p[0]) / 2
+            return `${d} C${cx},${prev[1]} ${cx},${p[1]} ${p[0]},${p[1]}`
+          }, '')
+          const lastPts = cumLast.map((v, i) => [X(i), Y(v)])
+          const thisPts = cumThis.map((v, i) => [X(i), Y(v)])
+          const end = thisPts[thisPts.length - 1] || [X(0), Y(0)]
+          const area = `${curve(thisPts)} L${end[0]},110 L${X(0)},110 Z`
           let status = ''
           if (beat) status = 'You beat last week. Every set now is a bonus.'
-          else if (current === 0) status = 'New week. Your move.'
+          else if (current === 0) status = `Last week you hit ${k(target)}. Your move.`
           else if (behind > 0) status = `${behind.toLocaleString()} behind pace. One good session closes it.`
           else status = `${Math.abs(behind).toLocaleString()} ahead of pace. Keep it rolling.`
+          const tiles = [
+            beat ? { label: 'Ahead by', val: '+' + (current - target).toLocaleString(), hi: true }
+              : behind > 0 ? { label: 'Behind pace', val: behind.toLocaleString(), hi: false }
+              : { label: 'Ahead of pace', val: Math.abs(behind).toLocaleString(), hi: true },
+            beat ? { label: 'Best day', val: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][bestIdx], hi: false }
+              : { label: 'To beat', val: (target - current).toLocaleString(), hi: false },
+            { label: 'Sessions', val: `${totalThisWeek} / ${lastSessions}`, hi: false }
+          ]
           return (
             <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: `1px solid ${beat ? brandColor : '#222222'}`}}>
-              <div className="flex justify-between mb-2">
-                <p className="text-xs font-bold tracking-widest uppercase" style={{color: beat ? brandColor : '#B0A89F'}}>{beat ? 'Record week' : 'Beat last week'}</p>
-                <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>{day}</p>
+              <div className="flex justify-between">
+                <p className="text-xs font-bold tracking-widest uppercase" style={{color: beat ? brandColor : '#B0A89F'}}>{beat ? 'Record week' : 'Race last week'}</p>
+                <p className="text-xs font-bold tracking-widest uppercase" style={{color: '#6B5E55'}}>{dayName}</p>
               </div>
               {!hasTarget ? (
                 <>
-                  <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-                    {current.toLocaleString()} <span className="text-xs font-normal" style={{color: '#B0A89F', letterSpacing: 0}}>lbs this week</span>
-                  </p>
-                  <p className="text-sm mt-2" style={{color: '#B0A89F'}}>Finish a full week and next week you'll have a target to beat.</p>
+                  <p className="mt-2" style={{fontSize: '30px', fontWeight: 900, color: brandColor, letterSpacing: '-1px', lineHeight: 1}}>{current.toLocaleString()}</p>
+                  <p className="text-xs mt-1" style={{color: '#B0A89F'}}>lbs this week</p>
+                  <p className="text-sm mt-3" style={{color: '#B0A89F'}}>Finish a full week and next week you'll have a race to run.</p>
                 </>
               ) : (
                 <>
-                  <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
-                    {beat ? '+' + (current - target).toLocaleString() : remaining.toLocaleString()}{' '}
-                    <span className="text-xs font-normal" style={{color: '#B0A89F', letterSpacing: 0}}>
-                      {beat ? 'lbs ahead' : current === 0 ? 'lbs to beat' : 'lbs to go'}
-                    </span>
-                  </p>
-                  <p className="text-sm mt-2 mb-4" style={{color: current > 0 && !beat ? brandColor : '#B0A89F'}}>{status}</p>
-                  <div className="relative rounded-full" style={{height: '12px', background: '#222222'}}>
-                    <div className="rounded-full" style={{width: `${pct}%`, height: '100%', background: brandColor, transition: 'width 0.6s ease'}} />
-                    {!beat && lastWeekPace > 0 && (
-                      <div style={{position: 'absolute', top: '-5px', left: `calc(${ghostPct}% - 1px)`, width: '2px', height: '22px', background: '#F0EBE6', opacity: 0.55}} />
-                    )}
+                  <div className="flex justify-between items-end mt-2">
+                    <div>
+                      <p style={{fontSize: '30px', fontWeight: 900, color: brandColor, letterSpacing: '-1px', lineHeight: 1}}>{current.toLocaleString()}</p>
+                      <p className="text-xs mt-1" style={{color: '#B0A89F'}}>lbs this week</p>
+                    </div>
+                    <div className="text-right">
+                      <p style={{fontSize: '18px', fontWeight: 800, color: '#9B6DFF', lineHeight: 1}}>
+                        {(current === 0 || beat ? target : lastWeekPace).toLocaleString()}
+                      </p>
+                      <p className="text-xs mt-1" style={{color: '#B0A89F'}}>{current === 0 || beat ? 'last week total' : `last week by ${dayName}`}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between mt-1.5" style={{fontSize: '11px', color: '#6B5E55'}}>
-                    <span style={{color: beat ? brandColor : '#6B5E55'}}>{current.toLocaleString()} this week</span>
-                    <span>{target.toLocaleString()}</span>
+                  <svg viewBox="0 0 300 136" width="100%" style={{marginTop: '10px', overflow: 'visible'}}>
+                    <defs>
+                      <linearGradient id="race-grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={brandColor} stopOpacity="0.5" />
+                        <stop offset="100%" stopColor={brandColor} stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <rect x={X(todayIdx) - 16} y={8} width={32} height={104} rx={6} fill="#FFFFFF" fillOpacity="0.04" />
+                    {[0, 0.5, 1].map(f => (
+                      <g key={f}>
+                        <line x1={40} x2={280} y1={Y(max * f)} y2={Y(max * f)} stroke="#1E1E1E" />
+                        <text x={32} y={Y(max * f) + 3} textAnchor="end" fontSize="9" fill="#6B5E55">{k(max * f)}</text>
+                      </g>
+                    ))}
+                    <path d={curve(lastPts)} fill="none" stroke="#9B6DFF" strokeWidth="2" strokeDasharray="5 4" strokeOpacity="0.85" />
+                    <circle cx={X(6)} cy={Y(target)} r="3.5" fill="#9B6DFF" />
+                    <text x={X(6)} y={Y(target) - 8} textAnchor="end" fontSize="10" fontWeight="700" fill="#9B6DFF">{k(target)}</text>
+                    {current > 0 && <path d={area} fill="url(#race-grad)" />}
+                    {thisPts.length > 1 && <path d={curve(thisPts)} fill="none" stroke={brandColor} strokeWidth="3" strokeLinecap="round" />}
+                    <circle cx={end[0]} cy={end[1]} r="10" fill={brandColor} fillOpacity="0.18" />
+                    <circle cx={end[0]} cy={end[1]} r="5" fill={brandColor} />
+                    {current > 0 && <text x={end[0]} y={end[1] - 14} textAnchor="middle" fontSize="11" fontWeight="700" fill={brandColor}>{k(current)}</text>}
+                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                      <text key={i} x={X(i)} y={128} textAnchor="middle" fontSize="10" fontWeight={i === todayIdx ? 700 : 400} fill={i === todayIdx ? '#F0EBE6' : '#6B5E55'}>{d}</text>
+                    ))}
+                  </svg>
+                  <div className="flex gap-4 mt-1" style={{fontSize: '11px', color: '#B0A89F'}}>
+                    <span className="flex items-center gap-1.5"><span style={{width: '14px', height: '3px', background: brandColor, borderRadius: '2px', display: 'inline-block'}} />This week</span>
+                    <span className="flex items-center gap-1.5"><span style={{width: '14px', borderTop: '2px dashed #9B6DFF', display: 'inline-block'}} />Last week</span>
                   </div>
+                  <div className="flex gap-2 mt-3">
+                    {tiles.map(t => (
+                      <div key={t.label} className="flex-1 rounded-xl px-3 py-2" style={{background: '#1A1A1A'}}>
+                        <p style={{fontSize: '11px', color: '#6B5E55'}}>{t.label}</p>
+                        <p className="font-bold" style={{fontSize: '15px', color: t.hi ? brandColor : '#E8E0D8'}}>{t.val}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm mt-3" style={{color: current > 0 || beat ? brandColor : '#B0A89F'}}>{status}</p>
                 </>
               )}
-              <div className="flex items-end gap-1.5 mt-4 pt-3" style={{height: '46px', borderTop: '1px solid #1E1E1E'}}>
-                {strip.map((v, j) => {
-                  const isCurrent = j === strip.length - 1
-                  return (
-                    <div key={j} style={{
-                      flex: 1, borderRadius: '3px', height: `${Math.max((v / stripMax) * 24, 2)}px`,
-                      background: isCurrent ? (v > 0 ? brandColor : 'transparent') : j === strip.length - 2 ? '#4A4A4A' : '#2A2A2A',
-                      border: isCurrent && v === 0 ? `1px dashed ${brandColor}` : 'none'
-                    }} />
-                  )
-                })}
-              </div>
             </div>
           )
         })()}
