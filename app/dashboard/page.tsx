@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import BottomNav from '../components/BottomNav'
+import { toUTC } from '../../lib/timezone'
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
@@ -21,6 +22,8 @@ export default function Dashboard() {
   const [totalWeightLifted, setTotalWeightLifted] = useState(0)
   const [loyalMachine, setLoyalMachine] = useState<string | null>(null)
   const [fourWeekData, setFourWeekData] = useState<number[]>([0, 0, 0, 0])
+  const [weeklyVolume, setWeeklyVolume] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0])
+  const [weekLabels, setWeekLabels] = useState<string[]>([])
   const [challengeOpen, setChallengeOpen] = useState(false)
   const [challengeExercises, setChallengeExercises] = useState<any[]>([])
   const [challengePool, setChallengePool] = useState<any[]>([])
@@ -54,6 +57,7 @@ export default function Dashboard() {
         fetchWeekActivity(user.id)
         fetchLiftStats(user.id)
         fetchFourWeekData(user.id)
+        fetchWeeklyVolume(user.id)
         fetchChallengeExercises(user.id)
         fetchRoutines(user.id)
       }
@@ -186,7 +190,7 @@ setIsChrome(chrome)
     if (data) {
       const activeDays = new Set<number>()
       data.forEach(w => {
-        const day = new Date(w.created_at).getDay()
+         const day = toUTC(w.created_at).getDay()
         const adjusted = day === 0 ? 6 : day - 1
         activeDays.add(adjusted)
       })
@@ -215,13 +219,40 @@ setIsChrome(chrome)
       end.setHours(23, 59, 59, 999)
       const days = new Set(
         data.filter(wo => {
-          const d = new Date(wo.created_at)
+          const d = toUTC(wo.created_at)
           return d >= start && d <= end
-        }).map(wo => new Date(wo.created_at).toDateString())
+          }).map(wo => toUTC(wo.created_at).toDateString())
       )
       return days.size
     }).reverse()
     setFourWeekData(weeks)
+  }
+
+  async function fetchWeeklyVolume(userId: string) {
+    const now = new Date()
+    const dow = now.getDay()
+    const thisMonday = new Date(now)
+    thisMonday.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1))
+    thisMonday.setHours(0, 0, 0, 0)
+    const start = new Date(thisMonday)
+    start.setDate(thisMonday.getDate() - 49)
+    const { data } = await supabase
+      .from('workouts')
+      .select('created_at, weight, reps, is_bodyweight')
+      .eq('user_id', userId)
+      .gte('created_at', start.toISOString())
+    const weeks = new Array(8).fill(0)
+    ;(data || []).forEach((w: any) => {
+      if (w.is_bodyweight || !w.weight || !w.reps) return
+      const idx = Math.floor((toUTC(w.created_at).getTime() - start.getTime()) / (7 * 86400000))
+      if (idx >= 0 && idx < 8) weeks[idx] += w.weight * w.reps
+    })
+    setWeeklyVolume(weeks.map(v => Math.round(v)))
+    setWeekLabels(weeks.map((_, i) => {
+      const d = new Date(start)
+      d.setDate(start.getDate() + i * 7)
+      return `${d.getMonth() + 1}/${d.getDate()}`
+    }))
   }
 
   async function fetchRoutines(userId: string) {
@@ -601,6 +632,54 @@ setIsChrome(chrome)
 
         </div>
 
+        {/* Weekly volume */}
+        {(() => {
+          const lastFull = weeklyVolume[6] || 0
+          const prev = weeklyVolume[5] || 0
+          const weeksWithData = weeklyVolume.filter(v => v > 0).length
+          const pct = prev > 0 ? Math.round(((lastFull - prev) / prev) * 100) : null
+          const max = Math.max(...weeklyVolume, 1)
+          return (
+            <div className="rounded-2xl p-5 mb-4" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
+              <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{color: '#6B5E55'}}>Weekly Volume</p>
+              {weeksWithData < 2 ? (
+                <p className="text-sm" style={{color: '#B0A89F'}}>Log a few more sessions to see your trend.</p>
+              ) : (
+                <>
+                  <div className="flex justify-between items-baseline">
+                    <p style={{fontSize: '28px', fontWeight: 900, color: '#E8E0D8', letterSpacing: '-1px', lineHeight: 1}}>
+                      {lastFull.toLocaleString()} <span className="text-xs font-normal" style={{color: '#B0A89F', letterSpacing: 0}}>lbs last week</span>
+                    </p>
+                    {pct !== null && (
+                      <span className="text-xs font-bold" style={{color: pct >= 0 ? brandColor : '#B0A89F'}}>{pct >= 0 ? '+' : ''}{pct}%</span>
+                    )}
+                  </div>
+                  <div className="flex items-end gap-2 mt-4" style={{height: '110px'}}>
+                    {weeklyVolume.map((v, i) => {
+                      const isCurrent = i === 7
+                      const isLast = i === 6
+                      const h = Math.max((v / max) * 80, v > 0 ? 4 : 2)
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center justify-end" style={{height: '100%'}}>
+                          {(isLast || isCurrent) && v > 0 && (
+                            <p style={{fontSize: '10px', color: isLast ? brandColor : '#B0A89F', marginBottom: '3px'}}>{(v / 1000).toFixed(1)}k</p>
+                          )}
+                          <div style={{
+                            width: '100%', height: `${h}px`, borderRadius: '4px',
+                            background: isCurrent ? 'transparent' : isLast ? brandColor : '#2A2A2A',
+                            border: isCurrent ? `1px dashed ${brandColor}` : 'none'
+                          }} />
+                          <p style={{fontSize: '10px', color: '#6B5E55', marginTop: '4px'}}>{isCurrent ? 'Now' : weekLabels[i]}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+        })()}
+
         {/* Challenge box */}
         {challengeExercises.length === 0 ? (
           <div className="rounded-2xl mb-4 p-5" style={{background: 'linear-gradient(180deg, #1A1A1A 0%, #111111 100%)', border: '1px solid #222222'}}>
@@ -760,7 +839,7 @@ setIsChrome(chrome)
                 </div>
                 <div className="text-right">
                   <p className="text-xs font-semibold" style={{color: brandColor}}>{daysSince(workout.created_at)}</p>
-                  <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{new Date(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
+                  <p className="text-xs mt-0.5" style={{color: '#6B5E55'}}>{toUTC(workout.created_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</p>
                 </div>
               </a>
             ))}
